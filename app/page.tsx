@@ -1,5 +1,10 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const SUPABASE_URL = "https://bjufnjnijkzypnktdxql.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdWZuam5pamt6eXBua3RkeHFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzUyMjgsImV4cCI6MjA4OTUxMTIyOH0.VWEtmhvSB8Crtjf2vcoFMJaIiDQ5ejkaQB1B2zEBnbw";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 type VocabItem = { es: string; pt: string };
 type QuizQuestion = { question: string; options: string[]; answer: string; explanation?: string; };
@@ -20,6 +25,8 @@ type AppState = {
   streaks: Record<string, { count: number; lastDate: string }>;
   weeklyActivity: Record<string, Record<string, number>>;
 };
+
+
 
 const MODULES: ModuleType[] = [
 
@@ -692,530 +699,9 @@ const MODULES: ModuleType[] = [
     readingTitle: "Lo que hacemos todos los días",
     reading: [
       "El presente de indicativo es el tiempo verbal más utilizado en las comunicaciones técnicas del laboratorio. Se usa para describir acciones habituales y rutinarias que se repiten regularmente ('el analista verifica los controles cada mañana'), para expresar hechos o verdades generales que no cambian con el tiempo ('la hemoglobina transporta oxígeno en los glóbulos rojos'), para describir situaciones actuales que están ocurriendo en este momento ('el sistema está procesando las solicitudes del turno'), y para dar instrucciones o procedimientos en voz activa ('el operador coloca el tubo en el soporte y selecciona el programa correspondiente').",
-      "La conjugación de los verbos regulares en presente sigue patrones predecibles según la terminación del infinitivo. Los verbos terminados en -ar forman el presente con las terminaciones -o, -as, -a, -amos, -áis, -an. Por ejemplo: analizar → analizo, analizas, analiza, analizamos, analizáis, analizan. Los verbos terminados en -er usan -o, -es, -e, -emos, -éis, -en. Por ejemplo: leer → leo, lees, lee, leemos, leéis, leen. Los verbos terminados en -ir usan las mismas terminaciones que los -er, excepto en la primera y segunda persona del plural. Por ejemplo: escribir → escribo, escribes, escribe, escribimos, escribís, escriben.",
-      "Sin embargo, muchos de los verbos más frecuentes en el lenguaje técnico del laboratorio son irregulares y deben memorizarse. El verbo ser se conjuga: soy, eres, es, somos, sois, son. El verbo estar: estoy, estás, está, estamos, estáis, están. El verbo tener: tengo, tienes, tiene, tenemos, tenéis, tienen. El verbo hacer: hago, haces, hace, hacemos, hacéis, hacen. El verbo poder: puedo, puedes, puede, podemos, podéis, pueden. El verbo ir: voy, vas, va, vamos, vais, van. Estos verbos aparecen constantemente en procedimientos, correos y conversaciones técnicas, por lo que su manejo fluido es fundamental.",
-      "Una diferencia importante entre el español y el portugués en el uso del presente es la frecuencia con que el español recurre a este tiempo donde el portugués preferiría usar el gerundio o una perífrasis verbal. En español es completamente natural decir 'el equipo procesa las muestras' para referirse a una acción que está ocurriendo ahora mismo, mientras que en portugués sería más frecuente decir 'o equipamento está processando as amostras'. Esta diferencia puede generar errores de transferencia en hablantes de portugués que aprenden español, porque tienden a construir frases con 'estar + gerundio' más frecuentemente de lo que la norma española lo requiere.",
-      "En los procedimientos operativos estándar del laboratorio, el presente de indicativo es el tiempo dominante porque describe acciones que se repiten igual en cada ejecución del procedimiento. 'El operador enciende el equipo y espera la secuencia de inicialización. Verifica que los reactivos estén correctamente instalados. Introduce los controles de calidad en el orden establecido. Registra los resultados en el sistema antes de procesar las muestras de pacientes.' Ese uso imperativo del presente terciopelado, que suena más formal que el imperativo directo, es una característica del lenguaje técnico en español que conviene conocer y manejar con fluidez.",
-    ],
-    vocab: [
-      { es: "verificar", pt: "verificar" }, { es: "registrar", pt: "registrar" },
-      { es: "procesar", pt: "processar" }, { es: "analizar", pt: "analisar" },
-      { es: "comunicar", pt: "comunicar" }, { es: "liberar resultados", pt: "liberar resultados" },
-    ],
-    quiz: [
-      { question: "¿Para qué se usa el presente de indicativo en contextos técnicos?", options: ["Solo para hablar del futuro inmediato", "Acciones habituales, hechos generales, situaciones actuales e instrucciones de procedimientos", "Solo para el pasado reciente", "Solo para preguntas formales"], answer: "Acciones habituales, hechos generales, situaciones actuales e instrucciones de procedimientos" },
-      { question: "¿Cómo se conjuga 'analizar' en primera persona del singular?", options: ["analiza", "analizamos", "analizo", "analizas"], answer: "analizo" },
-      { question: "¿Cuáles son las terminaciones del presente para verbos terminados en -er?", options: ["-o, -as, -a, -amos, -áis, -an", "-o, -es, -e, -emos, -éis, -en", "-o, -is, -e, -imos, -ís, -en", "-o, -as, -e, -amos, -éis, -an"], answer: "-o, -es, -e, -emos, -éis, -en" },
-      { question: "¿Cómo se conjuga 'hacer' en primera persona del singular?", options: ["hace", "hacemos", "hago", "haces"], answer: "hago" },
-      { question: "¿Cómo se conjuga 'poder' en segunda persona del singular?", options: ["podo", "puede", "puedes", "podemos"], answer: "puedes" },
-      { question: "¿Cuál es la diferencia de uso del presente entre español y portugués?", options: ["No hay ninguna diferencia de uso", "En español se usa el presente simple donde el portugués prefiere 'estar + gerundio'", "En español el presente solo se usa para el pasado", "En portugués el presente se usa más frecuentemente"], answer: "En español se usa el presente simple donde el portugués prefiere 'estar + gerundio'" },
-      { question: "¿Cuál de estos verbos es completamente irregular en presente?", options: ["trabajar", "leer", "escribir", "ser"], answer: "ser" },
-      { question: "¿Para qué se usa el presente en los procedimientos operativos estándar?", options: ["Solo como título del documento", "Para describir acciones que se repiten igual en cada ejecución del procedimiento", "Para indicar las fechas de vencimiento de reactivos", "Para señalar los responsables del proceso"], answer: "Para describir acciones que se repiten igual en cada ejecución del procedimiento" },
-    ],
-    dictation: "El analista verifica los controles, registra los resultados y comunica cualquier desviación al área responsable antes de liberar los informes.",
-  },
-  {
-    id: "pasado", title: "Pretérito perfecto e indefinido", level: "Intermedio", category: "Gramática", emoji: "📅",
-    description: "Cómo hablar del pasado con precisión en informes y comunicaciones técnicas.",
-    readingTitle: "Lo que ocurrió y lo que ha ocurrido",
-    reading: [
-      "En español existen dos tiempos verbales principales para expresar acciones pasadas, y la elección entre uno y otro no es arbitraria: refleja una diferencia de perspectiva sobre la relación entre esa acción pasada y el momento presente. El pretérito perfecto compuesto, formado con el auxiliar 'haber' más el participio del verbo principal (he verificado, ha detectado, hemos implementado), se usa cuando la acción pasada tiene algún tipo de conexión o relevancia con el presente: el resultado de esa acción aún importa, el período en el que ocurrió aún no ha terminado, o el hablante lo percibe como cercano o relacionado con el ahora.",
-      "El pretérito indefinido, también llamado pretérito perfecto simple, se usa para acciones que el hablante percibe como completamente terminadas y desconectadas del presente. 'Ayer el analista procesó cuarenta y ocho muestras' usa el indefinido porque 'ayer' define un período claramente terminado. 'Esta semana el equipo implementó el nuevo procedimiento' podría usar el indefinido o el perfecto compuesto dependiendo de si el hablante considera que la semana sigue siendo relevante o ya está cerrada. En los informes técnicos, la elección entre estos dos tiempos puede cambiar sutilmente el significado de lo que se comunica.",
-      "Para los hablantes de portugués brasileño, esta distinción es especialmente desafiante porque en el portugués de Brasil el pretérito perfeito composto tiene un uso muy restringido y particular, diferente del uso del pretérito perfecto compuesto en español. En portugués, 'tenho trabalhado' (pretérito perfeito composto) indica una acción que se ha repetido múltiples veces desde el pasado hasta ahora, mientras que en español 'he trabajado' puede usarse tanto para una acción puntual reciente como para una acción repetida. Esta diferencia hace que los hablantes de portugués brasileño frecuentemente usen el presente simple en español donde la norma requeriría el pretérito perfecto compuesto.",
-      "En los informes de no conformidades, auditorías y acciones correctivas del laboratorio, el uso correcto de estos tiempos verbales tiene importancia práctica. 'Se detectó una desviación' (indefinido) indica que esa detección ocurrió en un momento puntual del pasado. 'Se ha detectado una desviación' (perfecto compuesto) implica que esa detección es reciente y sus consecuencias aún se están gestionando. 'El equipo corrigió el procedimiento' indica que la corrección está completamente terminada. 'El equipo ha corregido el procedimiento' implica que la corrección es reciente y probablemente aún está siendo verificada.",
-      "Una estrategia práctica para los hablantes de portugués que aprenden español es asociar el pretérito perfecto compuesto con las palabras y expresiones que frecuentemente lo acompañan: hoy, esta semana, este mes, este año, últimamente, nunca, siempre (referido a la vida), recientemente, todavía no, ya (para afirmar que algo ocurrió). Y el indefinido con expresiones de tiempo claramente delimitado: ayer, el lunes pasado, el mes pasado, el año pasado, hace tres días, en 2022, en el turno de la mañana. Esa asociación no cubre todos los casos, pero cubre la mayoría de las situaciones del lenguaje técnico cotidiano.",
-    ],
-    vocab: [
-      { es: "pretérito perfecto compuesto", pt: "pretérito perfeito composto" }, { es: "pretérito indefinido", pt: "pretérito perfeito simples" },
-      { es: "ayer / la semana pasada", pt: "ontem / a semana passada" }, { es: "recientemente / últimamente", pt: "recentemente / ultimamente" },
-      { es: "ha detectado / ha implementado", pt: "detectou / implementou (recente)" }, { es: "ocurrió / procesó", pt: "ocorreu / processou" },
-    ],
-    quiz: [
-      { question: "¿Cuándo se usa el pretérito perfecto compuesto en español?", options: ["Para acciones completamente terminadas en el pasado lejano", "Cuando la acción pasada tiene conexión o relevancia con el momento presente", "Solo con la palabra 'ayer'", "Para acciones futuras inciertas"], answer: "Cuando la acción pasada tiene conexión o relevancia con el momento presente" },
-      { question: "¿Cuál es correcto con el marcador temporal 'ayer'?", options: ["He procesado ayer cuarenta muestras", "Ayer procesé cuarenta muestras", "Ayer proceso cuarenta muestras", "Ayer he procesado cuarenta muestras"], answer: "Ayer procesé cuarenta muestras" },
-      { question: "¿Qué implica 'el equipo ha detectado una desviación'?", options: ["Que la detección ocurrió hace mucho tiempo", "Que la detección es reciente y sus consecuencias siguen siendo relevantes ahora", "Que el equipo no detectó nada todavía", "Que la detección ocurrió exactamente ayer"], answer: "Que la detección es reciente y sus consecuencias siguen siendo relevantes ahora" },
-      { question: "¿Con qué expresiones temporales va bien el pretérito indefinido?", options: ["Hoy, esta semana, recientemente", "Ayer, el lunes pasado, el mes pasado, hace tres días", "Últimamente, todavía no, ya", "Este año, esta mañana, hoy temprano"], answer: "Ayer, el lunes pasado, el mes pasado, hace tres días" },
-      { question: "¿Qué diferencia tiene el pretérito perfeito composto del portugués brasileño respecto al español?", options: ["Son exactamente iguales en su uso", "En portugués indica acción repetida desde el pasado; en español tiene uso más amplio", "En español no existe ese tiempo verbal", "En portugués se usa con mucha más frecuencia"], answer: "En portugués indica acción repetida desde el pasado; en español tiene uso más amplio" },
-      { question: "¿Qué error cometen frecuentemente los hablantes de portugués brasileño en español?", options: ["Usar el subjuntivo en lugar del indicativo", "Usar el presente simple donde el español requiere el pretérito perfecto compuesto", "Usar demasiado el imperfecto de indicativo", "Confundir ser y estar constantemente"], answer: "Usar el presente simple donde el español requiere el pretérito perfecto compuesto" },
-      { question: "¿Qué diferencia de matiz hay entre 'corrigió' y 'ha corregido'?", options: ["No hay ninguna diferencia real entre ambas formas", "'Corrigió' indica acción terminada; 'ha corregido' implica que es reciente y aún se verifica", "Solo es una diferencia de registro formal versus informal", "'Ha corregido' es incorrecto en textos técnicos formales"], answer: "'Corrigió' indica acción terminada; 'ha corregido' implica que es reciente y aún se verifica" },
-      { question: "¿Cuál es la estrategia práctica recomendada para aprender estos tiempos?", options: ["Memorizar todas las reglas gramaticales en abstracto", "Asociar cada tiempo con las expresiones temporales que lo acompañan frecuentemente en contextos reales", "Solo practicar con ejercicios formales de gramática", "Evitar el pretérito perfecto compuesto para simplificar"], answer: "Asociar cada tiempo con las expresiones temporales que lo acompañan frecuentemente en contextos reales" },
-    ],
-    dictation: "Ayer el analista procesó cuarenta muestras y detectó una desviación que ha sido comunicada al área de calidad esta mañana.",
-  },
-  {
-    id: "ser-estar", title: "Ser vs. Estar", level: "Básico", category: "Gramática", emoji: "🔄",
-    description: "La distinción más importante entre español y portugués: ser y estar.",
-    readingTitle: "¿Es o está? La diferencia que cambia el significado",
-    reading: [
-      "La distinción entre 'ser' y 'estar' es probablemente el aspecto gramatical que más confunde a los hablantes de portugués cuando aprenden español. En portugués también existen ambos verbos, pero su distribución no coincide exactamente con la del español, lo que genera errores sistemáticos de transferencia. La regla más general que funciona como punto de partida es la siguiente: 'ser' se usa para características que se perciben como permanentes, esenciales o definitivas (identidad, origen, material, características inherentes), mientras que 'estar' se usa para estados, condiciones o situaciones que son temporales o percibidas como no definitivas.",
-      "En el contexto del laboratorio, esta distinción aparece constantemente y tiene consecuencias prácticas reales. Decir 'el reactivo es vencido' es incorrecto en español: el vencimiento es un estado temporal en el que ha entrado el reactivo, no una característica permanente de su identidad, por lo que la forma correcta es 'el reactivo está vencido'. De la misma manera, 'el resultado es incorrecto' y 'el resultado está incorrecto' pueden usarse en español, pero con matices diferentes: 'es incorrecto' implica que es inherentemente defectuoso, mientras que 'está incorrecto' implica que en este momento tiene un error que podría corregirse.",
-      "Los adjetivos que funcionan de forma diferente con 'ser' y 'estar' son una fuente constante de confusión y requieren práctica sistemática. 'El analista es aburrido' significa que la persona tiene una personalidad aburrida como característica permanente. 'El analista está aburrido' significa que en este momento se siente aburrido, sin implicar nada sobre su carácter habitual. 'El reactivo es malo' implica que es de mala calidad por naturaleza. 'El reactivo está malo' implica que en este momento no está en condiciones de uso, pero podría haberse deteriorado por alguna causa externa. Estas diferencias son sutiles pero importantes en la comunicación técnica precisa.",
-      "La ubicación y las condiciones físicas o emocionales van casi siempre con 'estar'. 'El laboratorio está en el tercer piso.' 'Las muestras están en el refrigerador de cuatro grados.' 'El equipo está en mantenimiento.' 'El resultado está validado.' Estas son situaciones o condiciones que caracterizan el estado actual de algo, no su identidad permanente. La excepción son los eventos, que van con 'ser' aunque expresen una ubicación: 'La reunión es en la sala de conferencias' usa 'ser' porque el evento en sí es lo que se está describiendo, no la condición del lugar.",
-      "Para los hablantes de portugués, una dificultad adicional es que algunas expresiones que en portugués usan 'ser' en español usan 'estar' y viceversa. 'Estou com fome' (tengo hambre, literalmente 'estoy con hambre') se traduce al español como 'tengo hambre', no como 'estoy hambriento' aunque ambas formas son posibles. 'É casado' (es casado) en portugués equivale a 'está casado' en español, porque el matrimonio se percibe como un estado más que como una característica identitaria permanente en el español estándar. La práctica constante con ejemplos del contexto laboral real es la mejor estrategia para internalizar estas diferencias.",
-    ],
-    vocab: [
-      { es: "ser (identidad/permanente)", pt: "ser (identidade/permanente)" }, { es: "estar (estado/temporal)", pt: "estar (estado/temporário)" },
-      { es: "el reactivo está vencido", pt: "o reagente está vencido" }, { es: "el resultado está validado", pt: "o resultado está validado" },
-      { es: "el equipo está en mantenimiento", pt: "o equipamento está em manutenção" }, { es: "ella es analista", pt: "ela é analista" },
-    ],
-    quiz: [
-      { question: "¿Cuál es la regla general para usar 'ser' en español?", options: ["Para estados y condiciones temporales", "Para características que se perciben como permanentes, esenciales o de identidad", "Para indicar ubicación siempre", "Para describir cómo está alguien en un momento específico"], answer: "Para características que se perciben como permanentes, esenciales o de identidad" },
-      { question: "¿Cuál es correcto en español para el estado de un reactivo?", options: ["El reactivo es vencido", "El reactivo está vencido", "El reactivo fue vencido siempre", "El reactivo ser vencido hoy"], answer: "El reactivo está vencido" },
-      { question: "¿Qué significa 'el analista está aburrido'?", options: ["Que es una persona aburrida por naturaleza y carácter permanente", "Que en este momento se siente aburrido sin implicar nada sobre su carácter habitual", "Que fue aburrido en el pasado laboral", "Que aburre permanentemente a sus compañeros de trabajo"], answer: "Que en este momento se siente aburrido sin implicar nada sobre su carácter habitual" },
-      { question: "¿Cuál es la diferencia entre 'el reactivo es malo' y 'el reactivo está malo'?", options: ["No hay ninguna diferencia real entre ambas frases", "'Es malo' implica mala calidad inherente; 'está malo' implica que actualmente no está en condiciones de uso", "Solo una diferencia de registro formal vs informal", "'Está malo' es siempre incorrecto en español técnico"], answer: "'Es malo' implica mala calidad inherente; 'está malo' implica que actualmente no está en condiciones de uso" },
-      { question: "¿Por qué 'la reunión es en la sala de conferencias' usa 'ser'?", options: ["Por una excepción gramatical sin explicación lógica", "Porque se describe el evento en sí mismo, no la condición de un lugar", "Porque las salas son características permanentes del edificio", "Porque es una expresión fija que no sigue las reglas generales"], answer: "Porque se describe el evento en sí mismo, no la condición de un lugar" },
-      { question: "¿Qué equivale en portugués a 'está casado' en español?", options: ["'Está casado' también en portugués", "'É casado' con el verbo ser", "'Foi casado' en el pasado", "'Fica casado' con verbo diferente"], answer: "'É casado' con el verbo ser" },
-      { question: "¿Cuál es correcto para describir la ubicación de los reactivos?", options: ["Los reactivos son en el refrigerador", "Los reactivos están en el refrigerador", "Los reactivos serán en el refrigerador siempre", "Los reactivos estuvieron en el refrigerador siempre"], answer: "Los reactivos están en el refrigerador" },
-      { question: "¿Cuál es la mejor estrategia para internalizar ser y estar?", options: ["Memorizar todas las reglas abstractas de una vez", "Practicar con ejemplos del contexto laboral real y corregir errores en el momento", "Usar siempre 'estar' para evitar errores con 'ser'", "Traducir literalmente del portugués en cada situación"], answer: "Practicar con ejemplos del contexto laboral real y corregir errores en el momento" },
-    ],
-    dictation: "El equipo está en mantenimiento, el resultado está validado y el reactivo está vencido: todos son estados temporales que usan estar, no ser.",
-  },
-  {
-    id: "subjuntivo", title: "Subjuntivo básico", level: "Avanzado", category: "Gramática", emoji: "🌀",
-    description: "El subjuntivo en recomendaciones, necesidades y comunicaciones técnicas formales.",
-    readingTitle: "Lo que recomendamos que hagan",
-    reading: [
-      "El subjuntivo es uno de los aspectos gramaticales del español que más dificultades genera para los hablantes de otras lenguas, incluido el portugués. Aunque el subjuntivo también existe en portugués (el subjuntivo presente: que eu faça, que ele verifique), su uso en español es más frecuente y abarca contextos que en portugués a veces se resuelven de otras formas. En el contexto técnico del laboratorio, el subjuntivo aparece con regularidad en tres situaciones principales: al expresar recomendaciones o necesidades ('es necesario que el analista verifique'), al expresar dudas o incertidumbre ('no es seguro que el resultado sea correcto') y en ciertas construcciones temporales que refieren al futuro ('cuando el equipo termine la calibración').",
-      "La estructura más frecuente del subjuntivo en el lenguaje técnico es la que combina un verbo de influencia, emoción, deseo o duda en la oración principal con 'que' y un verbo en subjuntivo en la oración subordinada. Ejemplos de verbos que desencadenan el subjuntivo: es importante que, es necesario que, es fundamental que, recomendamos que, sugerimos que, pedimos que, esperamos que, es posible que, dudamos que, no creemos que. En todos estos casos, el verbo de la oración subordinada debe conjugarse en subjuntivo, no en indicativo.",
-      "La conjugación del presente de subjuntivo para los verbos regulares se forma a partir de la primera persona del singular del presente de indicativo, eliminando la -o final y añadiendo las terminaciones opuestas: los verbos en -ar toman terminaciones de -er (-e, -es, -e, -emos, -éis, -en) y los verbos en -er e -ir toman terminaciones de -ar (-a, -as, -a, -amos, -áis, -an). Por ejemplo: verificar (verifico en indicativo) → verifique, verifiques, verifique, verifiquemos, verifiquéis, verifiquen. Documentar (documento) → documente, documentes, documente, documentemos, documentéis, documenten.",
-      "Para los verbos irregulares en la primera persona del presente de indicativo, esa irregularidad se traslada a todo el subjuntivo. Tener (tengo) → tenga, tengas, tenga, tengamos, tengáis, tengan. Hacer (hago) → haga, hagas, haga, hagamos, hagáis, hagan. Poner (pongo) → ponga, pongas, ponga, pongamos, pongáis, pongan. Los verbos ser, ir, haber, estar y saber tienen formas de subjuntivo completamente irregulares que deben memorizarse: sea, vaya, haya, esté, sepa.",
-      "En los documentos técnicos del laboratorio, el subjuntivo aparece frecuentemente en las secciones de recomendaciones de los informes de auditoría ('Se recomienda que el área actualice el procedimiento antes del próximo trimestre'), en las instrucciones de los protocolos de acción correctiva ('Es fundamental que el responsable verifique la eficacia de las acciones implementadas'), y en las comunicaciones formales con clientes ('Le solicitamos que nos confirme la recepción de este informe'). Reconocer y usar correctamente el subjuntivo en esos contextos es una marca de competencia lingüística técnica que distingue a un profesional que domina el español formal del que solo lo habla de forma coloquial.",
-    ],
-    vocab: [
-      { es: "es importante que", pt: "é importante que" }, { es: "recomendamos que", pt: "recomendamos que" },
-      { es: "es necesario que", pt: "é necessário que" }, { es: "verifique / documente", pt: "verifique / documente" },
-      { es: "cuando termine (futuro)", pt: "quando terminar (futuro)" }, { es: "es posible que", pt: "é possível que" },
-    ],
-    quiz: [
-      { question: "¿En cuáles situaciones principales aparece el subjuntivo en el lenguaje técnico?", options: ["Preguntas, órdenes y descripciones únicamente", "Recomendaciones y necesidades, dudas, y construcciones temporales futuras", "Solo en documentos formales escritos", "Solo en recomendaciones escritas de auditoría"], answer: "Recomendaciones y necesidades, dudas, y construcciones temporales futuras" },
-      { question: "¿Cómo se forma el presente de subjuntivo de un verbo regular en -ar?", options: ["Con las mismas terminaciones del indicativo", "Desde la primera persona del indicativo eliminando la -o y añadiendo terminaciones de -er", "Con las terminaciones del imperativo directo", "Con el prefijo 'sub-' más el infinitivo del verbo"], answer: "Desde la primera persona del indicativo eliminando la -o y añadiendo terminaciones de -er" },
-      { question: "¿Cuál es correcto en español técnico?", options: ["Es importante que verificas los controles cada día", "Es importante verificando los controles regularmente", "Es importante que verifiques los controles cada día", "Es importante verificar tú los controles directamente"], answer: "Es importante que verifiques los controles cada día" },
-      { question: "¿Qué tipo de verbos desencadenan el subjuntivo en la subordinada?", options: ["Verbos de movimiento como ir y venir", "Verbos de influencia, deseo, emoción o duda como 'es necesario que' y 'recomendamos que'", "Verbos de percepción como ver y oír", "Solo la expresión 'es importante que'"], answer: "Verbos de influencia, deseo, emoción o duda como 'es necesario que' y 'recomendamos que'" },
-      { question: "¿Cómo se conjuga 'tener' en presente de subjuntivo, primera persona?", options: ["tengo", "tenga", "tenes", "tiene"], answer: "tenga" },
-      { question: "¿Cómo se conjuga 'hacer' en presente de subjuntivo, primera persona?", options: ["hago", "haga", "hace", "haiga"], answer: "haga" },
-      { question: "¿Cómo se usa el subjuntivo en construcciones temporales futuras?", options: ["Con 'cuando' más presente de indicativo", "Con 'cuando' más presente de subjuntivo para acciones futuras", "Con 'cuando' más futuro simple de indicativo", "Con 'cuando' más infinitivo del verbo"], answer: "Con 'cuando' más presente de subjuntivo para acciones futuras" },
-      { question: "¿Qué distingue al profesional que domina el subjuntivo técnico?", options: ["Que nunca comete errores gramaticales", "Que demuestra competencia lingüística técnica propia del español formal", "Que puede hablar más rápido en reuniones", "Que escribe documentos más largos y detallados"], answer: "Que demuestra competencia lingüística técnica propia del español formal" },
-    ],
-    dictation: "Es fundamental que el analista verifique los controles y es necesario que documente cada resultado antes de liberar los informes.",
-  },
-  {
-    id: "conectores", title: "Conectores y cohesión", level: "Intermedio", category: "Gramática", emoji: "🔗",
-    description: "Conectores para textos técnicos: informes, hallazgos y comunicaciones formales.",
-    readingTitle: "El informe que fluía",
-    reading: [
-      "Un informe técnico de laboratorio es, ante todo, un texto que debe comunicar información compleja de forma clara, organizada y convincente. Para lograrlo, no basta con tener los datos correctos: también es necesario que esos datos estén conectados entre sí mediante una lógica explícita que el lector pueda seguir sin esfuerzo. Los conectores son las palabras y expresiones que hacen ese trabajo: guían al lector de una idea a la siguiente, señalan relaciones lógicas entre los datos y le indican cuándo se está agregando información, cuándo se está contrastando, cuándo se está explicando una causa o cuándo se está presentando una consecuencia.",
-      "Los conectores de adición son los más simples y los más utilizados: sirven para agregar información nueva que refuerza o complementa lo anterior. Los principales son: además, también, asimismo, igualmente, del mismo modo, por otra parte (cuando introduce un elemento adicional, no un contraste), y en este sentido. Por ejemplo: 'El control de nivel bajo fue rechazado. Además, el control de nivel alto mostró una tendencia descendente en los últimos cinco días. Asimismo, el reagente utilizado correspondía a un lote diferente al del período anterior.' Cada conector indica que lo que sigue es una pieza adicional del mismo rompecabezas.",
-      "Los conectores de contraste son fundamentales en los informes técnicos porque permiten presentar información que va en una dirección diferente o inesperada sin generar confusión en el lector. Los principales son: sin embargo, no obstante, aunque, a pesar de que, por el contrario, en cambio. Por ejemplo: 'Los resultados del control de nivel bajo fueron aceptables. Sin embargo, el control de nivel alto presentó valores fuera del rango de aceptación durante tres corridas consecutivas. A pesar de las acciones correctivas implementadas, la situación no mostró mejora en las primeras cuarenta y ocho horas.' El contraste señala que la realidad es más compleja que una tendencia simple.",
-      "Los conectores de causa y consecuencia son esenciales para explicar por qué ocurrió algo y qué efectos tuvo. Los principales conectores causales son: porque, ya que, dado que, debido a que, puesto que. Los conectores de consecuencia son: por lo tanto, en consecuencia, como resultado, por ende, así que, de modo que. Por ejemplo: 'Dado que el switch de red falló durante el turno vespertino, los equipos analíticos no pudieron transferir los resultados al LIMS. Por lo tanto, el personal procedió a registrar manualmente todos los resultados en las planillas de contingencia. Como resultado, ningún resultado fue perdido, aunque la entrega de informes se retrasó aproximadamente dos horas.'",
-      "El dominio de los conectores no solo mejora la calidad de los textos técnicos escritos: también mejora la claridad de la comunicación oral en reuniones, presentaciones y llamadas con clientes. Quien puede organizar su discurso con conectores explícitos transmite mayor claridad de pensamiento y genera más confianza en su interlocutor. Para los profesionales del laboratorio que trabajan en un contexto bilingüe español-portugués, muchos conectores tienen equivalentes directos entre ambas lenguas, lo que facilita el aprendizaje. Pero algunos tienen matices diferentes o usos más restringidos en uno u otro idioma, por lo que la práctica en contextos reales sigue siendo la mejor estrategia de aprendizaje.",
-    ],
-    vocab: [
-      { es: "sin embargo / no obstante", pt: "no entanto / porém" }, { es: "además / asimismo", pt: "além disso / igualmente" },
-      { es: "por lo tanto / en consecuencia", pt: "portanto / consequentemente" }, { es: "dado que / ya que", pt: "dado que / uma vez que" },
-      { es: "aunque / a pesar de que", pt: "embora / apesar de que" }, { es: "por el contrario / en cambio", pt: "pelo contrário / em vez disso" },
-    ],
-    quiz: [
-      { question: "¿Por qué son importantes los conectores en un texto técnico?", options: ["Para hacer el texto más largo y completo", "Porque guían al lector entre ideas y señalan las relaciones lógicas entre los datos", "Para complicar la lectura y demostrar conocimiento avanzado", "Solo por razones estéticas del texto"], answer: "Porque guían al lector entre ideas y señalan las relaciones lógicas entre los datos" },
-      { question: "¿Qué tipo de relación expresa el conector 'por lo tanto'?", options: ["Adición de información nueva al argumento", "Contraste con lo expresado anteriormente", "Consecuencia lógica de lo que se dijo antes", "Causa de lo que se expresará después"], answer: "Consecuencia lógica de lo que se dijo antes" },
-      { question: "¿Cuál de estos conectores expresa contraste?", options: ["Además", "Asimismo", "Sin embargo", "Dado que"], answer: "Sin embargo" },
-      { question: "¿Qué conectores sirven para indicar causa?", options: ["Sin embargo, aunque, a pesar de que", "Porque, ya que, dado que, debido a que", "Además, también, asimismo, igualmente", "Por lo tanto, en consecuencia, así que"], answer: "Porque, ya que, dado que, debido a que" },
-      { question: "¿Qué diferencia hay entre 'además' y 'sin embargo'?", options: ["Son sinónimos perfectos en español técnico", "'Además' añade en la misma dirección; 'sin embargo' introduce una idea contraria o inesperada", "'Sin embargo' es más formal que 'además' siempre", "Solo se diferencian en el nivel de registro usado"], answer: "'Además' añade en la misma dirección; 'sin embargo' introduce una idea contraria o inesperada" },
-      { question: "¿Cuál es el conector adecuado para una consecuencia formal en un informe técnico?", options: ["Pero, como conector más simple", "En consecuencia, como conector más formal", "Y además, para agregar información", "O sea, para reformular"], answer: "En consecuencia, como conector más formal" },
-      { question: "¿Los conectores mejoran solo la comunicación escrita?", options: ["Sí, exclusivamente para textos escritos", "No, también mejoran la claridad del discurso oral en reuniones y presentaciones", "Solo son útiles para correos electrónicos formales", "Solo son útiles en informes de auditoría"], answer: "No, también mejoran la claridad del discurso oral en reuniones y presentaciones" },
-      { question: "¿Qué transmite quien organiza su discurso con conectores explícitos?", options: ["Que conoce muchas palabras en español técnico", "Mayor claridad de pensamiento y más confianza en el interlocutor", "Que estudió gramática avanzada en la universidad", "Que habla más lento de lo necesario en las reuniones"], answer: "Mayor claridad de pensamiento y más confianza en el interlocutor" },
-    ],
-    dictation: "El control presentó una desviación; sin embargo, el equipo actuó rápidamente y, por lo tanto, no fue necesario rechazar la corrida analítica.",
-  },
-  {
-    id: "vocabulario-general", title: "Vocabulario del trabajo", level: "Básico", category: "Gramática", emoji: "📖",
-    description: "Vocabulario esencial para el entorno profesional y los falsos cognados más frecuentes.",
-    readingTitle: "Las palabras que parecen iguales pero no lo son",
-    reading: [
-      "Aprender el vocabulario del español técnico del laboratorio no significa solo memorizar los términos científicos equivalentes al portugués. También implica dominar el vocabulario del entorno laboral cotidiano: las palabras que se usan en reuniones, correos, llamadas telefónicas, conversaciones de pasillo y documentos internos. Muchas de esas palabras son fáciles porque son iguales o muy similares en ambos idiomas. Pero otras son engañosas precisamente por esa similitud: se llaman 'falsos cognados' o 'falsos amigos', y son una de las fuentes más frecuentes de malentendidos humorísticos o embarazosos entre hablantes de español y portugués.",
-      "Los falsos cognados son palabras que se parecen en la forma escrita o sonora, pero tienen significados diferentes o parcialmente diferentes en cada idioma. Algunos ejemplos muy frecuentes en el contexto laboral: 'embarazada' en español significa 'pregnant' (embaraçada en portugués significa 'avergonzada', y a la inversa, 'grávida' en portugués significa 'embarazada' en español). 'Borracha' en portugués es 'goma de borrar' o 'caucho', mientras que en español es una mujer que está ebria por el alcohol. 'Salada' en portugués significa 'ensalada', pero en español también puede significar 'con mucha sal'. 'Exquisito' en español significa algo de calidad extraordinaria o muy refinado; en portugués 'esquisito' significa 'extraño' o 'raro'.",
-      "En el contexto técnico del laboratorio, también existen falsos cognados que pueden generar confusión. 'Comprometido' en español puede significar 'involucrado' o 'afectado' (la muestra está comprometida por la hemólisis), pero también 'prometido en matrimonio', lo que puede generar confusión si un colega portugués espera que signifique solo lo primero. 'Polvo' en español significa 'polvillo' o 'partícula fina' (pó en portugués), pero 'polvo' en portugués es una palabra vulgar que debe evitarse absolutamente en contextos formales. 'Constipado' en español significa 'resfriado' (resfriado/gripado en portugués), mientras que en portugués 'constipado' significa 'con problemas de estreñimiento'.",
-      "Más allá de los falsos cognados, el vocabulario del entorno laboral en español incluye muchas expresiones y frases hechas que no tienen traducción literal directa y que deben aprenderse como unidades. 'Estar al tanto' significa estar informado de algo. 'Ponerse al día' significa actualizarse sobre lo que ha ocurrido. 'Dar de alta' a un paciente significa darlo de alta del hospital. 'Dar de baja' a un reactivo significa retirarlo del uso activo. 'Sacar turno' significa pedir un turno médico. 'Dar el visto bueno' significa dar la aprobación final a algo. Estas expresiones aparecen constantemente en la comunicación profesional y su comprensión es fundamental para participar plenamente en las conversaciones del equipo.",
-      "La mejor estrategia para ampliar el vocabulario en un contexto real como el del laboratorio es practicar activamente en situaciones concretas, no solo estudiar listas de palabras en abstracto. Leer los procedimientos operativos estándar del laboratorio en español, participar en las reuniones de equipo aunque sea de forma pasiva al principio, escuchar y repetir mentalmente cómo los colegas más experimentados describen los procesos, y usar conscientemente las palabras nuevas en conversaciones reales son las actividades que más rápidamente consolidan el vocabulario activo. El error forma parte del proceso: cometer un error de vocabulario delante de un colega comprensivo y corregirlo en el momento es una de las formas más efectivas de no volver a cometerlo.",
-    ],
-    vocab: [
-      { es: "reunión", pt: "reunião" }, { es: "correo electrónico", pt: "e-mail" },
-      { es: "embarazada (= grávida)", pt: "grávida (embaraçada = avergonzada)" },
-      { es: "constipado (= resfriado)", pt: "resfriado (constipado = estreñimiento)" },
-      { es: "dar el visto bueno", pt: "dar o sinal verde / aprovar" },
-      { es: "estar al tanto", pt: "estar a par / estar informado" },
-    ],
-    quiz: [
-      { question: "¿Qué son los falsos cognados o falsos amigos?", options: ["Palabras idénticas en español y portugués", "Palabras que se parecen en forma pero tienen significados diferentes en cada idioma", "Sinónimos técnicos entre los dos idiomas", "Palabras que solo existen en un idioma pero no en el otro"], answer: "Palabras que se parecen en forma pero tienen significados diferentes en cada idioma" },
-      { question: "¿Qué significa 'embarazada' en español?", options: ["Avergonzada por algo", "Con náuseas", "Grávida, con un bebé en el vientre", "Muy cansada y agotada"], answer: "Grávida, con un bebé en el vientre" },
-      { question: "¿Qué significa 'constipado' en español?", options: ["Con estreñimiento o problema intestinal", "Resfriado, con síntomas de gripe común", "Muy cansado y sin energía", "Con dolor de cabeza intenso"], answer: "Resfriado, con síntomas de gripe común" },
-      { question: "¿Qué significa 'exquisito' en español?", options: ["Extraño o raro, poco común", "De calidad extraordinaria o muy refinado y elegante", "Difícil de entender o comprender", "Demasiado elaborado para ser práctico"], answer: "De calidad extraordinaria o muy refinado y elegante" },
-      { question: "¿Qué significa la expresión 'dar el visto bueno'?", options: ["Ver algo por primera vez con agrado", "Dar la aprobación final a algo", "Mirar con buenos ojos a una persona específica", "Confirmar que algo fue recibido correctamente"], answer: "Dar la aprobación final a algo" },
-      { question: "¿Qué significa 'estar al tanto' en el contexto laboral?", options: ["Estar esperando hace mucho tiempo", "Estar informado de algo relevante", "Estar de acuerdo con alguna decisión", "Estar muy atento durante la reunión"], answer: "Estar informado de algo relevante" },
-      { question: "¿Qué significa 'ponerse al día' en el contexto laboral?", options: ["Trabajar durante todo el día sin descanso", "Actualizarse sobre lo que ha ocurrido en el trabajo", "Llegar temprano al laboratorio siempre", "Completar todas las tareas pendientes del período"], answer: "Actualizarse sobre lo que ha ocurrido en el trabajo" },
-      { question: "¿Cuál es la mejor estrategia para consolidar el vocabulario activo en español técnico?", options: ["Memorizar listas de palabras en abstracto", "Practicar activamente en situaciones laborales reales y usar conscientemente las palabras nuevas", "Solo leer libros de gramática española avanzada", "Ver películas en español sin subtítulos como única actividad"], answer: "Practicar activamente en situaciones laborales reales y usar conscientemente las palabras nuevas" },
-    ],
-    dictation: "Los falsos cognados son palabras parecidas en español y portugués con significados diferentes, y son una fuente frecuente de malentendidos profesionales.",
-  },
-
-  // ══════════════════════════════════════════
-  // LABORATORIO NUEVO
-  // ══════════════════════════════════════════
-  {
-    id: "coagulacion", title: "Coagulación y hemostasia", level: "Avanzado", category: "Laboratorio", emoji: "🩹",
-    description: "Estudios de coagulación, hemostasia primaria y secundaria en el laboratorio.",
-    readingTitle: "Cuando la sangre no se detiene",
-    reading: [
-      "La hemostasia es el conjunto de mecanismos que el organismo activa para detener un sangrado cuando se produce una lesión vascular. Este proceso se divide en dos grandes fases: la hemostasia primaria, que involucra a las plaquetas y forma un tapón provisional en el sitio de la lesión, y la hemostasia secundaria o coagulación, que consolida ese tapón mediante una red de fibrina formada a través de una cascada enzimática compleja.",
-      "El laboratorio de coagulación evalúa este sistema mediante pruebas específicas. El tiempo de protrombina (TP) y su expresión estandarizada como INR evalúan la vía extrínseca de la coagulación, utilizada principalmente para monitorear el tratamiento con anticoagulantes orales como warfarina o acenocumarol. El KPTT o tiempo de tromboplastina parcial activado evalúa la vía intrínseca, y es fundamental para monitorear el tratamiento con heparina y para el diagnóstico de deficiencias de factores como el VIII, IX o XII.",
-      "Una de las particularidades del laboratorio de coagulación es que los resultados son especialmente sensibles a los factores preanalíticos. La proporción correcta entre la sangre y el anticoagulante citrato presente en el tubo azul es crítica: si el tubo no está completamente llenado hasta la marca indicada, la relación sangre-citrato se altera y el resultado puede ser falsamente prolongado. Asimismo, una muestra hemolizada, con coágulos o con temperatura de conservación inadecuada puede generar resultados completamente erróneos.",
-      "El dímero D es otro marcador que el laboratorio de coagulación determina con frecuencia. Este producto de degradación de la fibrina se eleva cuando hay formación y lisis de coágulos en el organismo, y se utiliza principalmente para descartar tromboembolismo venoso, incluyendo trombosis venosa profunda y embolismo pulmonar. Sin embargo, el dímero D tiene alta sensibilidad pero baja especificidad: se eleva en muchas situaciones como inflamación, embarazo o postoperatorio, por lo que un resultado positivo requiere confirmación con estudios de imagen.",
-      "La comunicación de resultados críticos de coagulación es una responsabilidad de primer orden. Un TP o KPTT extremadamente prolongados pueden indicar riesgo inminente de sangrado severo. Un INR muy elevado en un paciente anticoagulado puede requerir intervención médica urgente. El laboratorio debe tener establecidos los valores de pánico para cada prueba de coagulación y el procedimiento para comunicarlos al médico de forma inmediata, documentada y verificada.",
-    ],
-    vocab: [
-      { es: "coagulación", pt: "coagulação" }, { es: "hemostasia", pt: "hemostasia" },
-      { es: "tiempo de protrombina", pt: "tempo de protrombina" }, { es: "anticoagulante", pt: "anticoagulante" },
-      { es: "dímero D", pt: "dímero D" }, { es: "trombosis", pt: "trombose" },
-    ],
-    quiz: [
-      { question: "¿Qué evalúa el tiempo de protrombina (TP)?", options: ["La vía intrínseca de coagulación", "La vía extrínseca de coagulación", "El número de plaquetas", "La función renal"], answer: "La vía extrínseca de coagulación" },
-      { question: "¿Para qué se usa el INR principalmente?", options: ["Diagnóstico de anemia", "Monitoreo del tratamiento con anticoagulantes orales", "Evaluación de la función plaquetaria", "Diagnóstico de infecciones"], answer: "Monitoreo del tratamiento con anticoagulantes orales" },
-      { question: "¿Qué evalúa el KPTT?", options: ["La vía extrínseca", "La vía intrínseca de la coagulación", "Las plaquetas", "El fibrinógeno únicamente"], answer: "La vía intrínseca de la coagulación" },
-      { question: "¿Por qué es crítica la proporción sangre-citrato en el tubo azul?", options: ["Por razones estéticas", "Una relación alterada puede generar resultados falsamente prolongados", "Para facilitar el centrifugado", "Por exigencia del fabricante únicamente"], answer: "Una relación alterada puede generar resultados falsamente prolongados" },
-      { question: "¿Qué indica el dímero D elevado?", options: ["Deficiencia de vitamina K", "Formación y lisis de coágulos en el organismo", "Anemia grave", "Infección bacteriana"], answer: "Formación y lisis de coágulos en el organismo" },
-      { question: "¿Por qué el dímero D tiene baja especificidad?", options: ["Porque no es confiable", "Porque se eleva en muchas situaciones además de tromboembolismo", "Porque el equipo tiene poca sensibilidad", "Porque varía según la edad del paciente"], answer: "Porque se eleva en muchas situaciones además de tromboembolismo" },
-      { question: "¿Qué factores preanalíticos afectan los resultados de coagulación?", options: ["Solo la temperatura del laboratorio", "Tubo no completamente lleno, hemólisis, coágulos y temperatura inadecuada", "Solo el tiempo de transporte", "Solo el tipo de anticoagulante del tubo"], answer: "Tubo no completamente lleno, hemólisis, coágulos y temperatura inadecuada" },
-      { question: "¿Qué debe hacer el laboratorio ante un valor crítico de coagulación?", options: ["Esperar a que el médico llame", "Comunicarlo inmediatamente de forma documentada y verificada", "Repetir el análisis sin avisar", "Solo anotarlo en el informe"], answer: "Comunicarlo inmediatamente de forma documentada y verificada" },
-    ],
-    dictation: "El tiempo de protrombina evalúa la vía extrínseca de la coagulación y se expresa como INR para monitorear el tratamiento anticoagulante oral.",
-  },
-  {
-    id: "inmunologia", title: "Inmunología y serología", level: "Intermedio", category: "Laboratorio", emoji: "🛡️",
-    description: "Anticuerpos, marcadores inflamatorios y pruebas serológicas en el laboratorio.",
-    readingTitle: "El sistema de defensa bajo la lupa",
-    reading: [
-      "La inmunología clínica es el área del laboratorio que estudia la respuesta inmune del organismo: cómo produce anticuerpos frente a agentes infecciosos, cómo se autodefiende, y en ocasiones, cómo esa defensa se vuelve contra el propio organismo en las enfermedades autoinmunes. Las pruebas serológicas permiten detectar anticuerpos específicos contra virus, bacterias u otros antígenos, y son fundamentales para el diagnóstico de infecciones pasadas o presentes.",
-      "Entre las pruebas serológicas más solicitadas se encuentran las de detección de anticuerpos contra el virus de la inmunodeficiencia humana (VIH), la hepatitis B y C, Toxoplasma gondii, Treponema pallidum (sífilis) y numerosos virus respiratorios. En muchos casos, la interpretación requiere distinguir entre anticuerpos IgM, que indican infección reciente o activa, e IgG, que pueden indicar infección pasada, vacunación o inmunidad adquirida.",
-      "Los marcadores inflamatorios son otro grupo importante dentro de la inmunología clínica. La proteína C reactiva (PCR) es el marcador de fase aguda más utilizado y se eleva rápidamente en respuesta a infecciones bacterianas, inflamación tisular y algunos procesos oncológicos. La eritrosedimentación (ESD o VSG) es un marcador más inespecífico que puede elevarse en infecciones, enfermedades inflamatorias crónicas y anemia. El factor reumatoide y los anticuerpos antinucleares (ANA) son importantes en el diagnóstico de enfermedades reumatológicas.",
-      "La zona de prozona es un fenómeno que puede causar resultados falsamente negativos en pruebas serológicas cuando la concentración de anticuerpos en la muestra es extremadamente alta. En esa situación, el exceso de anticuerpos satura todos los sitios de unión del antígeno y no se produce la reacción visible que indica un resultado positivo. Para detectar este fenómeno, se realizan diluciones seriadas de la muestra. Es un ejemplo de cómo un resultado negativo no siempre significa ausencia de enfermedad.",
-      "La interpretación de los resultados serológicos requiere siempre el contexto clínico del paciente. Un resultado positivo para anticuerpos IgG contra toxoplasma en una mujer embarazada tiene un significado completamente diferente del mismo resultado en un adulto sano no embarazado. La comunicación eficaz entre el laboratorio y el médico es especialmente crítica en inmunología, donde los resultados a menudo requieren correlación con la historia clínica, el cuadro clínico actual y otros estudios complementarios.",
-    ],
-    vocab: [
-      { es: "anticuerpo", pt: "anticorpo" }, { es: "antígeno", pt: "antígeno" },
-      { es: "serología", pt: "sorologia" }, { es: "proteína C reactiva", pt: "proteína C reativa" },
-      { es: "inmunoglobulina IgM / IgG", pt: "imunoglobulina IgM / IgG" }, { es: "autoinmune", pt: "autoimune" },
-    ],
-    quiz: [
-      { question: "¿Qué indica la presencia de anticuerpos IgM?", options: ["Infección pasada o vacunación", "Infección reciente o activa", "Inmunidad permanente", "Ausencia de respuesta inmune"], answer: "Infección reciente o activa" },
-      { question: "¿Qué evalúa la proteína C reactiva (PCR)?", options: ["La función renal", "La presencia de inflamación o infección aguda", "La cantidad de glóbulos rojos", "El nivel de glucosa"], answer: "La presencia de inflamación o infección aguda" },
-      { question: "¿Qué es la zona de prozona?", options: ["Un área del laboratorio", "Un fenómeno donde exceso de anticuerpos genera resultado falsamente negativo", "Una región geográfica de estudio", "El rango normal de anticuerpos"], answer: "Un fenómeno donde exceso de anticuerpos genera resultado falsamente negativo" },
-      { question: "¿Cómo se detecta el fenómeno de prozona?", options: ["Repitiendo el análisis igual", "Realizando diluciones seriadas de la muestra", "Usando un equipo diferente", "Cambiando el reactivo de lote"], answer: "Realizando diluciones seriadas de la muestra" },
-      { question: "¿Qué son los anticuerpos ANA?", options: ["Anticuerpos contra bacterias", "Anticuerpos antinucleares usados en diagnóstico reumatológico", "Anticuerpos contra virus", "Anticuerpos de defensa normal"], answer: "Anticuerpos antinucleares usados en diagnóstico reumatológico" },
-      { question: "¿Por qué importa el contexto clínico en serología?", options: ["No importa, los resultados son absolutos", "El mismo resultado puede tener significado completamente diferente según el paciente", "Solo importa en enfermedades raras", "Solo importa para el facturador"], answer: "El mismo resultado puede tener significado completamente diferente según el paciente" },
-      { question: "¿Qué diferencia hay entre IgM e IgG en una serología?", options: ["IgG es más moderna que IgM", "IgM indica infección activa/reciente; IgG indica exposición pasada o inmunidad", "IgM solo aparece en niños", "No hay diferencia clínica"], answer: "IgM indica infección activa/reciente; IgG indica exposición pasada o inmunidad" },
-      { question: "¿Qué marcadores son importantes en enfermedades reumatológicas?", options: ["Glucosa y creatinina", "Factor reumatoide y anticuerpos antinucleares ANA", "Hemoglobina y hematocrito", "TGO y TGP únicamente"], answer: "Factor reumatoide y anticuerpos antinucleares ANA" },
-    ],
-    dictation: "En serología, la presencia de IgM indica infección reciente o activa, mientras que la IgG puede indicar infección pasada o inmunidad adquirida.",
-  },
-  {
-    id: "orina", title: "Análisis de orina", level: "Básico", category: "Laboratorio", emoji: "🔬",
-    description: "Uroanálisis completo: físico, químico y sedimento urinario.",
-    readingTitle: "Lo que la orina puede revelar",
-    reading: [
-      "El análisis de orina o uroanálisis es uno de los estudios más solicitados en el laboratorio clínico y, a pesar de su aparente simplicidad, aporta una enorme cantidad de información sobre la función renal, el estado metabólico del organismo y la presencia de infecciones o inflamaciones del tracto urinario. Se compone de tres partes fundamentales: el examen físico, el examen químico y el examen microscópico del sedimento.",
-      "El examen físico evalúa el color, que puede variar del amarillo pálido al oscuro según el nivel de hidratación; la transparencia, que normalmente debe ser clara y puede volverse turbia por presencia de leucocitos, bacterias, moco o cristales; y la densidad o gravedad específica, que refleja la capacidad del riñón para concentrar la orina y puede estar disminuida en insuficiencia renal o diabetes insípida.",
-      "El examen químico mediante tira reactiva detecta una gran variedad de parámetros: glucosuria (glucosa en orina, que en condiciones normales no debería estar presente), proteinuria (proteínas, cuya presencia puede indicar daño renal o proteinuria de esfuerzo), hematuria (sangre, que puede ser macroscópica o solo detectable por la tira), cetonuria (cuerpos cetónicos, elevados en diabetes descompensada o ayuno prolongado), leucocituria (leucocitos, indicativa de infección o inflamación) y nitritos (producidos por bacterias, altamente específicos de infección urinaria).",
-      "El sedimento urinario es el componente más informativo y complejo del uroanálisis. Se obtiene por centrifugación de la muestra y se examina al microscopio. Los elementos que pueden observarse incluyen: glóbulos rojos (cuya morfología puede indicar si son de origen glomerular o de las vías bajas), glóbulos blancos, células epiteliales, cilindros de diferentes tipos (hialinos, granulosos, eritrocitarios, leucocitarios, granulares), bacterias, levaduras y cristales de diversas composiciones.",
-      "La correcta recolección de la muestra es fundamental para obtener un sedimento confiable. La muestra debe ser de la primera orina de la mañana, recolectada en la mitad del chorro (muestra de chorro medio) en un recipiente estéril, y procesada dentro de los primeros noventa minutos de recolección. Una muestra contaminada o procesada tardíamente puede tener sedimento completamente diferente al real, generando errores diagnósticos importantes. El laboratorio debe informar al paciente las instrucciones de recolección con claridad.",
-    ],
-    vocab: [
-      { es: "uroanálisis", pt: "urinálise" }, { es: "sedimento urinario", pt: "sedimento urinário" },
-      { es: "proteinuria", pt: "proteinúria" }, { es: "hematuria", pt: "hematúria" },
-      { es: "cilindro", pt: "cilindro" }, { es: "leucocituria", pt: "leucocitúria" },
-    ],
-    quiz: [
-      { question: "¿Cuáles son las tres partes del uroanálisis?", options: ["Color, densidad y pH", "Examen físico, químico y microscópico del sedimento", "Glucosa, proteínas y nitritos", "Peso, volumen y temperatura"], answer: "Examen físico, químico y microscópico del sedimento" },
-      { question: "¿Qué indica la presencia de nitritos en la tira reactiva?", options: ["Inflamación renal crónica", "Infección bacteriana del tracto urinario", "Diabetes mellitus", "Deshidratación severa"], answer: "Infección bacteriana del tracto urinario" },
-      { question: "¿Qué indica la glucosuria en condiciones normales?", options: ["Es normal en todas las personas", "No debería estar presente: puede indicar diabetes u otras condiciones", "Solo indica buena hidratación", "Es normal después de comer"], answer: "No debería estar presente: puede indicar diabetes u otras condiciones" },
-      { question: "¿Cómo se obtiene el sedimento urinario?", options: ["Filtrando la orina con papel", "Por centrifugación de la muestra y observación al microscopio", "Añadiendo reactivos químicos", "Dejando reposar la orina 24 horas"], answer: "Por centrifugación de la muestra y observación al microscopio" },
-      { question: "¿Cuál es la muestra ideal para el uroanálisis?", options: ["Cualquier muestra del día", "Primera orina de la mañana, chorro medio, recipiente estéril", "Muestra de 24 horas completas", "Solo la última orina del día"], answer: "Primera orina de la mañana, chorro medio, recipiente estéril" },
-      { question: "¿En cuánto tiempo debe procesarse la muestra de orina?", options: ["Puede esperar hasta el día siguiente", "Dentro de los primeros noventa minutos de recolección", "En 6 horas como máximo", "No importa el tiempo si está refrigerada"], answer: "Dentro de los primeros noventa minutos de recolección" },
-      { question: "¿Qué indica la presencia de cilindros eritrocitarios en el sedimento?", options: ["Infección bacteriana", "Daño glomerular con hematuria de origen renal", "Deshidratación normal", "Solo contaminación de la muestra"], answer: "Daño glomerular con hematuria de origen renal" },
-      { question: "¿Qué puede causar un sedimento falso o alterado?", options: ["Usar recipiente de plástico", "Muestra contaminada o procesada tardíamente", "Primer orina del día", "Muestra de chorro medio"], answer: "Muestra contaminada o procesada tardíamente" },
-    ],
-    dictation: "El uroanálisis incluye examen físico, químico y microscópico del sedimento, y la muestra debe procesarse dentro de los noventa minutos de recolección.",
-  },
-
-  // ══════════════════════════════════════════
-  // GRAMÁTICA NUEVA
-  // ══════════════════════════════════════════
-  {
-    id: "imperativo", title: "Imperativo y órdenes", level: "Básico", category: "Gramática", emoji: "📢",
-    description: "Cómo dar instrucciones, órdenes y recomendaciones en español técnico.",
-    readingTitle: "Las palabras que mueven a la acción",
-    reading: [
-      "El imperativo es el modo verbal que se usa para dar órdenes, instrucciones, recomendaciones o pedidos directos. En el contexto del laboratorio, es el tiempo más utilizado en los procedimientos operativos estándar, en las instrucciones de equipos y en las indicaciones al personal: 'centrifugue la muestra durante diez minutos', 'verifique el nivel de reactivo antes de iniciar la corrida', 'documente el resultado inmediatamente después de validar'.",
-      "En español existen formas diferentes de imperativo según el pronombre de tratamiento que se use. El imperativo de 'tú' (segunda persona informal) se forma generalmente igual que la tercera persona del presente de indicativo: verifica, centrifuga, registra. El imperativo de 'usted' (segunda persona formal) utiliza la misma forma que el presente de subjuntivo: verifique, centrifugue, registre. En Argentina y otros países del Río de la Plata, el 'vos' tiene sus propias formas del imperativo: verificá, centrifugá, registrá.",
-      "Para los hablantes de portugués, una diferencia importante es que el imperativo afirmativo del español puede usarse de forma más directa que en portugués sin que resulte descortés, especialmente en procedimientos escritos. En los manuales técnicos y procedimientos operativos, el imperativo impersonal con 'usted' ('verifique', 'registre', 'comunique') es el estándar profesional en la mayoría de los países hispanohablantes.",
-      "El imperativo negativo, usado para prohibiciones o advertencias, funciona de forma diferente al afirmativo. Para todas las personas, el imperativo negativo usa la forma del presente de subjuntivo: 'no mezcle los reactivos sin verificar la compatibilidad', 'no libere el resultado sin revisión del supervisor', 'no descarte la muestra hasta confirmar que el análisis fue completado correctamente'. Esta forma es fundamental en las instrucciones de seguridad del laboratorio.",
-      "Suavizar una orden directa es una habilidad comunicativa importante, especialmente en contextos jerárquicos o con clientes. Para una orden más amable, se pueden usar fórmulas como 'por favor, verifique...', 'le pido que revise...', 'sería importante que registre...'. Estas construcciones combinan el imperativo o el subjuntivo con marcadores de cortesía que reducen la impresión de mandato directo y resultan más apropiadas en situaciones de atención al cliente o comunicación entre pares.",
-    ],
-    vocab: [
-      { es: "verifique / verificá", pt: "verifique" }, { es: "registre / registrá", pt: "registre" },
-      { es: "centrifugue", pt: "centrifugue" }, { es: "no descarte", pt: "não descarte" },
-      { es: "por favor, revise", pt: "por favor, revise" }, { es: "documente inmediatamente", pt: "documente imediatamente" },
-    ],
-    quiz: [
-      { question: "¿Para qué se usa el imperativo en el laboratorio?", options: ["Solo para preguntas", "Para dar instrucciones, órdenes y recomendaciones directas", "Solo para el pasado", "Solo para descripciones"], answer: "Para dar instrucciones, órdenes y recomendaciones directas" },
-      { question: "¿Cuál es el imperativo de 'usted' para el verbo 'verificar'?", options: ["verifica", "verificás", "verifique", "verificar"], answer: "verifique" },
-      { question: "¿Cuál es el imperativo de 'vos' para el verbo 'registrar'?", options: ["registra", "registrá", "registre", "registro"], answer: "registrá" },
-      { question: "¿Cómo se forma el imperativo negativo en español?", options: ["Con 'no' más el infinitivo", "Con 'no' más el presente de subjuntivo", "Con 'no' más el imperativo afirmativo", "Con 'no' más el presente de indicativo"], answer: "Con 'no' más el presente de subjuntivo" },
-      { question: "¿Cuál es correcto como imperativo negativo formal?", options: ["No verificar el resultado", "No verifica el resultado", "No verifique el resultado sin revisión", "No verificando el resultado"], answer: "No verifique el resultado sin revisión" },
-      { question: "¿Cómo se puede suavizar una orden directa?", options: ["Usando solo el infinitivo", "Con fórmulas de cortesía como 'por favor, verifique' o 'le pido que revise'", "Usando solo el subjuntivo impersonal", "No es posible suavizar órdenes en español"], answer: "Con fórmulas de cortesía como 'por favor, verifique' o 'le pido que revise'" },
-      { question: "¿En qué persona se usa el imperativo en los procedimientos operativos?", options: ["Primera persona singular", "Imperativo de 'usted' como estándar profesional", "Solo en segunda persona informal", "Solo en plural"], answer: "Imperativo de 'usted' como estándar profesional" },
-      { question: "¿Qué diferencia al imperativo del 'tú' del de 'usted'?", options: ["No hay diferencia", "El 'tú' usa tercera persona del indicativo; el 'usted' usa el presente de subjuntivo", "El 'tú' siempre lleva tilde; el 'usted' no", "El 'usted' es más corto siempre"], answer: "El 'tú' usa tercera persona del indicativo; el 'usted' usa el presente de subjuntivo" },
-    ],
-    dictation: "Verifique el nivel del reactivo, centrifugue la muestra durante diez minutos y no libere el resultado sin la revisión del supervisor.",
-  },
-  {
-    id: "condicional", title: "Condicional y hipótesis", level: "Intermedio", category: "Gramática", emoji: "💭",
-    description: "El condicional para hipótesis, recomendaciones y situaciones técnicas.",
-    readingTitle: "Lo que haría si ocurriera",
-    reading: [
-      "El condicional simple es el tiempo verbal que se usa para expresar acciones que ocurrirían bajo ciertas condiciones o en situaciones hipotéticas. Se forma añadiendo al infinitivo del verbo las terminaciones -ía, -ías, -ía, -íamos, -íais, -ían. Por ejemplo: verificaría, procesaría, comunicaría. En el contexto técnico del laboratorio, el condicional aparece frecuentemente en protocolos de contingencia, análisis de riesgos y recomendaciones técnicas.",
-      "Una de las funciones más importantes del condicional en el lenguaje técnico es expresar recomendaciones de forma cortés y menos impositiva que el imperativo. 'Sería conveniente actualizar el procedimiento antes de la próxima auditoría' es más diplomático que 'actualice el procedimiento'. 'Convendría revisar los controles del turno anterior' sugiere una acción sin imponer. 'Debería documentarse cada desviación al momento de detectarla' expresa obligación de forma más suave que el imperativo directo.",
-      "El condicional también se usa para describir qué ocurriría en situaciones hipotéticas que se usan en la planificación de contingencias. 'Si el servidor fallara, el personal registraría los resultados manualmente.' 'Si se detectara una contaminación cruzada, se suspendería la corrida y se investigaría la causa.' Estas construcciones condicionales (si + imperfecto de subjuntivo + condicional simple) son fundamentales en los planes de contingencia y en el análisis de escenarios de riesgo.",
-      "Para los hablantes de portugués, el condicional simple del español (hablaría, haría, tendría) corresponde al futuro do pretérito del portugués (falaria, faria, teria). La correspondencia es bastante directa en la mayoría de los casos, lo que facilita el aprendizaje. Sin embargo, en el habla coloquial del español rioplatense es frecuente sustituir el condicional por el imperfecto de indicativo ('si venía, te avisaba' en lugar de 'si viniera, te avisaría'), un uso que se acepta en contextos informales pero que no es apropiado en comunicaciones técnicas escritas formales.",
-      "En los informes de auditoría y en las comunicaciones de calidad, el condicional se usa también para expresar lo que debería hacerse o lo que hubiera sido preferible hacer. 'El resultado debería haber sido retenido hasta la revisión' o 'hubiera sido apropiado consultar al supervisor antes de liberar' son fórmulas que el auditor usa para señalar una desviación sin acusar directamente. Dominar el condicional en español abre la posibilidad de comunicarse con mayor matiz y precisión en contextos profesionales formales.",
-    ],
-    vocab: [
-      { es: "sería conveniente", pt: "seria conveniente" }, { es: "convendría", pt: "conviria" },
-      { es: "debería documentarse", pt: "deveria ser documentado" }, { es: "si fallara... procesaría", pt: "se falhasse... processaria" },
-      { es: "hubiera sido apropiado", pt: "teria sido apropriado" }, { es: "en ese caso", pt: "nesse caso" },
-    ],
-    quiz: [
-      { question: "¿Cómo se forma el condicional simple?", options: ["Con el auxiliar 'haber' más participio", "Añadiendo -ía, -ías, -ía, -íamos, -íais, -ían al infinitivo", "Con el auxiliar 'ser' más participio", "Igual que el futuro pero con tilde"], answer: "Añadiendo -ía, -ías, -ía, -íamos, -íais, -ían al infinitivo" },
-      { question: "¿Para qué se usa el condicional en textos técnicos?", options: ["Solo para el pasado", "Hipótesis, recomendaciones corteses y situaciones condicionales", "Solo para preguntas formales", "Solo para el futuro cercano"], answer: "Hipótesis, recomendaciones corteses y situaciones condicionales" },
-      { question: "¿Cuál de estas frases usa el condicional de forma cortés?", options: ["Actualice el procedimiento ahora", "Sería conveniente actualizar el procedimiento", "Actualiza el procedimiento hoy", "El procedimiento se actualiza"], answer: "Sería conveniente actualizar el procedimiento" },
-      { question: "¿Qué estructura se usa para situaciones hipotéticas de contingencia?", options: ["Si + presente + futuro", "Si + imperfecto de subjuntivo + condicional simple", "Si + infinitivo + condicional", "Si + presente + condicional"], answer: "Si + imperfecto de subjuntivo + condicional simple" },
-      { question: "¿Cuál es el equivalente del condicional español en portugués?", options: ["Futuro do presente", "Futuro do pretérito", "Pretérito imperfeito", "Pretérito perfeito composto"], answer: "Futuro do pretérito" },
-      { question: "¿Cómo se expresa 'debería' para una obligación suave?", options: ["Tenés que", "Debería + infinitivo", "Hay que + infinitivo solamente", "Tiene que + infinitivo en todos los casos"], answer: "Debería + infinitivo" },
-      { question: "¿Es apropiado en español formal escrito usar el imperfecto en lugar del condicional?", options: ["Sí, siempre es correcto", "No, en comunicaciones técnicas escritas formales se prefiere el condicional", "Solo en informes de auditoría", "Solo si lo usa el director técnico"], answer: "No, en comunicaciones técnicas escritas formales se prefiere el condicional" },
-      { question: "¿Cómo señala el auditor una desviación usando el condicional?", options: ["Diciendo que el analista se equivocó", "Con frases como 'hubiera sido apropiado' o 'debería haberse consultado'", "Solo con el imperativo negativo", "Con preguntas directas al personal"], answer: "Con frases como 'hubiera sido apropiado' o 'debería haberse consultado'" },
-    ],
-    dictation: "Sería conveniente actualizar el procedimiento antes de la auditoría y convendría documentar cada desviación al momento de detectarla.",
-  },
-  {
-    id: "voz-pasiva", title: "Voz pasiva y construcciones impersonales", level: "Avanzado", category: "Gramática", emoji: "🔀",
-    description: "La voz pasiva y el se impersonal en documentos y comunicaciones técnicas.",
-    readingTitle: "Cuando el sujeto queda en segundo plano",
-    reading: [
-      "La voz pasiva es una construcción gramatical en la que el objeto de la acción se convierte en el sujeto gramatical de la oración. En lugar de 'el analista validó el resultado' (voz activa), se dice 'el resultado fue validado por el analista' (voz pasiva). Esta construcción es muy frecuente en el lenguaje técnico y científico porque permite enfocarse en el proceso o el objeto, más que en el agente que lo ejecuta.",
-      "En español existen dos tipos de pasiva. La pasiva con 'ser' (pasiva perifrástica) usa el verbo ser más el participio del verbo principal: 'la muestra fue procesada', 'el resultado fue comunicado', 'el procedimiento fue actualizado'. El participio concuerda en género y número con el sujeto. La pasiva con 'se' (pasiva refleja o se impersonal) es mucho más frecuente en el español actual y se usa sin mencionar al agente: 'se procesaron las muestras', 'se comunicó el resultado', 'se actualizó el procedimiento'.",
-      "Para los hablantes de portugués, la pasiva con 'se' en español tiene un comportamiento diferente al del portugués. En portugués, 'se processaram as amostras' concuerda con el sujeto gramatical (amostras, plural). En español, lo mismo ocurre en la norma estándar: 'se procesaron las muestras'. Sin embargo, en el habla coloquial y a veces en escritura informal, es frecuente encontrar la construcción sin concordancia: 'se procesó las muestras', que es considerada incorrecta en español estándar aunque muy extendida.",
-      "El se impersonal es otra construcción muy utilizada en los procedimientos y documentos técnicos del laboratorio. Se forma con 'se' más el verbo en tercera persona singular: 'se debe verificar', 'se recomienda documentar', 'se prohíbe el acceso sin autorización'. Esta construcción tiene la ventaja de que no especifica quién debe realizar la acción, lo cual es apropiado en procedimientos que aplican a cualquier persona que realice el proceso.",
-      "En los informes de no conformidades y las acciones correctivas, la voz pasiva y el se impersonal son herramientas comunicativas importantes porque permiten describir lo que ocurrió sin señalar directamente a una persona como responsable de un error. 'Se omitió el registro de recepción' es menos acusatorio que 'el analista omitió el registro'. Esta objetividad del lenguaje técnico no implica que las responsabilidades no sean claras internamente: es simplemente una forma de comunicar que pone el foco en el proceso y no en la persona.",
-    ],
-    vocab: [
-      { es: "fue validado / fue procesado", pt: "foi validado / foi processado" }, { es: "se procesaron las muestras", pt: "as amostras foram processadas" },
-      { es: "se recomienda documentar", pt: "recomenda-se documentar" }, { es: "se debe verificar", pt: "deve-se verificar" },
-      { es: "se omitió el registro", pt: "o registro foi omitido" }, { es: "fue comunicado por el analista", pt: "foi comunicado pelo analista" },
-    ],
-    quiz: [
-      { question: "¿Qué es la voz pasiva?", options: ["Una forma de hablar más lento", "Construcción donde el objeto se convierte en sujeto gramatical", "Una forma de evitar el subjuntivo", "El uso de verbos en pasado únicamente"], answer: "Construcción donde el objeto se convierte en sujeto gramatical" },
-      { question: "¿Cuáles son los dos tipos de pasiva en español?", options: ["Pasiva formal e informal", "Pasiva con 'ser' y pasiva con 'se'", "Pasiva presente y pasiva pasada", "Pasiva activa y pasiva reflexiva"], answer: "Pasiva con 'ser' y pasiva con 'se'" },
-      { question: "¿Cuál es la pasiva con 'se' de 'procesaron las muestras'?", options: ["Se procesó las muestras", "Se procesaron las muestras", "Las muestras se procesa", "Las muestras se procesaba"], answer: "Se procesaron las muestras" },
-      { question: "¿Qué es el se impersonal?", options: ["Una forma de hablar sin sujeto definido usando 'se' más tercera persona singular", "El uso de 'se' reflexivo como en 'se lava'", "Una forma de plural exclusiva", "Solo se usa en publicaciones científicas"], answer: "Una forma de hablar sin sujeto definido usando 'se' más tercera persona singular" },
-      { question: "¿Por qué se usa la voz pasiva en informes técnicos?", options: ["Para hacer el texto más largo", "Enfoca en el proceso sin señalar directamente a una persona", "Es obligatorio por norma", "Para evitar el imperativo"], answer: "Enfoca en el proceso sin señalar directamente a una persona" },
-      { question: "¿Cuál es la forma correcta en español estándar?", options: ["Se procesó las muestras", "Se procesaron las muestras", "Se procesa las muestras siempre", "Muestras se procesaron"], answer: "Se procesaron las muestras" },
-      { question: "¿Cuál de estas usa el se impersonal correctamente?", options: ["Se debo verificar", "Se debe verificar la calibración antes de iniciar", "Se deben verificar yo", "Verificar se debe"], answer: "Se debe verificar la calibración antes de iniciar" },
-      { question: "¿Por qué 'se omitió el registro' es preferible en un informe de no conformidad?", options: ["Porque es más corto", "Porque enfoca en el proceso sin señalar directamente a una persona como culpable", "Porque es gramaticalmente más simple", "Porque evita el pasado"], answer: "Porque enfoca en el proceso sin señalar directamente a una persona como culpable" },
-    ],
-    dictation: "Se procesaron las muestras, se verificaron los controles y se comunicó el resultado al médico solicitante dentro del tiempo establecido.",
-  },
-
-  // ══════════════════════════════════════════
-  // SITUACIONES REALES
-  // ══════════════════════════════════════════
-  {
-    id: "llamada-urgente", title: "Llamada urgente al médico", level: "Intermedio", category: "Comunicación", emoji: "📱",
-    description: "Cómo comunicar un resultado crítico por teléfono de forma clara y profesional.",
-    readingTitle: "La llamada que no podía esperar",
-    reading: [
-      "Comunicar un resultado crítico por teléfono es una de las situaciones más exigentes en la comunicación técnica del laboratorio. Requiere claridad absoluta, vocabulario preciso, manejo de la presión y la capacidad de verificar que el médico haya entendido correctamente la información. Un error en esa comunicación puede tener consecuencias clínicas graves para el paciente.",
-      "El protocolo estándar para la comunicación de un resultado crítico por teléfono incluye los siguientes pasos: identificarse como profesional del laboratorio y dar el nombre del laboratorio; solicitar hablar con el médico tratante o responsable del paciente; confirmar la identidad del interlocutor; comunicar el resultado con el nombre del análisis, el valor numérico y la unidad, y el rango de referencia o valor de pánico; indicar el nombre y número de identificación del paciente; y solicitar al médico que repita la información para confirmar que fue recibida correctamente.",
-      "En español, algunas frases útiles para esta situación son: 'Buenos días, habla [nombre] del Laboratorio Controllab. Necesito comunicar un resultado crítico. ¿Podría hablar con el médico responsable del paciente [apellido]?' Una vez en línea con el médico: 'Doctor/Doctora, le llamo para informar un resultado crítico del paciente [nombre]. El potasio es de 6.8 mEq/L, con valor de pánico superior a 6.5. ¿Podría confirmarme que recibió esta información?' El cierre: 'Gracias, queda documentado. Mi nombre es [nombre] y el número de solicitud es [número].'",
-      "La documentación de la llamada es parte inseparable del proceso. Después de cada comunicación de resultado crítico, el analista debe registrar en el sistema: la hora exacta de la llamada, el nombre del médico que recibió la información, la confirmación verbal del médico y el nombre del analista que realizó la comunicación. Si no es posible comunicarse con el médico tratante, debe dejarse registro de los intentos y escalarse a través de la cadena de responsabilidad definida en el procedimiento.",
-      "Una dificultad adicional en la comunicación oral técnica es el deletreo de nombres y apellidos, especialmente cuando hay interferencias en la línea. En español se puede deletrear usando palabras de referencia: A de Argentina, B de Bolivia, C de Colombia, D de Denmark, E de España... Este recurso, aunque informal, es muy práctico en situaciones donde la claridad es crítica y debe conocerse para usarlo con fluidez cuando la situación lo requiera.",
-    ],
-    vocab: [
-      { es: "resultado crítico", pt: "resultado crítico" }, { es: "habla [nombre] del laboratorio", pt: "fala [nome] do laboratório" },
-      { es: "valor de pánico", pt: "valor de pânico" }, { es: "¿podría confirmarme?", pt: "poderia me confirmar?" },
-      { es: "queda documentado", pt: "fica registrado / documentado" }, { es: "médico responsable", pt: "médico responsável" },
-    ],
-    quiz: [
-      { question: "¿Cuál es el primer paso al llamar para comunicar un resultado crítico?", options: ["Dar el resultado directamente", "Identificarse con nombre y nombre del laboratorio", "Preguntar si el médico está ocupado", "Enviar el informe por correo primero"], answer: "Identificarse con nombre y nombre del laboratorio" },
-      { question: "¿Por qué se pide al médico que repita la información?", options: ["Por protocolo burocrático", "Para confirmar que la información fue recibida y comprendida correctamente", "Para que el médico tome notas", "Para registrar la llamada automáticamente"], answer: "Para confirmar que la información fue recibida y comprendida correctamente" },
-      { question: "¿Qué debe quedar documentado después de la llamada?", options: ["Solo el valor crítico", "Hora, nombre del médico, confirmación verbal y nombre del analista", "Solo el nombre del paciente", "Solo si el médico acepta el resultado"], answer: "Hora, nombre del médico, confirmación verbal y nombre del analista" },
-      { question: "¿Qué se hace si no se puede comunicar con el médico tratante?", options: ["Se espera hasta que llame", "Se registran los intentos y se escala según el procedimiento", "Se envía solo por correo", "Se libera el resultado sin comunicar"], answer: "Se registran los intentos y se escala según el procedimiento" },
-      { question: "¿Para qué se usa el deletreo con palabras de referencia?", options: ["Para hablar más despacio", "Para asegurar claridad cuando hay interferencias al comunicar nombres", "Es obligatorio en todas las llamadas", "Solo para apellidos extranjeros"], answer: "Para asegurar claridad cuando hay interferencias al comunicar nombres" },
-      { question: "¿Qué información debe incluirse al comunicar el resultado crítico?", options: ["Solo el valor numérico", "Nombre del análisis, valor numérico, unidad, rango de pánico y nombre del paciente", "Solo el diagnóstico probable", "Solo el nombre del paciente y el valor"], answer: "Nombre del análisis, valor numérico, unidad, rango de pánico y nombre del paciente" },
-      { question: "¿Cuál de estas frases es apropiada para iniciar la llamada crítica?", options: ["Hola, tengo un resultado raro", "Buenos días, habla [nombre] del Laboratorio. Necesito comunicar un resultado crítico.", "¿Está el doctor? Tengo algo urgente", "Doctor, su paciente tiene un problema"], answer: "Buenos días, habla [nombre] del Laboratorio. Necesito comunicar un resultado crítico." },
-      { question: "¿Por qué es tan exigente la comunicación oral de resultados críticos?", options: ["Porque dura mucho tiempo", "Porque requiere claridad absoluta, vocabulario preciso y verificación de comprensión con consecuencias clínicas directas", "Porque el médico no entiende el laboratorio", "Porque se hace en un idioma extranjero siempre"], answer: "Porque requiere claridad absoluta, vocabulario preciso y verificación de comprensión con consecuencias clínicas directas" },
-    ],
-    dictation: "Buenos días, habla el analista del laboratorio. Le llamo para comunicar un resultado crítico del potasio del paciente García, número de solicitud cinco cuatro tres dos.",
-  },
-
-  // ══ LABORATORIO EXTRA ══
-  {
-    id: "uremia-electrolitos", title: "Electrolitos y función renal", level: "Intermedio", category: "Laboratorio", emoji: "💧",
-    description: "Sodio, potasio, cloro y su interpretación clínica en laboratorio.",
-    readingTitle: "El equilibrio que el riñón mantiene",
-    reading: [
-      "Los electrolitos son iones cargados eléctricamente que cumplen funciones vitales en el organismo: regulan el equilibrio hídrico, participan en la conducción nerviosa y muscular, y mantienen el equilibrio ácido-base. Los principales electrolitos medidos en el laboratorio clínico son el sodio (Na+), el potasio (K+), el cloro (Cl-) y el bicarbonato (HCO3-).",
-      "El sodio es el electrolito más abundante en el líquido extracelular y es el principal regulador de la osmolaridad plasmática. Una hiponatremia (sodio bajo) puede causar síntomas neurológicos graves como convulsiones. Una hipernatremia (sodio elevado) indica deshidratación o pérdida de agua libre. El potasio, en cambio, es el principal catión intracelular y su concentración en plasma es muy pequeña pero clínicamente crítica: variaciones mínimas pueden causar arritmias cardíacas potencialmente fatales.",
-      "Los valores de pánico para electrolitos son especialmente importantes en la práctica de laboratorio. Un potasio mayor de 6.5 mEq/L o menor de 2.5 mEq/L, o un sodio mayor de 160 mEq/L o menor de 120 mEq/L, son situaciones que requieren comunicación inmediata al médico. Estos valores pueden reflejar emergencias médicas reales que requieren intervención urgente.",
-      "Una fuente frecuente de error en la determinación de potasio es la hemólisis de la muestra. Los glóbulos rojos contienen una concentración de potasio intracelular muy superior a la del plasma. Si la muestra se hemoliza durante la extracción o el transporte, el potasio intracelular se libera al plasma, generando una hiperpotasemia artificiosa que puede llevar a decisiones clínicas incorrectas. El analista debe siempre verificar el índice de hemólisis antes de liberar un resultado de potasio elevado.",
-      "El anión gap es un cálculo derivado de los electrolitos que el laboratorio puede reportar junto con los resultados de ionograma. Se calcula como sodio menos la suma de cloro y bicarbonato, y su valor normal es de 8 a 12 mEq/L. Un anión gap elevado indica la presencia de ácidos no medidos en el plasma y es útil en el diagnóstico diferencial de la acidosis metabólica. Saber explicar este cálculo al médico solicitante es un ejemplo de cómo el laboratorio puede agregar valor interpretativo a los resultados.",
-    ],
-    vocab: [
-      { es: "electrolito", pt: "eletrólito" }, { es: "sodio / potasio", pt: "sódio / potássio" },
-      { es: "hiponatremia", pt: "hiponatremia" }, { es: "hiperpotasemia", pt: "hiperpotassemia" },
-      { es: "anión gap", pt: "ânion gap" }, { es: "osmolaridad", pt: "osmolaridade" },
-    ],
-    quiz: [
-      { question: "¿Cuál es el principal electrolito del líquido extracelular?", options: ["Potasio", "Sodio", "Cloro", "Bicarbonato"], answer: "Sodio', explanation: 'El sodio es el catión más abundante en el espacio extracelular y regula la osmolaridad plasmática." },
-      { question: "¿Por qué es clínicamente crítico el potasio?", options: ["Porque regula la sed", "Porque variaciones mínimas pueden causar arritmias cardíacas fatales", "Porque determina el color de la orina", "Porque regula la temperatura"], answer: "Porque variaciones mínimas pueden causar arritmias cardíacas fatales', explanation: 'El potasio tiene un rango normal muy estrecho (3.5-5.0 mEq/L) y pequeñas desviaciones afectan directamente la conducción cardíaca." },
-      { question: "¿Qué causa un potasio falsamente elevado en la muestra?", options: ["Alta temperatura ambiente", "Hemólisis: el potasio intracelular se libera al plasma", "Muestra muy fresca", "Anticoagulante incorrecto"], answer: "Hemólisis: el potasio intracelular se libera al plasma', explanation: 'Los eritrocitos contienen concentraciones de potasio muy superiores al plasma. La hemólisis contamina el plasma con ese potasio intracelular." },
-      { question: "¿Qué indica un anión gap elevado?", options: ["Exceso de bicarbonato", "Presencia de ácidos no medidos en el plasma", "Deshidratación severa", "Función renal normal"], answer: "Presencia de ácidos no medidos en el plasma', explanation: 'El anión gap aumentado sugiere acidosis metabólica por acumulación de ácidos como lactato, cetoácidos o tóxicos." },
-      { question: "¿Cómo se calcula el anión gap?", options: ["Na + K - Cl", "Na - (Cl + HCO3)", "Cl + HCO3 - Na", "Na + Cl - HCO3"], answer: "Na - (Cl + HCO3)', explanation: 'El anión gap = Sodio - (Cloro + Bicarbonato). El rango normal es 8-12 mEq/L." },
-      { question: "¿Cuál es el valor de pánico para el potasio?", options: ["Mayor de 5.5 mEq/L", "Mayor de 6.5 o menor de 2.5 mEq/L", "Mayor de 4.0 mEq/L", "Cualquier valor fuera de rango"], answer: "Mayor de 6.5 o menor de 2.5 mEq/L', explanation: 'Estos valores extremos representan riesgo vital inminente y requieren comunicación inmediata al médico." },
-      { question: "¿Qué indica una hiponatremia severa?", options: ["Deshidratación leve", "Puede causar síntomas neurológicos graves como convulsiones", "Solo deshidratación", "Es siempre un error analítico"], answer: "Puede causar síntomas neurológicos graves como convulsiones', explanation: 'Un sodio menor de 120 mEq/L puede causar edema cerebral, convulsiones y coma." },
-      { question: "¿Qué debe verificar el analista antes de liberar un potasio elevado?", options: ["Solo el nombre del paciente", "El índice de hemólisis de la muestra", "El color del tubo", "La temperatura de almacenamiento"], answer: "El índice de hemólisis de la muestra', explanation: 'La hemólisis es la causa más frecuente de hiperpotasemia artefactual. Verificarla evita alarmar innecesariamente al médico." },
-    ],
-    dictation: "Un potasio mayor de seis punto cinco o menor de dos punto cinco mEq por litro es un valor de pánico que requiere comunicación inmediata al médico.",
-  },
-  {
-    id: "marcadores-cardiacos", title: "Marcadores cardíacos", level: "Avanzado", category: "Laboratorio", emoji: "❤️",
-    description: "Troponina, CK-MB y BNP en el diagnóstico de eventos cardiovasculares.",
-    readingTitle: "Cuando el corazón habla a través de la sangre",
-    reading: [
-      "Los marcadores cardíacos son proteínas o enzimas que se liberan al torrente sanguíneo cuando las células del músculo cardíaco sufren daño. Su determinación en el laboratorio es fundamental en el diagnóstico del infarto agudo de miocardio y otras condiciones cardíacas. El tiempo es crítico en estos casos: un resultado rápido y confiable puede ser determinante para que el médico tome la decisión de activar el protocolo de revascularización urgente.",
-      "La troponina cardíaca (troponina I o troponina T de alta sensibilidad) es actualmente el marcador de elección para el diagnóstico de infarto de miocardio. Se eleva en las primeras horas después del daño miocárdico, alcanza su pico entre 12 y 24 horas y puede permanecer elevada durante varios días. Los ensayos de alta sensibilidad permiten detectar elevaciones muy pequeñas, lo que mejora el diagnóstico temprano pero también requiere interpretación cuidadosa para distinguir entre daño miocárdico de origen isquémico y otras causas de elevación como miocarditis, insuficiencia renal o sepsis.",
-      "La CK-MB (creatinquinasa fracción MB) fue durante muchos años el marcador de referencia para el infarto. Aunque ha sido desplazada por la troponina en muchos protocolos, sigue siendo útil para detectar reinfartos y para el monitoreo postoperatorio cardíaco, porque su elevación y normalización son más rápidas que las de la troponina.",
-      "El péptido natriurético cerebral (BNP) y su precursor NT-proBNP son marcadores del estrés de la pared ventricular. Se elevan en la insuficiencia cardíaca y son útiles tanto para el diagnóstico como para el seguimiento y la evaluación de la respuesta al tratamiento. Su interpretación debe considerar factores como la edad, el sexo y la función renal del paciente, que afectan los valores de referencia.",
-      "La comunicación de resultados críticos de marcadores cardíacos es una responsabilidad especialmente importante. Una troponina significativamente elevada en un paciente con dolor torácico puede implicar la activación inmediata del equipo de hemodinamia. El laboratorio debe tener establecido un tiempo de respuesta máximo para estos marcadores, generalmente de sesenta minutos desde la recepción de la muestra, y comunicar el resultado de forma verbal además del informe digital.",
-    ],
-    vocab: [
-      { es: "troponina", pt: "troponina" }, { es: "infarto de miocardio", pt: "infarto do miocárdio" },
-      { es: "CK-MB", pt: "CK-MB" }, { es: "BNP / NT-proBNP", pt: "BNP / NT-proBNP" },
-      { es: "insuficiencia cardíaca", pt: "insuficiência cardíaca" }, { es: "revascularización", pt: "revascularização" },
-    ],
-    quiz: [
-      { question: "¿Qué marcador es actualmente de elección para el diagnóstico de infarto?", options: ["CK-MB", "Troponina cardíaca de alta sensibilidad", "BNP", "LDH"], answer: "Troponina cardíaca de alta sensibilidad', explanation: 'La troponina de alta sensibilidad permite detectar daño miocárdico muy temprano, incluso antes de las 3 horas del inicio del dolor." },
-      { question: "¿Cuándo alcanza su pico la troponina después del infarto?", options: ["A los 30 minutos", "Entre 12 y 24 horas", "A los 5 días", "Inmediatamente al inicio del dolor"], answer: "Entre 12 y 24 horas', explanation: 'La troponina comienza a elevarse en las primeras 2-4 horas, alcanza su pico a las 12-24 horas y puede permanecer elevada 7-14 días." },
-      { question: "¿Para qué sigue siendo útil la CK-MB?", options: ["Es el marcador principal actualmente", "Para detectar reinfartos y monitoreo postoperatorio por su cinética más rápida", "Solo para diagnóstico de insuficiencia cardíaca", "No tiene utilidad actual"], answer: "Para detectar reinfartos y monitoreo postoperatorio por su cinética más rápida', explanation: 'La CK-MB se normaliza más rápido que la troponina, lo que permite detectar una nueva elevación indicativa de reinfarto." },
-      { question: "¿Qué indica un BNP elevado?", options: ["Infarto agudo de miocardio", "Estrés de la pared ventricular e insuficiencia cardíaca", "Infección viral cardíaca", "Arritmia"], answer: "Estrés de la pared ventricular e insuficiencia cardíaca', explanation: 'El BNP se libera cuando el ventrículo está sometido a mayor presión o volumen, como en la insuficiencia cardíaca." },
-      { question: "¿Qué tiempo máximo de respuesta suele establecerse para marcadores cardíacos urgentes?", options: ["24 horas", "6 horas", "60 minutos desde la recepción de la muestra", "Solo durante el día"], answer: "60 minutos desde la recepción de la muestra', explanation: 'En síndromes coronarios agudos, cada minuto de demora en el diagnóstico puede significar mayor daño miocárdico irreversible." },
-      { question: "¿Puede elevarse la troponina sin infarto de miocardio?", options: ["No, es exclusiva del infarto", "Sí, también en miocarditis, insuficiencia renal o sepsis", "Solo en personas mayores", "Solo con CK-MB también elevada"], answer: "Sí, también en miocarditis, insuficiencia renal o sepsis', explanation: 'La troponina de alta sensibilidad es muy sensible pero no específica: cualquier daño miocárdico o reducción de su excreción puede elevarla." },
-      { question: "¿Cómo afecta la función renal al BNP?", options: ["No tiene ningún efecto", "La insuficiencia renal puede elevar los niveles de NT-proBNP independientemente de la función cardíaca", "La mejora renal elimina el BNP", "Solo afecta a la CK-MB"], answer: "La insuficiencia renal puede elevar los niveles de NT-proBNP independientemente de la función cardíaca', explanation: 'El NT-proBNP se excreta por el riñón, por lo que su reducción causa acumulación plasmática incluso sin insuficiencia cardíaca." },
-      { question: "¿Por qué es especialmente importante comunicar una troponina elevada?", options: ["Solo por protocolo", "Porque puede implicar activación inmediata del equipo de hemodinamia para salvar al paciente", "Para registrar en el sistema", "Solo si el médico lo solicita"], answer: "Porque puede implicar activación inmediata del equipo de hemodinamia para salvar al paciente', explanation: 'En infarto con elevación del ST, la revascularización percutánea en menos de 90 minutos mejora dramáticamente el pronóstico." },
-    ],
-    dictation: "La troponina cardíaca de alta sensibilidad es el marcador de elección para el infarto de miocardio y debe reportarse dentro de los sesenta minutos de recibida la muestra.",
-  },
-
-  // ══ GESTIÓN EXTRA ══
-  {
-    id: "iso-15189", title: "Norma ISO 15189", level: "Avanzado", category: "Gestión", emoji: "📜",
-    description: "Requisitos de la norma ISO 15189 para laboratorios clínicos.",
-    readingTitle: "La norma que define la excelencia",
-    reading: [
-      "La ISO 15189 es la norma internacional específica para laboratorios de análisis clínicos. Establece los requisitos de competencia técnica y de gestión que un laboratorio debe cumplir para garantizar la calidad y confiabilidad de sus resultados. A diferencia de otras normas ISO, la 15189 fue diseñada específicamente para el entorno clínico, considerando el impacto directo que los resultados del laboratorio tienen sobre la salud de los pacientes.",
-      "La norma organiza sus requisitos en dos grandes bloques: los requisitos de gestión, que abordan aspectos como la organización, la gestión de documentos, la gestión de no conformidades, las auditorías internas y la revisión por la dirección; y los requisitos técnicos, que cubren la competencia del personal, las instalaciones y condiciones ambientales, el equipamiento, los procedimientos pre y postanalíticos, el aseguramiento de la calidad de los resultados y los informes.",
-      "Uno de los conceptos clave de la ISO 15189 es la trazabilidad metrológica: los valores de los resultados deben poder vincularse a referencias nacionales o internacionales reconocidas mediante una cadena ininterrumpida de calibraciones. Esto garantiza que un resultado de creatinina de 1.0 mg/dL en un laboratorio de Buenos Aires sea comparable con el mismo resultado en un laboratorio de Río de Janeiro o Madrid.",
-      "La norma también pone énfasis en la comunicación con los usuarios del laboratorio: los médicos y los pacientes. Requiere que el laboratorio tenga mecanismos para recibir y responder consultas técnicas, para comunicar resultados críticos, para gestionar las quejas de los usuarios y para evaluar periódicamente la satisfacción de sus clientes. Esta dimensión comunicativa reconoce que el laboratorio no termina su trabajo cuando libera el resultado: también es responsable de que ese resultado sea comprendido y utilizado correctamente.",
-      "La acreditación bajo ISO 15189 es el reconocimiento formal por parte de un organismo acreditador de que el laboratorio cumple con los requisitos de la norma. En la práctica, implica superar una auditoría inicial y auditorías de seguimiento periódicas. Para muchos laboratorios, el proceso de preparación para la acreditación es tan valioso como la acreditación en sí misma: obliga a revisar, documentar y mejorar todos los procesos, generando una cultura de calidad que beneficia a los pacientes.",
-    ],
-    vocab: [
-      { es: "acreditación", pt: "acreditação" }, { es: "trazabilidad metrológica", pt: "rastreabilidade metrológica" },
-      { es: "requisito técnico", pt: "requisito técnico" }, { es: "revisión por la dirección", pt: "revisão pela direção" },
-      { es: "competencia del personal", pt: "competência do pessoal" }, { es: "organismo acreditador", pt: "organismo acreditador" },
-    ],
-    quiz: [
-      { question: "¿Para qué tipo de laboratorios es específica la ISO 15189?", options: ["Laboratorios industriales", "Laboratorios de análisis clínicos", "Solo laboratorios hospitalarios", "Laboratorios ambientales"], answer: "Laboratorios de análisis clínicos', explanation: 'La ISO 15189 fue diseñada específicamente para el laboratorio clínico, considerando su impacto directo en la salud de los pacientes." },
-      { question: "¿Cuáles son los dos grandes bloques de requisitos de la ISO 15189?", options: ["Técnicos y financieros", "Requisitos de gestión y requisitos técnicos", "Administrativos y científicos", "Nacionales e internacionales"], answer: "Requisitos de gestión y requisitos técnicos', explanation: 'La norma separa los requisitos organizacionales y de gestión de calidad de los requisitos específicamente técnicos del proceso analítico." },
-      { question: "¿Qué garantiza la trazabilidad metrológica?", options: ["Que los resultados sean siempre normales", "Que los resultados sean comparables entre laboratorios de diferentes países", "Que el equipo no falle nunca", "Que los reactivos sean siempre del mismo lote"], answer: "Que los resultados sean comparables entre laboratorios de diferentes países', explanation: 'La trazabilidad metrológica permite que un mismo resultado tenga el mismo significado clínico en cualquier laboratorio acreditado del mundo." },
-      { question: "¿Qué reconoce la acreditación ISO 15189?", options: ["Que el laboratorio tiene los equipos más modernos", "Que el laboratorio cumple formalmente los requisitos de competencia y calidad de la norma", "Que el laboratorio es el más grande del país", "Que el laboratorio no ha tenido errores en el último año"], answer: "Que el laboratorio cumple formalmente los requisitos de competencia y calidad de la norma', explanation: 'La acreditación es una evaluación independiente y periódica realizada por un organismo externo reconocido." },
-      { question: "¿Qué aspecto comunicativo enfatiza la ISO 15189?", options: ["Solo la comunicación interna entre analistas", "Comunicación con médicos y pacientes: consultas, resultados críticos y gestión de quejas", "Solo la comunicación con proveedores", "Solo los informes escritos"], answer: "Comunicación con médicos y pacientes: consultas, resultados críticos y gestión de quejas', explanation: 'La norma reconoce que el ciclo del laboratorio incluye la comunicación efectiva del resultado y su comprensión por parte del usuario." },
-      { question: "¿Cuándo termina el trabajo del laboratorio según la ISO 15189?", options: ["Cuando libera el resultado digital", "No termina al liberar el resultado: también es responsable de que sea comprendido y utilizado", "Cuando el médico firma el informe", "Cuando el paciente retira su resultado"], answer: "No termina al liberar el resultado: también es responsable de que sea comprendido y utilizado', explanation: 'La norma incluye requisitos de comunicación post-analítica y gestión de consultas que extienden la responsabilidad del laboratorio más allá del informe." },
-      { question: "¿Cuál es el valor del proceso de preparación para la acreditación?", options: ["Solo obtener el certificado", "Obliga a revisar y mejorar todos los procesos generando una cultura de calidad", "Solo es burocrático sin beneficio real", "Solo beneficia al área de calidad"], answer: "Obliga a revisar y mejorar todos los procesos generando una cultura de calidad', explanation: 'Muchos laboratorios reportan que la mayor transformación ocurre durante el proceso de preparación, antes de la auditoría de acreditación." },
-      { question: "¿Qué implica la acreditación una vez obtenida?", options: ["Es permanente para siempre", "Requiere auditorías de seguimiento periódicas para mantener la acreditación", "Solo se renueva cada 10 años", "Solo aplica al director técnico"], answer: "Requiere auditorías de seguimiento periódicas para mantener la acreditación', explanation: 'La acreditación no es un logro estático: requiere demostrar continuamente el mantenimiento y mejora del sistema de gestión de calidad." },
-    ],
-    dictation: "La ISO quince mil ciento ochenta y nueve establece los requisitos técnicos y de gestión que un laboratorio clínico debe cumplir para garantizar la calidad de sus resultados.",
-  },
-
-  // ══ COMUNICACIÓN EXTRA ══
-  {
-    id: "informe-escrito", title: "Redacción de informes técnicos", level: "Intermedio", category: "Comunicación", emoji: "📄",
-    description: "Cómo estructurar y redactar informes técnicos claros en español.",
-    readingTitle: "El informe que se entiende solo",
-    reading: [
-      "Un informe técnico bien redactado es uno de los documentos más valiosos que puede producir un profesional del laboratorio. Es la evidencia escrita de un proceso, una decisión o un hallazgo, y puede ser consultado semanas, meses o años después de haber sido elaborado. Por eso, debe ser claro, preciso, completo y comprensible para cualquier persona calificada que lo lea, no solo para quien lo escribió.",
-      "La estructura básica de un informe técnico incluye: un encabezado con la identificación del laboratorio, la fecha y el autor; un resumen ejecutivo o conclusión principal al inicio; el desarrollo con los datos, el análisis y la evidencia que sostiene las conclusiones; y un cierre con las recomendaciones o acciones propuestas. Esta estructura responde a la lógica de la pirámide invertida: lo más importante primero, los detalles después.",
-      "El lenguaje del informe técnico en español tiene características específicas. Predomina la voz pasiva o el se impersonal para dar objetividad: 'se detectó una desviación', 'fue comunicado al médico', 'se implementaron las acciones correctivas'. Los tiempos verbales más frecuentes son el pretérito indefinido para hechos pasados y el condicional o el subjuntivo para recomendaciones. Las oraciones deben ser cortas y directas, evitando la ambigüedad.",
-      "Los errores más frecuentes en la redacción de informes técnicos son: usar lenguaje excesivamente técnico sin definir los términos para el lector previsto, mezclar hechos con opiniones sin distinguirlos claramente, omitir información relevante asumiendo que el lector ya la conoce, y escribir conclusiones que no se sostienen con los datos presentados. Un buen informe es aquel en el que cada afirmación puede rastrearse hasta la evidencia concreta que la fundamenta.",
-      "En el contexto bilingüe español-portugués del equipo Controllab, la redacción de informes en español requiere prestar atención especial a las diferencias de registro y formalidad entre ambos idiomas. Algunas estructuras que suenan naturales en portugués resultan demasiado coloquiales en español formal, y viceversa. La práctica constante de leer informes en español, recibir retroalimentación sobre la propia escritura y revisar modelos de referencia es la mejor estrategia para desarrollar esta competencia.",
-    ],
-    vocab: [
-      { es: "informe técnico", pt: "relatório técnico" }, { es: "resumen ejecutivo", pt: "resumo executivo" },
-      { es: "evidencia", pt: "evidência" }, { es: "recomendación", pt: "recomendação" },
-      { es: "conclusión", pt: "conclusão" }, { es: "retroalimentación", pt: "feedback / retorno" },
-    ],
-    quiz: [
-      { question: "¿Qué estructura responde al principio de pirámide invertida en un informe?", options: ["Detalles primero, conclusión al final", "Conclusión principal al inicio, detalles después", "Solo datos sin conclusión", "Solo recomendaciones sin datos"], answer: "Conclusión principal al inicio, detalles después', explanation: 'La pirámide invertida pone la información más importante al principio para que el lector comprenda el mensaje principal desde el inicio." },
-      { question: "¿Qué voz predomina en el lenguaje de informes técnicos en español?", options: ["Primera persona singular activa", "Voz pasiva o se impersonal para dar objetividad", "Segunda persona informal", "Solo el imperativo"], answer: "Voz pasiva o se impersonal para dar objetividad', explanation: 'La voz pasiva permite enfocarse en el proceso y los hechos sin personalizar la acción, dando mayor objetividad al informe." },
-      { question: "¿Cuál es un error frecuente en la redacción de informes técnicos?", options: ["Usar demasiados datos", "Mezclar hechos con opiniones sin distinguirlos claramente", "Ser demasiado preciso", "Incluir demasiadas recomendaciones"], answer: "Mezclar hechos con opiniones sin distinguirlos claramente', explanation: 'Un informe confiable diferencia claramente lo que ocurrió (hechos) de lo que el autor interpreta o recomienda (opiniones/juicios)." },
-      { question: "¿Cuál es la característica más importante de una conclusión bien escrita?", options: ["Que sea larga y detallada", "Que cada afirmación pueda rastrearse a la evidencia concreta que la fundamenta", "Que use vocabulario técnico avanzado", "Que cite muchas fuentes externas"], answer: "Que cada afirmación pueda rastrearse a la evidencia concreta que la fundamenta', explanation: 'Una conclusión sin respaldo en los datos presentados no es una conclusión técnica válida, sino una opinión no sustentada." },
-      { question: "¿Qué tiempos verbales predominan en informes técnicos en español?", options: ["Presente e imperativo", "Pretérito indefinido para hechos y condicional o subjuntivo para recomendaciones", "Solo el futuro simple", "Solo el presente de indicativo"], answer: "Pretérito indefinido para hechos y condicional o subjuntivo para recomendaciones', explanation: 'El indefinido describe lo que ocurrió; el condicional o subjuntivo expresa lo que debería hacerse con mayor cortesía y precisión." },
-      { question: "¿Qué debe incluir el encabezado de un informe técnico?", options: ["Solo el título del informe", "Identificación del laboratorio, fecha y autor como mínimo", "Solo la firma del director técnico", "Solo el número de solicitud"], answer: "Identificación del laboratorio, fecha y autor como mínimo', explanation: 'El encabezado permite identificar de forma inequívoca quién emitió el informe, cuándo y en qué contexto institucional." },
-      { question: "¿Cuál es la mejor estrategia para mejorar la redacción técnica en español?", options: ["Solo estudiar gramática abstracta", "Leer informes en español, recibir retroalimentación y revisar modelos de referencia constantemente", "Solo traducir del portugués al español", "Solo escribir mucho sin revisar"], answer: "Leer informes en español, recibir retroalimentación y revisar modelos de referencia constantemente', explanation: 'La competencia en escritura técnica se desarrolla con práctica activa y retroalimentación, no solo con conocimiento teórico de la gramática." },
-      { question: "¿Por qué un informe debe ser comprensible para cualquier persona calificada?", options: ["Por razones estéticas", "Porque puede ser consultado mucho tiempo después por personas que no estuvieron involucradas", "Solo porque lo exige la norma", "Solo para los auditores externos"], answer: "Porque puede ser consultado mucho tiempo después por personas que no estuvieron involucradas', explanation: 'Un informe técnico es un documento de largo plazo. Su claridad debe ser independiente del contexto inmediato en que fue escrito." },
-    ],
-    dictation: "Un informe técnico bien redactado presenta la conclusión principal al inicio, sostiene cada afirmación con evidencia concreta y usa la voz pasiva para dar objetividad.",
-  },
-
-  // ══ GRAMÁTICA EXTRA ══
-  {
-    id: "pronunciacion", title: "Pronunciación y fonología", level: "Básico", category: "Gramática", emoji: "🗣️",
-    description: "Sonidos del español que difieren del portugués y estrategias para mejorar.",
-    readingTitle: "Los sonidos que cambian el significado",
-    reading: [
-      "La pronunciación es una de las dimensiones del aprendizaje de idiomas que más influye en la comprensión oral y en la credibilidad del hablante, y al mismo tiempo es una de las que más frecuentemente se descuida en la enseñanza formal. Para los hablantes de portugués brasileño que aprenden español, la mayoría de los sonidos son similares o idénticos, lo que facilita enormemente la comunicación. Sin embargo, existen diferencias fonológicas específicas que conviene conocer y trabajar sistemáticamente.",
-      "Una de las diferencias más notables es la pronunciación de la letra 'll' y la 'y'. En el español estándar, ambas se pronuncian como un sonido similar al de la 'y' francesa o inglesa (como en 'yellow'). En el Río de la Plata, tanto la 'll' como la 'y' se pronuncian como 'sh' (como en 'she') o 'zh' (sonido sonoro), dando el característico acento porteño. En el contexto del laboratorio, palabras como 'llevar', 'llave', 'inyección' o 'rayos' tendrán pronunciaciones diferentes según el país hispanohablante del interlocutor.",
-      "Las vocales del español son más breves y uniformes que las del portugués. El portugués tiene vocales largas, nasalizadas (ã, õ) y reducidas que no existen en español. En español, todas las vocales tienen una duración y apertura más pareja. Para el hablante de portugués brasileño, esto significa que debe evitar nasalizar las vocales en palabras como 'análisis', 'función' o 'condición', que en portugués tendrían una pronunciación diferente.",
-      "La 'r' es otro sonido que genera diferencias importantes. El español tiene dos sonidos de 'r': la 'r' simple (como en 'pero') y la 'r' vibrante múltiple o 'rr' (como en 'perro'). Esta distinción es fonémica en español: 'pero' y 'perro' son palabras completamente diferentes. En portugués, la 'r' en posición inicial o doble se pronuncia de forma más aspirada o gutural, similar a la 'j' española, lo que puede generar confusión en palabras técnicas como 'resultado', 'reactivo' o 'referencia'.",
-      "La mejor estrategia para mejorar la pronunciación no es estudiar reglas fonéticas en abstracto, sino escuchar activamente el español técnico en contextos reales: podcasts de divulgación médica en español, videos de formación de laboratorio, o simplemente las lecturas de audio de esta plataforma. La imitación consciente de los patrones de entonación y pronunciación de hablantes nativos, seguida de práctica en voz alta, es lo que transforma el conocimiento fonético en una habilidad comunicativa real.",
-    ],
-    vocab: [
-      { es: "pronunciación", pt: "pronúncia" }, { es: "vocal / consonante", pt: "vogal / consoante" },
-      { es: "sílaba tónica", pt: "sílaba tônica" }, { es: "entonación", pt: "entonação" },
-      { es: "r vibrante múltiple", pt: "r vibrante múltiplo (rr)" }, { es: "acento", pt: "acento" },
-    ],
-    quiz: [
-      { question: "¿Cómo se pronuncian 'll' e 'y' en el español rioplatense (Argentina)?", options: ["Como la 'y' inglesa en 'yes'", "Como 'sh' o 'zh', el acento porteño característico", "Como la 'l' normal", "Como la 'j' española"], answer: "Como 'sh' o 'zh', el acento porteño característico', explanation: 'El yeísmo rehilado es la pronunciación característica del Río de la Plata, diferente al español estándar de España o México." },
-      { question: "¿Qué diferencia existe entre 'pero' y 'perro' en español?", options: ["Son sinónimos con diferente ortografía", "Son palabras completamente diferentes: 'r' simple vs 'rr' vibrante múltiple", "Solo se diferencian en el acento gráfico", "No hay diferencia en pronunciación"], answer: "Son palabras completamente diferentes: 'r' simple vs 'rr' vibrante múltiple', explanation: 'La distinción entre r simple y rr vibrante es fonémica en español: cambia el significado de la palabra." },
-      { question: "¿Qué característica tienen las vocales del español comparadas con el portugués?", options: ["Son más largas y nasalizadas", "Son más breves, uniformes y sin nasalización", "Son idénticas al portugués", "Tienen más variedad de sonidos"], answer: "Son más breves, uniformes y sin nasalización', explanation: 'El español tiene 5 vocales puras sin nasalización ni reducción, a diferencia del portugués que tiene vocales nasales y reducidas." },
-      { question: "¿Cómo puede pronunciarse incorrectamente 'resultado' por influencia del portugués?", options: ["Con acento en la primera sílaba", "Con la 'r' inicial pronunciada de forma gutural o aspirada como en portugués", "Sin pronunciar la 'd' final", "Con la 'u' muy prolongada"], answer: "Con la 'r' inicial pronunciada de forma gutural o aspirada como en portugués', explanation: 'En portugués brasileño, la 'r' inicial se pronuncia como 'j' española. En español, la 'r' inicial es vibrante múltiple, no gutural." },
-      { question: "¿Cuál es la mejor estrategia para mejorar la pronunciación?", options: ["Solo estudiar reglas fonéticas en libros", "Escuchar español técnico real e imitar conscientemente la pronunciación de hablantes nativos", "Practicar solo palabras sueltas", "Evitar hablar hasta dominar todas las reglas"], answer: "Escuchar español técnico real e imitar conscientemente la pronunciación de hablantes nativos', explanation: 'La pronunciación es una habilidad motriz que se desarrolla con práctica activa y exposición al input real, no solo con conocimiento teórico." },
-      { question: "¿Qué error de pronunciación es común en hablantes de portugués brasileño?", options: ["Pronunciar las consonantes finales", "Nasalizar vocales en palabras como 'función' o 'condición'", "Alargar las consonantes", "Pronunciar la 'h' con sonido"], answer: "Nasalizar vocales en palabras como 'función' o 'condición'', explanation: 'En portugués, la terminación -ção es nasal. En español, la terminación -ción se pronuncia sin nasalización de la vocal." },
-      { question: "¿Qué son los pares mínimos en fonología?", options: ["Palabras que se escriben igual pero significan distinto", "Palabras que solo se diferencian en un sonido como 'pero/perro' o 'casa/caza'", "Palabras con la misma pronunciación", "Sinónimos exactos"], answer: "Palabras que solo se diferencian en un sonido como 'pero/perro' o 'casa/caza'', explanation: 'Los pares mínimos demuestran que un sonido es fonémico, es decir, que distingue significados en esa lengua." },
-      { question: "¿Por qué la pronunciación influye en la credibilidad del hablante?", options: ["Solo por razones estéticas superficiales", "Porque facilita la comprensión y reduce malentendidos en contextos técnicos de alta responsabilidad", "Solo importa en conversaciones sociales", "Solo en presentaciones formales"], answer: "Porque facilita la comprensión y reduce malentendidos en contextos técnicos de alta responsabilidad', explanation: 'En contextos médicos y técnicos, una pronunciación clara puede ser crítica para evitar errores de comunicación con consecuencias clínicas." },
-    ],
-    dictation: "En español rioplatense, las letras ll e y se pronuncian como sh, mientras que la r inicial como en resultado es vibrante y diferente de la r del portugués brasileño.",
-  },
-];
-
+      "La conjugación de los verbos regulares en presente sigue patrones predecibles según la terminación del infinitivo. Los verbos terminados en -ar forman el presente con las terminaciones -o, -as, -a, -amos, -áis, -an. Por ejemplo: analizar → analizo, analizas, analiza, analizamos, analizáis, analizan. Los verbos terminados en -er usan -o, -es, -e, -emos, -éis, -en. Por ejemplo: leer → leo, l
 const ALL_ACHIEVEMENTS = [
-  { id: "first-module", title: "Primer paso", emoji: "🌱", condition: (cm: number, _score: number, _dicts: number, streak: number) => cm >= 1 },
+  { id: "first-module", title: "Primer paso", emoji: "🌱", condition: (cm: number) => cm >= 1 },
   { id: "five-modules", title: "En racha", emoji: "🔥", condition: (cm: number) => cm >= 5 },
   { id: "ten-modules", title: "A mitad de camino", emoji: "⭐", condition: (cm: number) => cm >= 10 },
   { id: "twenty-modules", title: "Muy dedicado", emoji: "💪", condition: (cm: number) => cm >= 20 },
@@ -1226,7 +712,6 @@ const ALL_ACHIEVEMENTS = [
   { id: "streak-7", title: "¡Una semana!", emoji: "🗓️", condition: (_cm: number, _s: number, _d: number, streak: number) => streak >= 7 },
   { id: "lab-master", title: "Maestro del Lab", emoji: "🔬", condition: (_cm: number, _s: number, _d: number, _str: number, labDone: number) => labDone >= 8 },
 ];
-
 
 const defaultStudents: Student[] = [
   { id: "marilia", name: "Marília", code: "MARILIA" },
@@ -1247,6 +732,85 @@ const defaultStudents: Student[] = [
 
 const STORAGE_KEY = "aula-controllab-v6";
 const PROFESSOR_PASSWORD = "controllab2025";
+
+// ─── Supabase sync helpers ────────────────────────────────────────────────────
+async function loadProgressFromCloud(studentId: string): Promise<Record<string, ModuleProgress>> {
+  try {
+    const { data } = await supabase.from("progress").select("*").eq("student_id", studentId);
+    if (!data) return {};
+    return data.reduce((acc: Record<string, ModuleProgress>, row: any) => {
+      acc[row.module_id] = { completed: row.completed ?? false, score: row.score ?? 0, total: row.total ?? 0, attempts: row.attempts ?? 1 };
+      return acc;
+    }, {});
+  } catch { return {}; }
+}
+
+async function saveProgressToCloud(studentId: string, moduleId: string, prog: ModuleProgress) {
+  try {
+    await supabase.from("progress").upsert({
+      student_id: studentId, module_id: moduleId,
+      score: prog.score, total: prog.total, attempts: prog.attempts, completed: prog.completed,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "student_id,module_id" });
+  } catch {}
+}
+
+async function deleteProgressFromCloud(studentId: string, moduleId: string) {
+  try {
+    await supabase.from("progress").delete().eq("student_id", studentId).eq("module_id", moduleId);
+  } catch {}
+}
+
+async function loadDictationsFromCloud(studentId: string): Promise<Record<string, DictationResult>> {
+  try {
+    const { data } = await supabase.from("dictations").select("*").eq("student_id", studentId);
+    if (!data) return {};
+    return data.reduce((acc: Record<string, DictationResult>, row: any) => {
+      acc[row.module_id] = { exact: row.exact, score: row.score, written: row.written, expected: row.expected, updatedAt: row.updated_at };
+      return acc;
+    }, {});
+  } catch { return {}; }
+}
+
+async function loadStreakFromCloud(studentId: string): Promise<{ count: number; lastDate: string } | null> {
+  try {
+    const { data } = await supabase.from("streaks").select("*").eq("student_id", studentId).single();
+    if (!data) return null;
+    return { count: data.count, lastDate: data.last_date };
+  } catch { return null; }
+}
+
+async function saveStreakToCloud(studentId: string, count: number, lastDate: string) {
+  try {
+    await supabase.from("streaks").upsert({ student_id: studentId, count, last_date: lastDate }, { onConflict: "student_id" });
+  } catch {}
+}
+
+async function loadAchievementsFromCloud(studentId: string): Promise<Achievement[]> {
+  try {
+    const { data } = await supabase.from("achievements").select("*").eq("student_id", studentId);
+    if (!data) return [];
+    return data.map((row: any) => ({ id: row.achievement_id, title: row.title, emoji: row.emoji, unlockedAt: row.unlocked_at }));
+  } catch { return []; }
+}
+
+async function saveAchievementToCloud(studentId: string, achievement: Achievement) {
+  try {
+    await supabase.from("achievements").upsert({
+      student_id: studentId, achievement_id: achievement.id,
+      title: achievement.title, emoji: achievement.emoji, unlocked_at: achievement.unlockedAt
+    }, { onConflict: "student_id,achievement_id" });
+  } catch {}
+}
+
+async function loadWeeklyActivityFromCloud(studentId: string): Promise<Record<string, number>> {
+  try {
+    const { data } = await supabase.from("weekly_activity").select("*").eq("student_id", studentId);
+    if (!data) return {};
+    return data.reduce((acc: Record<string, number>, row: any) => { acc[row.activity_date] = row.count; return acc; }, {});
+  } catch { return {}; }
+}
+// ─────────────────────────────────────────────────────────────────────────────
 const CATEGORIES = ["Todos", "Laboratorio", "Gestión", "Comunicación", "Tecnología", "Gramática"];
 const LEVEL_COLOR: Record<string, string> = {
   "Básico": "bg-emerald-900 text-emerald-300",
@@ -1254,6 +818,24 @@ const LEVEL_COLOR: Record<string, string> = {
   "Avanzado": "bg-rose-900 text-rose-300",
 };
 const QUIZ_TIME = 30;
+
+// ─── Seed helpers ────────────────────────────────────────────────────────────
+function strSeed(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  return Math.abs(h);
+}
+function shuffleOpts(options: string[], seed: number): string[] {
+  const arr = [...options];
+  let s = (seed >>> 0) || 1;
+  for (let i = arr.length - 1; i > 0; i--) {
+    s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+    const j = (s >>> 0) % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function createInitialState(): AppState {
   return { students: defaultStudents, currentStudentId: null, progress: {}, dictations: {}, achievements: {}, streaks: {}, weeklyActivity: {} };
@@ -1310,16 +892,12 @@ const STYLES = `
   .badge-red{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);}
   .badge-purple{background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);}
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-  @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
   .ani{animation:fadeIn .35s cubic-bezier(.4,0,.2,1);}
   .pop{animation:pop .3s cubic-bezier(.4,0,.2,1);}
   .m1{color:#FFD700;}.m2{color:#C0C0C0;}.m3{color:#CD7F32;}
   ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:99px;}
   .reading-text{font-size:15px;line-height:1.85;color:#cbd5e1;}
-  .reading-text strong{color:#fff;font-weight:600;}
-  .section-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(99,202,183,.2),transparent);margin:8px 0;}
   .hover-lift{transition:all .2s;} .hover-lift:hover{transform:translateY(-2px);}
   .glow-teal{box-shadow:0 0 30px rgba(99,202,183,.15);}
   .glow-purple{box-shadow:0 0 30px rgba(167,139,250,.15);}
@@ -1354,6 +932,7 @@ export default function Home() {
   const [transDir, setTransDir] = useState<"es-pt" | "pt-es">("es-pt");
   const [transLoading, setTransLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [cloudLoading, setCloudLoading] = useState(false);
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
   const [showAchievements, setShowAchievements] = useState(false);
   const [weekTab, setWeekTab] = useState<"weekly" | "achievements">("weekly");
@@ -1368,11 +947,36 @@ export default function Home() {
   const [reviewMode, setReviewMode] = useState(false);
 
   useEffect(() => {
-    try { const s = localStorage.getItem(STORAGE_KEY); if (s) setAppState({ ...createInitialState(), ...JSON.parse(s) }); } catch { }
+    try { const s = localStorage.getItem(STORAGE_KEY); if (s) setAppState({ ...createInitialState(), ...JSON.parse(s) }); } catch {}
   }, []);
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch { }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
   }, [appState]);
+
+  // Load from cloud when student logs in
+  useEffect(() => {
+    if (!appState.currentStudentId) return;
+    const studentId = appState.currentStudentId;
+    setCloudLoading(true);
+    Promise.all([
+      loadProgressFromCloud(studentId),
+      loadDictationsFromCloud(studentId),
+      loadStreakFromCloud(studentId),
+      loadAchievementsFromCloud(studentId),
+      loadWeeklyActivityFromCloud(studentId),
+    ]).then(([progress, dictations, streak, achievements, weeklyAct]) => {
+      setAppState(prev => ({
+        ...prev,
+        progress: { ...prev.progress, [studentId]: { ...(prev.progress[studentId] || {}), ...progress } },
+        dictations: { ...prev.dictations, [studentId]: { ...(prev.dictations[studentId] || {}), ...dictations } },
+        streaks: streak ? { ...prev.streaks, [studentId]: streak } : prev.streaks,
+        achievements: { ...prev.achievements, [studentId]: achievements.length > 0 ? achievements : (prev.achievements[studentId] || []) },
+        weeklyActivity: { ...prev.weeklyActivity, [studentId]: { ...(prev.weeklyActivity[studentId] || {}), ...weeklyAct } },
+      }));
+      setCloudLoading(false);
+    }).catch(() => setCloudLoading(false));
+  }, [appState.currentStudentId]);
+
   useEffect(() => {
     if (!timerOn) return;
     if (timeLeft <= 0) { setSubmitted(true); setTimerOn(false); return; }
@@ -1386,6 +990,11 @@ export default function Home() {
   const sd = student ? appState.dictations[student.id] || {} : {};
   const mp: ModuleProgress = sp[selectedModuleId] || { completed: false, score: 0, total: mod.quiz.length, attempts: 0 };
   const q = mod.quiz[qIdx];
+
+  // ─── Shuffle options for current question (stable per module+question) ─────
+  const shuffledOpts = shuffleOpts(q.options, strSeed(mod.id + String(qIdx)));
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const isOk = submitted && selectedOption === q.answer;
   const curDict = sd[selectedModuleId] || null;
   const filtered = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);
@@ -1410,43 +1019,17 @@ export default function Home() {
     return { ...s, cm, bs, da, pts: bs * 10 + da };
   }).sort((a, b) => b.pts - a.pts);
 
-  // REVIEW MODE: modules where score < 100% or never attempted
-  const reviewModules = MODULES.filter(m => {
-    const p = sp[m.id];
-    if (!p) return true; // never done
-    return p.score < p.total; // has errors
-  });
-
-  // EXAM MODE logic
+  const reviewModules = MODULES.filter(m => { const p = sp[m.id]; if (!p) return true; return p.score < p.total; });
   const examModules = MODULES;
-  const currentExamMod = examModules[examModuleIdx] ?? examModules[0];
   const examTotalQ = examModules.reduce((s, m) => s + m.quiz.length, 0);
-  const examAnsweredQ = Object.values(examAnswers).reduce((s, a) => s + Object.keys(a).length, 0);
-  const examProgress = Math.round((examAnsweredQ / examTotalQ) * 100);
 
   const startExam = () => {
-    setExamAnswers({});
-    setExamModuleIdx(0);
-    setExamFinished(false);
-    setQIdx(0);
-    setSelectedOption("");
-    setSubmitted(false);
-    setAnswers({});
-    setTimeLeft(QUIZ_TIME);
-    setTimerOn(true);
-    setExamMode(true);
+    setExamAnswers({}); setExamModuleIdx(0); setExamFinished(false);
+    setQIdx(0); setSelectedOption(""); setSubmitted(false); setAnswers({});
+    setTimeLeft(QUIZ_TIME); setTimerOn(true); setExamMode(true);
   };
 
-  const finishExam = () => {
-    let totalCorrect = 0;
-    examModules.forEach(m => {
-      const ans = examAnswers[m.id] || {};
-      m.quiz.forEach((q, i) => { if (ans[i] === q.answer) totalCorrect++; });
-    });
-    saveProg(0, 0); // just trigger save
-    setExamFinished(true);
-    setTimerOn(false);
-  };
+  const finishExam = () => { setExamFinished(true); setTimerOn(false); };
 
   const examScore = examFinished ? (() => {
     let correct = 0;
@@ -1467,7 +1050,7 @@ export default function Home() {
       const validPass = s.password ? normalize(s.password) === normalize(loginCode) : normalize(s.code) === normalize(loginCode);
       return nameMatch && validPass;
     });
-    if (!found) { setLoginError("Nombre o código incorrecto. Si cambiaste tu contraseña, usá la nueva."); return; }
+    if (!found) { setLoginError("Nombre o código incorrecto."); return; }
     setAppState(p => ({ ...p, currentStudentId: found.id }));
     setLoginError(""); setLoginName(""); setLoginCode(""); setShowWelcome(true);
   };
@@ -1477,50 +1060,54 @@ export default function Home() {
     if (!student) return;
     if (newPass.trim().length < 4) { setPassMsg("La contraseña debe tener al menos 4 caracteres."); return; }
     if (newPass !== newPassConfirm) { setPassMsg("Las contraseñas no coinciden."); return; }
-    setAppState(p => ({
-      ...p,
-      students: p.students.map(s => s.id === student.id ? { ...s, password: newPass.trim(), passwordChanged: true } : s)
-    }));
-    setPassMsg("✓ Contraseña actualizada correctamente.");
+    setAppState(p => ({ ...p, students: p.students.map(s => s.id === student.id ? { ...s, password: newPass.trim(), passwordChanged: true } : s) }));
+    setPassMsg("✓ Contraseña actualizada.");
     setNewPass(""); setNewPassConfirm("");
     setTimeout(() => { setShowChangePass(false); setPassMsg(""); }, 1500);
   };
 
   const resetStudentPassword = (studentId: string) => {
-    setAppState(p => ({
-      ...p,
-      students: p.students.map(s => s.id === studentId ? { ...s, password: undefined, passwordChanged: false } : s)
-    }));
+    setAppState(p => ({ ...p, students: p.students.map(s => s.id === studentId ? { ...s, password: undefined, passwordChanged: false } : s) }));
   };
+
   const saveProg = (score: number, total: number) => {
     if (!student) return;
     setAppState(p => {
       const ps = p.progress[student.id] || {};
       const pm = ps[selectedModuleId] || { completed: false, score: 0, total, attempts: 0 };
-      return { ...p, progress: { ...p.progress, [student.id]: { ...ps, [selectedModuleId]: { completed: true, score: Math.max(pm.score, score), total, attempts: pm.attempts + 1 } } } };
+      const newProg = { completed: true, score: Math.max(pm.score, score), total, attempts: pm.attempts + 1 };
+      // Sync to cloud
+      saveProgressToCloud(student.id, selectedModuleId, newProg);
+      return { ...p, progress: { ...p.progress, [student.id]: { ...ps, [selectedModuleId]: newProg } } };
     });
   };
+
+  const resetModuleProgress = (studentId: string, moduleId: string) => {
+    setAppState(p => {
+      const ps = { ...(p.progress[studentId] || {}) };
+      delete ps[moduleId];
+      deleteProgressFromCloud(studentId, moduleId);
+      return { ...p, progress: { ...p.progress, [studentId]: ps } };
+    });
+  };
+
   const checkAchievements = (studentId: string) => {
     const p = appState.progress[studentId] || {};
     const d = appState.dictations[studentId] || {};
     const cm = Object.keys(p).length;
-    const bestScore = Math.max(...Object.values(p).map(mp => mp.score), 0);
-    const dictScores = Object.values(d).map(dr => dr.score);
+    const bestScore = Math.max(...Object.values(p).map((mp: ModuleProgress) => mp.score), 0);
+    const dictScores = Object.values(d).map((dr: DictationResult) => dr.score);
     const bestDict = dictScores.length ? Math.max(...dictScores) : 0;
     const streak = appState.streaks[studentId]?.count || 0;
     const labDone = MODULES.filter(m => m.category === "Laboratorio" && p[m.id]).length;
-    const existing = (appState.achievements[studentId] || []).map(a => a.id);
-    const unlocked = ALL_ACHIEVEMENTS.filter(a =>
-      !existing.includes(a.id) && a.condition(cm, bestScore, bestDict, streak, labDone)
-    );
+    const existing = (appState.achievements[studentId] || []).map((a: Achievement) => a.id);
+    const unlocked = ALL_ACHIEVEMENTS.filter(a => !existing.includes(a.id) && a.condition(cm, bestScore, bestDict, streak, labDone));
     if (unlocked.length > 0) {
       const now = new Date().toLocaleString();
       const newOnes = unlocked.map(a => ({ id: a.id, title: a.title, emoji: a.emoji, unlockedAt: now }));
       setNewAchievements(newOnes);
-      setAppState(prev => ({
-        ...prev,
-        achievements: { ...prev.achievements, [studentId]: [...(prev.achievements[studentId] || []), ...newOnes] }
-      }));
+      setAppState(prev => ({ ...prev, achievements: { ...prev.achievements, [studentId]: [...(prev.achievements[studentId] || []), ...newOnes] } }));
+      newOnes.forEach(a => saveAchievementToCloud(studentId, a));
       setTimeout(() => setNewAchievements([]), 4000);
     }
   };
@@ -1532,16 +1119,14 @@ export default function Home() {
     let newCount = 1;
     if (streak?.lastDate === today) return;
     if (streak?.lastDate === yesterday) newCount = (streak.count || 0) + 1;
-    const week = today.slice(0, 7);
+    saveStreakToCloud(studentId, newCount, today);
     setAppState(prev => ({
       ...prev,
       streaks: { ...prev.streaks, [studentId]: { count: newCount, lastDate: today } },
-      weeklyActivity: {
-        ...prev.weeklyActivity,
-        [studentId]: { ...(prev.weeklyActivity[studentId] || {}), [today]: (prev.weeklyActivity[studentId]?.[today] || 0) + 1 }
-      }
+      weeklyActivity: { ...prev.weeklyActivity, [studentId]: { ...(prev.weeklyActivity[studentId] || {}), [today]: (prev.weeklyActivity[studentId]?.[today] || 0) + 1 } }
     }));
   };
+
 
   const handleSubmit = () => { if (!selectedOption) return; setSubmitted(true); setTimerOn(false); };
   const handleNext = () => {
@@ -1592,9 +1177,8 @@ export default function Home() {
       const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(transInput)}`;
       const res = await fetch(url);
       const data = await res.json();
-      const translated = data[0].map((item: [string]) => item[0]).join("");
-      setTransResult(translated || "No se pudo traducir.");
-    } catch { setTransResult("Error de conexion. Verifica tu internet."); }
+      setTransResult(data[0].map((item: [string]) => item[0]).join("") || "No se pudo traducir.");
+    } catch { setTransResult("Error de conexión."); }
     setTransLoading(false);
   };
   const openGoogleTranslate = () => {
@@ -1610,46 +1194,25 @@ export default function Home() {
     return { ...s, pts, cm };
   }).sort((a, b) => b.pts - a.pts).slice(0, 5);
 
-  // LOGIN
+  // ── LOGIN ────────────────────────────────────────────────────────────────────
   if (!student) return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8 overflow-x-hidden">
       <style>{STYLES}</style>
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
-        <div style={{ position: "absolute", top: "-10%", left: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,202,183,0.12) 0%, transparent 70%)" }} />
-        <div style={{ position: "absolute", bottom: "-10%", right: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,202,183,0.08) 0%, transparent 70%)" }} />
-      </div>
       <div className="relative z-10 max-w-6xl mx-auto">
         <div className="text-center mb-10 ani">
-          <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 text-xs mono tracking-widest text-slate-400 mb-6">
-            <span className="w-2 h-2 rounded-full accent-bg inline-block" />
-            CONTROLLAB · PLATAFORMA DE ESPAÑOL TÉCNICO
-          </div>
-          <h1 className="text-5xl md:text-7xl font-black text-white leading-none tracking-tight">Aula<br /><span className="accent" style={{ textShadow: "0 0 60px rgba(99,202,183,0.4)" }}>Controllab</span></h1>
-          <p className="mt-5 text-slate-300 text-lg max-w-xl mx-auto leading-7">Español técnico para el equipo Controllab.<br /><span className="accent font-semibold">{MODULES.length} módulos</span> · laboratorio · gestión · TI · comunicación · gramática</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 ani">
-          {[{ icon: "🧪", n: MODULES.length, l: "Módulos", sub: "Lecciones completas" }, { icon: "👥", n: defaultStudents.length, l: "Alumnos", sub: "Equipo Controllab" }, { icon: "📚", n: "6", l: "Áreas", sub: "Lab · TI · Gestión · más" }, { icon: "🏆", n: "Top 5", l: "Ranking", sub: "Competencia entre colegas" }].map(x => (
-            <div key={x.l} className="glass rounded-2xl p-4 text-center" style={{ borderColor: "rgba(99,202,183,0.1)" }}>
-              <div className="text-2xl mb-1">{x.icon}</div>
-              <div className="text-2xl font-black mono text-white">{x.n}</div>
-              <div className="text-sm font-bold text-white mt-0.5">{x.l}</div>
-              <div className="text-xs text-slate-500 mt-1">{x.sub}</div>
-            </div>
-          ))}
+          <h1 className="text-5xl md:text-7xl font-black text-white leading-none tracking-tight">Aula<br /><span className="accent">Controllab</span></h1>
+          <p className="mt-5 text-slate-300 text-lg max-w-xl mx-auto leading-7"><span className="accent font-semibold">{MODULES.length} módulos</span> · laboratorio · gestión · TI · comunicación · gramática</p>
         </div>
         <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
           <div className="space-y-4">
             <div className="glass rounded-3xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="mono text-xs text-slate-400 tracking-widest">🏆 RANKING ACTUAL</div>
-                <div className="text-xs text-slate-500">Top 5</div>
-              </div>
+              <div className="mono text-xs text-slate-400 tracking-widest mb-4">🏆 RANKING</div>
               {loginRanking.filter(r => r.pts > 0).length === 0 ? (
-                <div className="text-center py-6"><div className="text-3xl mb-2">🚀</div><div className="text-slate-400 text-sm">¡Nadie ha completado módulos todavía! Sé el primero.</div></div>
+                <div className="text-center py-6 text-slate-400 text-sm">¡Nadie ha completado módulos todavía! Sé el primero.</div>
               ) : (
                 <div className="space-y-2">{loginRanking.map((r, i) => (
                   <div key={r.id} className={`flex items-center gap-3 rounded-xl px-4 py-3 ${i === 0 ? "bg-yellow-500/10 border border-yellow-500/20" : "glass"}`}>
-                    <span className={`text-lg w-7 ${i === 0 ? "m1" : i === 1 ? "m2" : i === 2 ? "m3" : "text-slate-500"}`}>{i < 3 ? ["🥇", "🥈", "🥉"][i] : `${i + 1}.`}</span>
+                    <span className={`text-lg w-7 ${i === 0 ? "m1" : i === 1 ? "m2" : i === 2 ? "m3" : "text-slate-500"}`}>{i < 3 ? ["🥇","🥈","🥉"][i] : `${i+1}.`}</span>
                     <span className="flex-1 font-semibold text-sm">{r.name}</span>
                     <span className="text-xs text-slate-400">{r.cm} mód.</span>
                     <span className="mono text-sm font-black accent">{r.pts} pts</span>
@@ -1658,33 +1221,19 @@ export default function Home() {
               )}
             </div>
             <div className="glass rounded-3xl p-5">
-              <div className="mono text-xs text-slate-400 tracking-widest mb-4">📚 MÓDULOS DISPONIBLES</div>
-              <div className="grid grid-cols-4 gap-2">
-                {MODULES.map(m => (
-                  <div key={m.id} className="glass rounded-xl p-2.5 text-center" title={m.title}>
-                    <div className="text-xl">{m.emoji}</div>
-                    <div className="text-slate-400 mt-1 truncate" style={{ fontSize: "9px" }}>{m.title}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="glass rounded-3xl p-5">
               <div className="mono text-xs text-slate-400 tracking-widest mb-3">👥 ALUMNOS</div>
               <div className="flex flex-wrap gap-2">{defaultStudents.map(s => <span key={s.id} className="glass text-slate-200 text-xs px-3 py-1.5 rounded-full font-medium">{s.name}</span>)}</div>
             </div>
           </div>
           <div className="space-y-4">
-            <div className="glass rounded-3xl p-7" style={{ boxShadow: "0 0 40px rgba(99,202,183,0.12)", borderColor: "rgba(99,202,183,0.15)" }}>
-              <div className="mono text-xs tracking-widest text-slate-400 mb-1">INGRESO</div>
+            <div className="glass rounded-3xl p-7" style={{ borderColor: "rgba(99,202,183,0.15)" }}>
               <h2 className="text-2xl font-bold text-white mb-1">Entrar como alumno</h2>
               <p className="text-slate-400 text-sm mb-6">Usá tu nombre y el código que te dio el profe.</p>
               <div className="space-y-4">
-                <div><label className="block text-sm text-slate-300 mb-2 font-medium">Nombre</label>
-                  <input value={loginName} onChange={e => setLoginName(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Ej: Marília" className="w-full rounded-xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3.5" /></div>
-                <div><label className="block text-sm text-slate-300 mb-2 font-medium">Código de acceso</label>
-                  <input value={loginCode} onChange={e => setLoginCode(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Ej: MARILIA" className="w-full rounded-xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3.5 mono" /></div>
+                <input value={loginName} onChange={e => setLoginName(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Nombre — Ej: Marília" className="w-full rounded-xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3.5" />
+                <input value={loginCode} onChange={e => setLoginCode(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Código — Ej: MARILIA" className="w-full rounded-xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3.5 mono" />
                 {loginError && <p className="text-rose-400 text-sm">{loginError}</p>}
-                <button onClick={login} className="btn-accent w-full px-5 py-4 text-sm">Ingresar a la plataforma →</button>
+                <button onClick={login} className="btn-accent w-full px-5 py-4 text-sm">Ingresar →</button>
               </div>
               <div className="mt-5 glass rounded-2xl p-4">
                 <button onClick={openPanel} className="w-full text-left text-sm text-slate-300 hover:text-white transition flex justify-between items-center">
@@ -1697,19 +1246,14 @@ export default function Home() {
                 </div>}
               </div>
             </div>
-            <div className="glass rounded-3xl p-5" style={{ borderColor: "rgba(99,202,183,0.15)" }}>
+            <div className="glass rounded-3xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <div><div className="mono text-xs text-slate-400 tracking-widest mb-0.5">🌐 TRADUCTOR RÁPIDO</div><div className="text-sm font-semibold text-white">Español ↔ Portugués</div></div>
-                <button onClick={() => setTransDir(d => d === "es-pt" ? "pt-es" : "es-pt")} className="glass rounded-xl px-3 py-2 text-xs font-bold accent hover:border-[#63CAB7] transition">{transDir === "es-pt" ? "ES → PT" : "PT → ES"} ⇄</button>
+                <div className="text-sm font-semibold text-white">🌐 Traductor ES ↔ PT</div>
+                <button onClick={() => setTransDir(d => d === "es-pt" ? "pt-es" : "es-pt")} className="glass rounded-xl px-3 py-2 text-xs font-bold accent">{transDir === "es-pt" ? "ES→PT" : "PT→ES"} ⇄</button>
               </div>
-              <textarea value={transInput} onChange={e => setTransInput(e.target.value)} rows={3} placeholder={transDir === "es-pt" ? "Escribí en español..." : "Escreva em português..."} className="w-full rounded-2xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3 text-sm leading-6 resize-none" />
+              <textarea value={transInput} onChange={e => setTransInput(e.target.value)} rows={3} placeholder={transDir === "es-pt" ? "Escribí en español..." : "Escreva em português..."} className="w-full rounded-2xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3 text-sm resize-none" />
               <button onClick={translate} disabled={transLoading || !transInput.trim()} className="btn-accent w-full mt-3 py-3 text-sm">{transLoading ? "Traduciendo..." : "Traducir"}</button>
-              {transInput.trim() && <button onClick={openGoogleTranslate} className="w-full mt-2 py-2 text-xs text-slate-400 hover:text-white transition text-center">Abrir en Google Translate ↗</button>}
-              {transResult && (<div className="mt-3 glass-dark rounded-2xl p-4 ani">
-                <div className="text-xs text-slate-400 mono mb-2 tracking-widest">{transDir === "es-pt" ? "PORTUGUÉS" : "ESPAÑOL"}</div>
-                <p className="text-slate-100 text-sm leading-6">{transResult}</p>
-                <button onClick={() => speak(transResult, 0.85)} className="mt-2 text-xs text-slate-400 hover:text-white transition">🔊 Escuchar</button>
-              </div>)}
+              {transResult && <div className="mt-3 glass-dark rounded-2xl p-4 ani"><p className="text-slate-100 text-sm">{transResult}</p></div>}
             </div>
           </div>
         </div>
@@ -1717,14 +1261,13 @@ export default function Home() {
     </div>
   );
 
-
-  // EXAM MODE SCREEN
+  // ── EXAM MODE ────────────────────────────────────────────────────────────────
   if (examMode && !examFinished) {
     const emod = examModules[examModuleIdx];
     const eQ = emod.quiz[qIdx];
-    const eAnswers = examAnswers[emod.id] || {};
     const isEOk = submitted && selectedOption === eQ.answer;
-    const allModDone = Object.keys(eAnswers).length >= emod.quiz.length && submitted;
+    // Shuffle exam options too
+    const shuffledExamOpts = shuffleOpts(eQ.options, strSeed(emod.id + String(qIdx)));
 
     const handleExamNext = () => {
       const newAnswers = { ...examAnswers, [emod.id]: { ...(examAnswers[emod.id] || {}), [qIdx]: selectedOption } };
@@ -1733,9 +1276,7 @@ export default function Home() {
         setQIdx(i => i + 1); setSelectedOption(""); setSubmitted(false); setTimeLeft(QUIZ_TIME); setTimerOn(true);
       } else if (examModuleIdx < examModules.length - 1) {
         setExamModuleIdx(i => i + 1); setQIdx(0); setSelectedOption(""); setSubmitted(false); setTimeLeft(QUIZ_TIME); setTimerOn(true);
-      } else {
-        finishExam();
-      }
+      } else { finishExam(); }
     };
     const handleExamSubmit = () => {
       if (!selectedOption) return;
@@ -1743,70 +1284,47 @@ export default function Home() {
       setSubmitted(true); setTimerOn(false);
     };
 
-    const totalAnswered = Object.values(examAnswers).reduce((s, a) => s + Object.keys(a).length, 0) + (submitted ? 0 : 0);
-
     return (
       <div className="min-h-screen exam-bg text-white px-4 py-6">
         <style>{STYLES}</style>
         <div className="max-w-3xl mx-auto">
-          {/* Exam header */}
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
               <div className="badge badge-purple mb-2">⚡ MODO EXAMEN</div>
-              <div className="text-sm text-slate-400">Módulo {examModuleIdx + 1} de {examModules.length} · Pregunta {qIdx + 1} de {emod.quiz.length}</div>
+              <div className="text-sm text-slate-400">Módulo {examModuleIdx+1}/{examModules.length} · Pregunta {qIdx+1}/{emod.quiz.length}</div>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative w-14 h-14">
                 <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
                   <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(167,139,250,0.2)" strokeWidth="4" />
                   <circle cx="28" cy="28" r="24" fill="none" stroke={timeLeft <= 10 ? "#f87171" : "#a78bfa"} strokeWidth="4"
-                    strokeDasharray={`${2 * Math.PI * 24}`} strokeDashoffset={`${2 * Math.PI * 24 * (1 - timeLeft / QUIZ_TIME)}`}
-                    style={{ transition: "stroke-dashoffset 0.5s linear" }} strokeLinecap="round" />
+                    strokeDasharray={`${2*Math.PI*24}`} strokeDashoffset={`${2*Math.PI*24*(1-timeLeft/QUIZ_TIME)}`}
+                    style={{transition:"stroke-dashoffset 0.5s linear"}} strokeLinecap="round" />
                 </svg>
-                <div className={`absolute inset-0 flex items-center justify-center mono text-sm font-black ${timeLeft <= 10 ? "text-rose-400" : "text-purple-300"}`}>{timeLeft}</div>
+                <div className={`absolute inset-0 flex items-center justify-center mono text-sm font-black ${timeLeft<=10?"text-rose-400":"text-purple-300"}`}>{timeLeft}</div>
               </div>
               <button onClick={() => { setExamMode(false); setTimerOn(false); }} className="glass rounded-xl px-4 py-2 text-xs text-slate-300 hover:text-white transition">✕ Salir</button>
             </div>
           </div>
-
-          {/* Overall progress */}
-          <div className="glass rounded-2xl px-5 py-3 mb-5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-400">Progreso del examen</span>
-              <span className="mono text-xs accent2">{Object.values(examAnswers).reduce((s, a) => s + Object.keys(a).length, 0) + (submitted ? 1 : 0)}/{examTotalQ}</span>
-            </div>
-            <div className="progress-bar"><div className="progress-fill-purple" style={{ width: `${Math.round((Object.values(examAnswers).reduce((s, a) => s + Object.keys(a).length, 0) + (submitted ? 1 : 0)) / examTotalQ * 100)}%` }} /></div>
-          </div>
-
-          {/* Module name */}
           <div className="glass rounded-2xl px-5 py-3 mb-5 flex items-center gap-3">
             <span className="text-2xl">{emod.emoji}</span>
-            <div>
-              <div className="font-bold">{emod.title}</div>
-              <div className="text-xs text-slate-400">{emod.category}</div>
-            </div>
-            <div className="ml-auto progress-bar w-24"><div className="progress-fill-purple" style={{ width: `${Math.round((qIdx + (submitted ? 1 : 0)) / emod.quiz.length * 100)}%` }} /></div>
+            <div><div className="font-bold">{emod.title}</div><div className="text-xs text-slate-400">{emod.category}</div></div>
           </div>
-
-          {/* Question */}
           <div className="glass rounded-3xl p-6 ani">
             <p className="text-lg font-semibold mb-5 leading-7">{eQ.question}</p>
             <div className="space-y-3">
-              {eQ.options.map(opt => {
+              {shuffledExamOpts.map(opt => {
                 const sel = selectedOption === opt;
                 const ok = submitted && opt === eQ.answer;
                 const bad = submitted && sel && opt !== eQ.answer;
                 return <button key={opt} onClick={() => !submitted && setSelectedOption(opt)} disabled={submitted}
-                  className={`opt ${ok ? "ok" : bad ? "bad" : sel ? "sel" : ""}`}>{opt}</button>;
+                  className={`opt ${ok?"ok":bad?"bad":sel?"sel":""}`}>{opt}</button>;
               })}
             </div>
             <div className="mt-5 flex items-center justify-between flex-wrap gap-4">
               <div className="text-sm">{submitted ? (isEOk ? <span className="text-emerald-400 font-semibold">✓ ¡Correcto!</span> : <span className="text-rose-400">✗ Correcto: <strong className="text-white">{eQ.answer}</strong></span>) : <span className="text-slate-500">Sin ayudas — modo examen.</span>}</div>
-              {!submitted
-                ? <button onClick={handleExamSubmit} disabled={!selectedOption} className="btn-purple px-6 py-3 text-sm">Responder</button>
-                : <button onClick={handleExamNext} className="btn-purple px-6 py-3 text-sm">
-                  {examModuleIdx < examModules.length - 1 || qIdx < emod.quiz.length - 1 ? "Siguiente →" : "Finalizar examen ✓"}
-                </button>}
+              {!submitted ? <button onClick={handleExamSubmit} disabled={!selectedOption} className="btn-purple px-6 py-3 text-sm">Responder</button>
+                : <button onClick={handleExamNext} className="btn-purple px-6 py-3 text-sm">{examModuleIdx < examModules.length-1 || qIdx < emod.quiz.length-1 ? "Siguiente →" : "Finalizar ✓"}</button>}
             </div>
           </div>
         </div>
@@ -1814,65 +1332,43 @@ export default function Home() {
     );
   }
 
-  // EXAM FINISHED SCREEN
   if (examMode && examFinished) {
     return (
       <div className="min-h-screen exam-bg flex items-center justify-center px-4 py-10">
         <style>{STYLES}</style>
         <div className="cert glow-purple max-w-2xl w-full text-center pop" style={{ borderColor: "#a78bfa" }}>
-          <div className="text-6xl mb-4">{examScore / examTotalQ >= 0.9 ? "🏆" : examScore / examTotalQ >= 0.7 ? "🎯" : "📚"}</div>
+          <div className="text-6xl mb-4">{examScore/examTotalQ>=0.9?"🏆":examScore/examTotalQ>=0.7?"🎯":"📚"}</div>
           <div className="badge badge-purple mb-4">⚡ RESULTADO DEL EXAMEN</div>
-          <h1 className="text-3xl font-bold text-white mt-2">{examScore / examTotalQ >= 0.9 ? "¡Excelente!" : examScore / examTotalQ >= 0.7 ? "¡Muy bien!" : "Seguí practicando"}</h1>
-          <h2 className="text-xl font-bold mt-2" style={{ color: "#a78bfa" }}>{student.name}</h2>
+          <h1 className="text-3xl font-bold text-white mt-2">{examScore/examTotalQ>=0.9?"¡Excelente!":examScore/examTotalQ>=0.7?"¡Muy bien!":"Seguí practicando"}</h1>
+          <h2 className="text-xl font-bold mt-2" style={{color:"#a78bfa"}}>{student.name}</h2>
           <div className="mt-8 grid grid-cols-3 gap-4">
-            <div className="glass rounded-2xl p-4"><div className="text-3xl font-black mono" style={{ color: "#a78bfa" }}>{examScore}</div><div className="text-xs text-slate-400 mt-1">Correctas</div></div>
+            <div className="glass rounded-2xl p-4"><div className="text-3xl font-black mono" style={{color:"#a78bfa"}}>{examScore}</div><div className="text-xs text-slate-400 mt-1">Correctas</div></div>
             <div className="glass rounded-2xl p-4"><div className="text-3xl font-black mono text-white">{examTotalQ}</div><div className="text-xs text-slate-400 mt-1">Total</div></div>
-            <div className="glass rounded-2xl p-4"><div className="text-3xl font-black mono" style={{ color: examScore / examTotalQ >= 0.7 ? "#63CAB7" : "#f87171" }}>{Math.round((examScore / examTotalQ) * 100)}%</div><div className="text-xs text-slate-400 mt-1">Puntaje</div></div>
-          </div>
-          <div className="mt-6 glass rounded-2xl p-4">
-            <div className="text-xs text-slate-400 mono mb-3 tracking-widest">MÓDULOS CON ERRORES</div>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {examModules.filter(m => {
-                const ans = examAnswers[m.id] || {};
-                return m.quiz.some((q, i) => ans[i] !== q.answer);
-              }).map(m => <span key={m.id} className="badge badge-red">{m.emoji} {m.title}</span>)}
-              {examModules.every(m => { const a = examAnswers[m.id] || {}; return m.quiz.every((q, i) => a[i] === q.answer); }) && <span className="badge badge-green">✓ ¡Sin errores!</span>}
-            </div>
+            <div className="glass rounded-2xl p-4"><div className="text-3xl font-black mono" style={{color:examScore/examTotalQ>=0.7?"#63CAB7":"#f87171"}}>{Math.round((examScore/examTotalQ)*100)}%</div><div className="text-xs text-slate-400 mt-1">Puntaje</div></div>
           </div>
           <div className="flex gap-3 justify-center mt-8 flex-wrap">
-            <button onClick={startExam} className="btn-purple px-6 py-3 text-sm">🔄 Repetir examen</button>
-            <button onClick={() => { setExamMode(false); setExamFinished(false); setReviewMode(true); }} className="glass rounded-xl px-6 py-3 text-sm text-yellow-300 hover:text-white transition">🔁 Ir al repaso</button>
-            <button onClick={() => { setExamMode(false); setExamFinished(false); }} className="glass rounded-xl px-6 py-3 text-sm text-slate-300 hover:text-white transition">← Volver a la app</button>
+            <button onClick={startExam} className="btn-purple px-6 py-3 text-sm">🔄 Repetir</button>
+            <button onClick={() => { setExamMode(false); setExamFinished(false); }} className="glass rounded-xl px-6 py-3 text-sm text-slate-300 hover:text-white transition">← Volver</button>
           </div>
         </div>
       </div>
     );
   }
 
-  // WELCOME SCREEN
+  // ── WELCOME ──────────────────────────────────────────────────────────────────
   if (showWelcome && student) {
     const streak = appState.streaks[student.id];
-    const today = new Date().toISOString().split("T")[0];
-    const isStreakActive = streak?.lastDate === today;
     const hour = new Date().getHours();
     const greeting = hour < 12 ? "¡Buenos días" : hour < 18 ? "¡Buenas tardes" : "¡Buenas noches";
-    const completedToday = Object.values(appState.weeklyActivity[student.id] || {}).reduce((s, v) => s + v, 0);
     const suggestedMod = MODULES.find(m => !sp[m.id]) || MODULES.find(m => sp[m.id] && sp[m.id].score < sp[m.id].total) || MODULES[0];
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center px-4 py-10">
         <style>{STYLES}</style>
-        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: "-10%", left: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,202,183,0.1) 0%, transparent 70%)" }} />
-          <div style={{ position: "absolute", bottom: "-10%", right: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%)" }} />
-        </div>
-        <div className="relative z-10 max-w-2xl w-full ani">
+        <div className="max-w-2xl w-full ani">
           <div className="glass rounded-3xl p-8 glow-teal text-center" style={{ borderColor: "rgba(99,202,183,0.2)" }}>
-            <div className="text-6xl mb-4">{hour < 12 ? "🌅" : hour < 18 ? "☀️" : "🌙"}</div>
-            <div className="mono text-xs tracking-widest text-slate-400 mb-3">AULA CONTROLLAB</div>
+            <div className="text-6xl mb-4">{hour<12?"🌅":hour<18?"☀️":"🌙"}</div>
             <h1 className="text-3xl md:text-4xl font-black text-white">{greeting}, <span className="accent">{student.name}</span>!</h1>
-            <p className="text-slate-300 mt-3 text-lg">Bienvenido/a a tu espacio de español técnico.</p>
-
             <div className="grid grid-cols-3 gap-3 mt-8">
               <div className="glass-dark rounded-2xl p-4 text-center">
                 <div className="text-2xl mb-1">🔥</div>
@@ -1890,24 +1386,17 @@ export default function Home() {
                 <div className="text-xs text-slate-400 mt-0.5">logros</div>
               </div>
             </div>
-
             {suggestedMod && (
               <div className="glass rounded-2xl p-4 mt-6 text-left">
                 <div className="mono text-xs text-slate-400 tracking-widest mb-2">💡 SUGERENCIA DE HOY</div>
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">{suggestedMod.emoji}</span>
-                  <div className="flex-1">
-                    <div className="font-bold text-white">{suggestedMod.title}</div>
-                    <div className="text-xs text-slate-400">{suggestedMod.category} · {suggestedMod.level}</div>
-                  </div>
+                  <div className="flex-1"><div className="font-bold text-white">{suggestedMod.title}</div><div className="text-xs text-slate-400">{suggestedMod.category} · {suggestedMod.level}</div></div>
                   <button onClick={() => { setShowWelcome(false); setSelectedModuleId(suggestedMod.id); }} className="btn-accent px-4 py-2 text-xs">Ir →</button>
                 </div>
               </div>
             )}
-
-            <button onClick={() => setShowWelcome(false)} className="btn-accent w-full mt-6 py-4 text-sm font-bold">
-              Entrar a la plataforma →
-            </button>
+            <button onClick={() => setShowWelcome(false)} className="btn-accent w-full mt-6 py-4 text-sm font-bold">Entrar a la plataforma →</button>
             <button onClick={logout} className="mt-3 text-xs text-slate-500 hover:text-slate-300 transition">No soy {student.name} — Salir</button>
           </div>
         </div>
@@ -1915,42 +1404,35 @@ export default function Home() {
     );
   }
 
-  // CERTIFICATE
   if (showCert) return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-10">
       <style>{STYLES}</style>
       <div className="cert ani max-w-2xl w-full text-center">
         <div className="text-6xl mb-4">🎓</div>
-        <div className="mono text-xs text-slate-400 tracking-widest mb-2">CERTIFICADO DE COMPLETACIÓN</div>
         <h1 className="text-3xl font-bold text-white mt-4">¡Felicitaciones!</h1>
         <h2 className="text-2xl font-bold accent mt-2">{student.name}</h2>
-        <p className="mt-4 text-slate-300 leading-7">Completaste todos los <strong className="text-white">{MODULES.length} módulos</strong> de <strong className="accent">Aula Controllab</strong>.</p>
+        <p className="mt-4 text-slate-300">Completaste todos los <strong className="text-white">{MODULES.length} módulos</strong> de <strong className="accent">Aula Controllab</strong>.</p>
         <div className="mt-8 grid grid-cols-3 gap-4">
           <div className="glass rounded-2xl p-4"><div className="text-2xl font-black mono accent">{totalScore}</div><div className="text-xs text-slate-400 mt-1">Puntos</div></div>
           <div className="glass rounded-2xl p-4"><div className="text-2xl font-black mono">{MODULES.length}</div><div className="text-xs text-slate-400 mt-1">Módulos</div></div>
           <div className="glass rounded-2xl p-4"><div className="text-2xl font-black mono accent">100%</div><div className="text-xs text-slate-400 mt-1">Completado</div></div>
         </div>
-        <div className="mt-6 text-slate-500 text-sm mono">{new Date().toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}</div>
-        <button onClick={() => setShowCert(false)} className="btn-accent mt-8 px-8 py-3 text-sm">← Volver a la app</button>
+        <button onClick={() => setShowCert(false)} className="btn-accent mt-8 px-8 py-3 text-sm">← Volver</button>
       </div>
     </div>
   );
 
-  // MAIN APP
+  // ── MAIN APP ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <style>{STYLES}</style>
 
-      {/* ACHIEVEMENT TOAST */}
       {newAchievements.length > 0 && (
         <div className="fixed top-4 right-4 z-[100] space-y-2 ani">
           {newAchievements.map(a => (
-            <div key={a.id} className="glass-accent rounded-2xl px-5 py-4 flex items-center gap-3 pop" style={{ borderColor: "rgba(99,202,183,.4)", boxShadow: "0 0 30px rgba(99,202,183,.3)" }}>
+            <div key={a.id} className="glass-accent rounded-2xl px-5 py-4 flex items-center gap-3 pop" style={{borderColor:"rgba(99,202,183,.4)"}}>
               <span className="text-3xl">{a.emoji}</span>
-              <div>
-                <div className="text-xs mono tracking-widest text-slate-400 mb-0.5">🏅 LOGRO DESBLOQUEADO</div>
-                <div className="font-bold text-white">{a.title}</div>
-              </div>
+              <div><div className="text-xs mono tracking-widest text-slate-400 mb-0.5">🏅 LOGRO DESBLOQUEADO</div><div className="font-bold text-white">{a.title}</div></div>
             </div>
           ))}
         </div>
@@ -1961,150 +1443,126 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <div>
               <div className="mono text-xs text-slate-500 tracking-widest">CONTROLLAB</div>
-              <div className="font-bold text-base">Hola, <span className="accent">{student.name}</span> 👋</div>
+              <div className="font-bold text-base">Hola, <span className="accent">{student.name}</span> 👋 {cloudLoading && <span className="text-xs text-slate-500 font-normal">☁️ sincronizando...</span>}</div>
             </div>
             <div className="hidden md:flex items-center gap-2 ml-2">
               <div className="glass rounded-xl px-3 py-1.5 text-xs"><span className="text-slate-400">Progreso </span><span className="font-bold accent">{pct}%</span></div>
-              <div className="glass rounded-xl px-3 py-1.5 text-xs"><span className="text-slate-400">Puntos </span><span className="font-bold">{totalScore}/{totalQ}</span></div>
               <div className="glass rounded-xl px-3 py-1.5 text-xs"><span className="text-slate-400">Módulos </span><span className="font-bold">{completedMods}/{MODULES.length}</span></div>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {allDone && <button onClick={() => setShowCert(true)} className="btn-accent px-3 py-2 text-xs">🎓 Certificado</button>}
-            <button onClick={() => setShowAchievements(a => !a)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showAchievements ? "accent" : "text-slate-300 hover:text-white"}`}>
+            <button onClick={() => setShowAchievements(a => !a)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showAchievements?"accent":"text-slate-300 hover:text-white"}`}>
               🏅 {(appState.achievements[student?.id || ""] || []).length}/{ALL_ACHIEVEMENTS.length}
             </button>
             <button onClick={startExam} className="btn-purple px-3 py-2 text-xs">⚡ Examen</button>
-            {reviewModules.length > 0 && <button onClick={() => { setReviewMode(r => !r); setActiveCategory("Todos"); }} className={`glass rounded-xl px-3 py-2 text-xs transition font-semibold ${reviewMode ? "text-yellow-300 border-yellow-500/50" : "text-slate-300 hover:text-white"}`}>🔁 Repaso {reviewMode ? "ON" : `(${reviewModules.length})`}</button>}
-            <button onClick={() => setShowTranslator(t => !t)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showTranslator ? "accent" : "text-slate-300 hover:text-white"}`}>🌐 Traductor</button>
-            <button onClick={openPanel} className="glass rounded-xl px-3 py-2 text-xs text-slate-300 hover:text-white transition">{showPanel ? "✕ Panel" : "📊 Panel profe"}</button>
-            <button onClick={() => setShowChangePass(c => !c)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showChangePass ? "accent" : "text-slate-300 hover:text-white"}`}>🔑 Contraseña</button>
-            <button onClick={logout} className="glass rounded-xl px-3 py-2 text-xs text-slate-300 hover:text-white transition">Salir →</button>
+            {reviewModules.length > 0 && <button onClick={() => { setReviewMode(r => !r); setActiveCategory("Todos"); }} className={`glass rounded-xl px-3 py-2 text-xs font-semibold ${reviewMode?"text-yellow-300":"text-slate-300 hover:text-white"}`}>🔁 Repaso ({reviewModules.length})</button>}
+            <button onClick={() => setShowTranslator(t => !t)} className={`glass rounded-xl px-3 py-2 text-xs ${showTranslator?"accent":"text-slate-300 hover:text-white"}`}>🌐</button>
+            <button onClick={openPanel} className="glass rounded-xl px-3 py-2 text-xs text-slate-300 hover:text-white">{showPanel?"✕ Panel":"📊 Profe"}</button>
+            <button onClick={() => setShowChangePass(c => !c)} className={`glass rounded-xl px-3 py-2 text-xs ${showChangePass?"accent":"text-slate-300 hover:text-white"}`}>🔑</button>
+            <button onClick={logout} className="glass rounded-xl px-3 py-2 text-xs text-slate-300 hover:text-white">Salir →</button>
           </div>
         </div>
-        <div className="progress-bar mx-4 mb-2" style={{ borderRadius: 0 }}><div className="progress-fill" style={{ width: `${pct}%` }} /></div>
+        <div className="progress-bar mx-4 mb-2" style={{borderRadius:0}}><div className="progress-fill" style={{width:`${pct}%`}} /></div>
       </header>
 
       <div className="max-w-screen-2xl mx-auto px-4 py-6">
-        {/* TRANSLATOR */}
+
         {showTranslator && (
           <div className="glass rounded-3xl p-5 mb-6 ani">
             <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-              <div><div className="mono text-xs text-slate-400 tracking-widest mb-0.5">🌐 TRADUCTOR</div><div className="text-sm font-semibold text-white">Español ↔ Portugués</div></div>
-              <button onClick={() => setTransDir(d => d === "es-pt" ? "pt-es" : "es-pt")} className="glass rounded-xl px-4 py-2 text-sm font-bold accent hover:border-[#63CAB7] transition">{transDir === "es-pt" ? "ES → PT" : "PT → ES"} ⇄</button>
+              <div className="text-sm font-semibold text-white">🌐 Traductor ES ↔ PT</div>
+              <button onClick={() => setTransDir(d => d==="es-pt"?"pt-es":"es-pt")} className="glass rounded-xl px-4 py-2 text-sm font-bold accent">{transDir==="es-pt"?"ES→PT":"PT→ES"} ⇄</button>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-slate-400 mono mb-2">{transDir === "es-pt" ? "ESPAÑOL" : "PORTUGUÉS"}</div>
-                <textarea value={transInput} onChange={e => setTransInput(e.target.value)} rows={4} placeholder={transDir === "es-pt" ? "Escribí en español..." : "Escreva em português..."} className="w-full rounded-2xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm leading-6 resize-none" />
-                <button onClick={translate} disabled={transLoading || !transInput.trim()} className="btn-accent w-full mt-2 py-2.5 text-sm">{transLoading ? "Traduciendo..." : "Traducir →"}</button>
-                {transInput.trim() && <button onClick={openGoogleTranslate} className="w-full mt-1.5 py-2 text-xs text-slate-400 hover:text-white transition text-center">Abrir en Google Translate ↗</button>}
+                <textarea value={transInput} onChange={e => setTransInput(e.target.value)} rows={4} placeholder={transDir==="es-pt"?"Escribí en español...":"Escreva em português..."} className="w-full rounded-2xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm resize-none" />
+                <button onClick={translate} disabled={transLoading||!transInput.trim()} className="btn-accent w-full mt-2 py-2.5 text-sm">{transLoading?"Traduciendo...":"Traducir →"}</button>
+                {transInput.trim() && <button onClick={openGoogleTranslate} className="w-full mt-1.5 py-2 text-xs text-slate-400 hover:text-white text-center">Abrir en Google Translate ↗</button>}
               </div>
               <div>
-                <div className="text-xs text-slate-400 mono mb-2">{transDir === "es-pt" ? "PORTUGUÉS" : "ESPAÑOL"}</div>
-                <div className="w-full rounded-2xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm leading-6 min-h-[104px] text-slate-100">
-                  {transLoading ? <span className="text-slate-500">Traduciendo...</span> : transResult || <span className="text-slate-600">La traducción aparece aquí...</span>}
+                <div className="w-full rounded-2xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm min-h-[104px] text-slate-100">
+                  {transLoading?<span className="text-slate-500">Traduciendo...</span>:transResult||<span className="text-slate-600">La traducción aparece aquí...</span>}
                 </div>
-                {transResult && <button onClick={() => speak(transResult, 0.85)} className="mt-2 text-xs text-slate-400 hover:text-white transition">🔊 Escuchar</button>}
+                {transResult && <button onClick={() => speak(transResult, 0.85)} className="mt-2 text-xs text-slate-400 hover:text-white">🔊 Escuchar</button>}
               </div>
             </div>
           </div>
         )}
 
-        {/* ACHIEVEMENTS & STATS PANEL */}
         {showAchievements && student && (
           <div className="glass rounded-3xl p-5 mb-6 ani">
             <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-              <div>
-                <div className="mono text-xs text-slate-400 tracking-widest mb-1">MIS ESTADÍSTICAS</div>
-                <h2 className="text-xl font-bold">Progreso de <span className="accent">{student.name}</span></h2>
-              </div>
+              <h2 className="text-xl font-bold">Progreso de <span className="accent">{student.name}</span></h2>
               <div className="flex gap-2">
-                <button onClick={() => setWeekTab("weekly")} className={`tab ${weekTab === "weekly" ? "active" : ""}`}>📊 Actividad</button>
-                <button onClick={() => setWeekTab("achievements")} className={`tab ${weekTab === "achievements" ? "active" : ""}`}>🏅 Logros</button>
+                <button onClick={() => setWeekTab("weekly")} className={`tab ${weekTab==="weekly"?"active":""}`}>📊 Actividad</button>
+                <button onClick={() => setWeekTab("achievements")} className={`tab ${weekTab==="achievements"?"active":""}`}>🏅 Logros</button>
               </div>
             </div>
-
             {weekTab === "weekly" && (() => {
               const today = new Date();
-              const days = Array.from({length: 7}, (_, i) => {
-                const d = new Date(today); d.setDate(d.getDate() - (6 - i));
-                return d.toISOString().split("T")[0];
-              });
+              const days = Array.from({length:7},(_,i)=>{const d=new Date(today);d.setDate(d.getDate()-(6-i));return d.toISOString().split("T")[0];});
               const activity = appState.weeklyActivity[student.id] || {};
               const streak = appState.streaks[student.id];
-              const maxVal = Math.max(1, ...days.map(d => activity[d] || 0));
-              const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+              const maxVal = Math.max(1,...days.map(d=>activity[d]||0));
+              const dayNames = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
               return (
                 <div className="space-y-5">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {[
-                      { icon: "🔥", val: streak?.count || 0, label: "Días de racha", sub: streak?.lastDate === new Date().toISOString().split("T")[0] ? "Activa hoy" : "Sin actividad hoy" },
-                      { icon: "✅", val: completedMods, label: "Módulos", sub: `de ${MODULES.length} totales` },
-                      { icon: "⭐", val: totalScore, label: "Puntos", sub: `de ${totalQ} posibles` },
-                      { icon: "📝", val: `${pct}%`, label: "Completado", sub: allDone ? "¡Todo listo!" : "En progreso" },
-                    ].map(s => (
+                    {[{icon:"🔥",val:streak?.count||0,label:"Días de racha"},{icon:"✅",val:completedMods,label:`Módulos / ${MODULES.length}`},{icon:"⭐",val:totalScore,label:"Puntos"},{icon:"📝",val:`${pct}%`,label:"Completado"}].map(s=>(
                       <div key={s.label} className="glass-dark rounded-2xl p-4 text-center">
                         <div className="text-2xl mb-1">{s.icon}</div>
                         <div className="text-2xl font-black mono accent">{s.val}</div>
-                        <div className="text-xs font-semibold text-white mt-0.5">{s.label}</div>
-                        <div className="text-xs text-slate-500 mt-0.5">{s.sub}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">{s.label}</div>
                       </div>
                     ))}
                   </div>
                   <div className="glass-dark rounded-2xl p-5">
                     <div className="mono text-xs text-slate-400 tracking-widest mb-4">ACTIVIDAD ÚLTIMOS 7 DÍAS</div>
                     <div className="flex items-end gap-2 h-24">
-                      {days.map((d, i) => {
-                        const val = activity[d] || 0;
-                        const h = Math.max(4, Math.round((val / maxVal) * 80));
-                        const isToday = d === new Date().toISOString().split("T")[0];
-                        const dayName = dayNames[new Date(d + "T12:00:00").getDay()];
-                        return (
-                          <div key={d} className="flex-1 flex flex-col items-center gap-1">
-                            <div className="text-xs mono accent font-bold">{val > 0 ? val : ""}</div>
-                            <div className="w-full rounded-lg transition-all" style={{ height: `${h}px`, background: isToday ? "#63CAB7" : val > 0 ? "rgba(99,202,183,0.4)" : "rgba(255,255,255,0.06)" }} />
-                            <div className={`text-xs ${isToday ? "accent font-bold" : "text-slate-500"}`}>{dayName}</div>
-                          </div>
-                        );
+                      {days.map((d,i)=>{
+                        const val=activity[d]||0;
+                        const h=Math.max(4,Math.round((val/maxVal)*80));
+                        const isToday=d===new Date().toISOString().split("T")[0];
+                        const dayName=dayNames[new Date(d+"T12:00:00").getDay()];
+                        return (<div key={d} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="text-xs mono accent font-bold">{val>0?val:""}</div>
+                          <div className="w-full rounded-lg" style={{height:`${h}px`,background:isToday?"#63CAB7":val>0?"rgba(99,202,183,0.4)":"rgba(255,255,255,0.06)"}} />
+                          <div className={`text-xs ${isToday?"accent font-bold":"text-slate-500"}`}>{dayName}</div>
+                        </div>);
                       })}
                     </div>
                   </div>
                   <div className="glass-dark rounded-2xl p-5">
                     <div className="mono text-xs text-slate-400 tracking-widest mb-3">PROGRESO POR ÁREA</div>
                     <div className="space-y-3">
-                      {["Laboratorio","Gestión","Comunicación","Tecnología","Gramática"].map(cat => {
-                        const catMods = MODULES.filter(m => m.category === cat);
-                        const done = catMods.filter(m => sp[m.id]).length;
-                        const pctCat = Math.round((done / catMods.length) * 100);
-                        return (
-                          <div key={cat}>
-                            <div className="flex justify-between text-xs mb-1"><span className="text-slate-300 font-medium">{cat}</span><span className="mono accent">{done}/{catMods.length}</span></div>
-                            <div className="progress-bar"><div className="progress-fill" style={{ width: `${pctCat}%` }} /></div>
-                          </div>
-                        );
+                      {["Laboratorio","Gestión","Comunicación","Tecnología","Gramática"].map(cat=>{
+                        const catMods=MODULES.filter(m=>m.category===cat);
+                        const done=catMods.filter(m=>sp[m.id]).length;
+                        return (<div key={cat}>
+                          <div className="flex justify-between text-xs mb-1"><span className="text-slate-300 font-medium">{cat}</span><span className="mono accent">{done}/{catMods.length}</span></div>
+                          <div className="progress-bar"><div className="progress-fill" style={{width:`${Math.round((done/catMods.length)*100)}%`}} /></div>
+                        </div>);
                       })}
                     </div>
                   </div>
                 </div>
               );
             })()}
-
             {weekTab === "achievements" && (() => {
               const unlocked = appState.achievements[student.id] || [];
-              const unlockedIds = unlocked.map(a => a.id);
+              const unlockedIds = unlocked.map((a: Achievement) => a.id);
               return (
                 <div className="grid gap-3 md:grid-cols-2">
                   {ALL_ACHIEVEMENTS.map(a => {
                     const isUnlocked = unlockedIds.includes(a.id);
-                    const data = unlocked.find(u => u.id === a.id);
+                    const data = unlocked.find((u: Achievement) => u.id === a.id);
                     return (
-                      <div key={a.id} className={`rounded-2xl px-5 py-4 flex items-center gap-4 transition ${isUnlocked ? "glass-accent" : "glass-dark opacity-50"}`}>
-                        <span className="text-3xl">{isUnlocked ? a.emoji : "🔒"}</span>
+                      <div key={a.id} className={`rounded-2xl px-5 py-4 flex items-center gap-4 ${isUnlocked?"glass-accent":"glass-dark opacity-50"}`}>
+                        <span className="text-3xl">{isUnlocked?a.emoji:"🔒"}</span>
                         <div className="flex-1">
-                          <div className={`font-bold text-sm ${isUnlocked ? "text-white" : "text-slate-500"}`}>{a.title}</div>
-                          {isUnlocked && data && <div className="text-xs text-slate-400 mt-0.5">Desbloqueado {data.unlockedAt}</div>}
-                          {!isUnlocked && <div className="text-xs text-slate-600 mt-0.5">Sigue practicando...</div>}
+                          <div className={`font-bold text-sm ${isUnlocked?"text-white":"text-slate-500"}`}>{a.title}</div>
+                          {isUnlocked&&data&&<div className="text-xs text-slate-400 mt-0.5">Desbloqueado {data.unlockedAt}</div>}
                         </div>
                         {isUnlocked && <span className="badge badge-green">✓</span>}
                       </div>
@@ -2116,123 +1574,104 @@ export default function Home() {
           </div>
         )}
 
-        {/* CHANGE PASSWORD PANEL */}
         {showChangePass && (
           <div className="glass rounded-3xl p-5 mb-6 ani glow-teal">
             <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="mono text-xs text-slate-400 tracking-widest mb-1">🔑 CAMBIAR CONTRASEÑA</div>
-                <div className="text-sm text-white font-semibold">Nueva contraseña para <span className="accent">{student?.name}</span></div>
-              </div>
-              <button onClick={() => { setShowChangePass(false); setPassMsg(""); setNewPass(""); setNewPassConfirm(""); }} className="glass rounded-xl px-3 py-2 text-xs text-slate-400 hover:text-white transition">✕</button>
+              <div className="text-sm text-white font-semibold">🔑 Cambiar contraseña — <span className="accent">{student?.name}</span></div>
+              <button onClick={() => { setShowChangePass(false); setPassMsg(""); setNewPass(""); setNewPassConfirm(""); }} className="glass rounded-xl px-3 py-2 text-xs text-slate-400 hover:text-white">✕</button>
             </div>
             {student && (
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-slate-400 mb-1.5 font-medium">Nueva contraseña (mín. 4 caracteres)</label>
-                    <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)}
-                      placeholder="Nueva contraseña..." className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-400 mb-1.5 font-medium">Confirmar contraseña</label>
-                    <input type="password" value={newPassConfirm} onChange={e => setNewPassConfirm(e.target.value)}
-                      onKeyDown={e => e.key === "Enter" && changePassword()}
-                      placeholder="Repetí la contraseña..." className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
-                  </div>
-                  <button onClick={changePassword} disabled={!newPass || !newPassConfirm} className="btn-accent w-full py-3 text-sm">Guardar nueva contraseña</button>
-                  {passMsg && <p className={`text-sm font-medium ${passMsg.startsWith("✓") ? "accent" : "text-rose-400"}`}>{passMsg}</p>}
+                  <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)} placeholder="Nueva contraseña (mín. 4 caracteres)" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
+                  <input type="password" value={newPassConfirm} onChange={e => setNewPassConfirm(e.target.value)} onKeyDown={e=>e.key==="Enter"&&changePassword()} placeholder="Confirmar contraseña" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
+                  <button onClick={changePassword} disabled={!newPass||!newPassConfirm} className="btn-accent w-full py-3 text-sm">Guardar</button>
+                  {passMsg && <p className={`text-sm font-medium ${passMsg.startsWith("✓")?"accent":"text-rose-400"}`}>{passMsg}</p>}
                 </div>
-                <div className="glass-dark rounded-2xl p-4">
-                  <div className="text-xs text-slate-400 mono tracking-widest mb-3">ℹ️ INFORMACIÓN</div>
-                  <div className="space-y-2 text-sm text-slate-300">
-                    <p>• Tu contraseña actual es tu <strong className="text-white">código de acceso</strong> {student.passwordChanged ? "personalizado" : `(${student.code})`}.</p>
-                    <p>• Solo vos conocés tu nueva contraseña.</p>
-                    <p>• Si olvidás tu contraseña, pedile al profe que la resetee.</p>
-                    <p>• El profe puede restablecer tu código original pero <strong className="text-white">no puede ver tu nueva contraseña</strong>.</p>
-                  </div>
-                  {student.passwordChanged && (
-                    <div className="mt-3 glass rounded-xl px-3 py-2">
-                      <span className="badge badge-green">✓ Contraseña personalizada activa</span>
-                    </div>
-                  )}
+                <div className="glass-dark rounded-2xl p-4 text-sm text-slate-300 space-y-2">
+                  <p>• Código actual: <strong className="text-white">{student.passwordChanged ? "personalizado" : student.code}</strong></p>
+                  <p>• Solo vos conocés tu nueva contraseña.</p>
+                  {student.passwordChanged && <span className="badge badge-green">✓ Contraseña personalizada</span>}
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* PANEL */}
         {showPanel && (
           <div className="glass rounded-3xl p-5 mb-6 ani">
             <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-              <div><div className="mono text-xs text-slate-400 tracking-widest mb-1">PANEL DEL PROFESOR</div><h2 className="text-xl font-bold">Gestión y seguimiento</h2></div>
+              <h2 className="text-xl font-bold">📊 Panel del Profesor</h2>
               <div className="flex gap-2 flex-wrap">
-                {(["ranking", "progress", "dictations", "students"] as const).map(t => (
-                  <button key={t} onClick={() => setTeacherTab(t)} className={`tab ${teacherTab === t ? "active" : ""}`}>
-                    {t === "ranking" ? "🏆 Ranking" : t === "progress" ? "📊 Quiz" : t === "dictations" ? "🎙 Dictados" : "👥 Alumnos"}
+                {(["ranking","progress","dictations","students"] as const).map(t=>(
+                  <button key={t} onClick={()=>setTeacherTab(t)} className={`tab ${teacherTab===t?"active":""}`}>
+                    {t==="ranking"?"🏆 Ranking":t==="progress"?"📊 Quiz":t==="dictations"?"🎙 Dictados":"👥 Alumnos"}
                   </button>
                 ))}
               </div>
             </div>
-            {teacherTab === "ranking" && (
-              <div className="space-y-3">{ranking.map((r, i) => (
-                <div key={r.id} className={`glass rounded-2xl px-5 py-4 flex items-center gap-4 ${i === 0 ? "border border-yellow-500/30" : ""}`}>
-                  <div className={`text-2xl font-black w-8 ${i === 0 ? "m1" : i === 1 ? "m2" : i === 2 ? "m3" : "text-slate-500"}`}>{i < 3 ? ["🥇", "🥈", "🥉"][i] : `${i + 1}`}</div>
+            {teacherTab==="ranking" && (
+              <div className="space-y-3">{ranking.map((r,i)=>(
+                <div key={r.id} className={`glass rounded-2xl px-5 py-4 flex items-center gap-4 ${i===0?"border border-yellow-500/30":""}`}>
+                  <div className={`text-2xl font-black w-8 ${i===0?"m1":i===1?"m2":i===2?"m3":"text-slate-500"}`}>{i<3?["🥇","🥈","🥉"][i]:`${i+1}`}</div>
                   <div className="flex-1"><div className="font-bold">{r.name}</div><div className="text-xs text-slate-400">{r.cm}/{MODULES.length} mód · dictado {r.da}%</div></div>
                   <div className="text-right"><div className="text-2xl font-black mono accent">{r.pts}</div><div className="text-xs text-slate-500">pts</div></div>
                 </div>
               ))}</div>
             )}
-            {teacherTab === "progress" && (
+            {teacherTab==="progress" && (
               <div className="overflow-x-auto rounded-2xl border border-white/10">
                 <table className="w-full text-sm">
-                  <thead><tr className="bg-white/5 text-slate-400"><th className="text-left px-4 py-3">Alumno</th>{MODULES.map(m => <th key={m.id} className="text-center px-1 py-3 text-xs" title={m.title}>{m.emoji}</th>)}<th className="text-center px-4 py-3">%</th></tr></thead>
-                  <tbody>{ranking.map((r, i) => (
-                    <tr key={r.id} className={`border-t border-white/5 ${i % 2 === 0 ? "bg-white/[0.02]" : ""}`}>
+                  <thead><tr className="bg-white/5 text-slate-400"><th className="text-left px-4 py-3">Alumno</th>{MODULES.map(m=><th key={m.id} className="text-center px-1 py-3 text-xs" title={m.title}>{m.emoji}</th>)}<th className="text-center px-4 py-3">%</th><th className="text-center px-4 py-3">Reset</th></tr></thead>
+                  <tbody>{ranking.map((r,i)=>(
+                    <tr key={r.id} className={`border-t border-white/5 ${i%2===0?"bg-white/[0.02]":""}`}>
                       <td className="px-4 py-2 font-medium text-sm">{r.name}</td>
-                      {MODULES.map(m => { const p = (appState.progress[r.id] || {})[m.id]; return <td key={m.id} className="text-center px-1 py-2">{p ? <span className="accent font-bold mono text-xs">{p.score}/{p.total}</span> : <span className="text-slate-600 text-xs">—</span>}</td>; })}
-                      <td className="text-center px-4 py-2"><span className={`text-xs font-bold px-2 py-1 rounded-full ${r.cm === MODULES.length ? "bg-emerald-900 text-emerald-300" : r.cm > 0 ? "bg-amber-900 text-amber-300" : "bg-slate-700 text-slate-400"}`}>{Math.round((r.cm / MODULES.length) * 100)}%</span></td>
+                      {MODULES.map(m=>{const p=(appState.progress[r.id]||{})[m.id];return <td key={m.id} className="text-center px-1 py-2">{p?<button onClick={()=>{if(window.confirm(`¿Reiniciar ${m.title} de ${r.name}?`))resetModuleProgress(r.id,m.id);}} className="font-bold mono text-xs hover:text-rose-400 transition cursor-pointer" title="Clic para reiniciar"><span className={p.score===p.total?"text-emerald-400":p.score>0?"accent":"text-amber-400"}>{p.score}/{p.total}</span></button>:<span className="text-slate-700 text-xs">·</span>}</td>;})}
+                      <td className="text-center px-4 py-2"><span className={`text-xs font-bold px-2 py-1 rounded-full ${r.cm===MODULES.length?"bg-emerald-900 text-emerald-300":r.cm>0?"bg-amber-900 text-amber-300":"bg-slate-700 text-slate-400"}`}>{Math.round((r.cm/MODULES.length)*100)}%</span></td>
+                      <td className="text-center px-4 py-2">
+                        <button onClick={()=>{if(window.confirm(`¿Reiniciar TODO el progreso de ${r.name}?`)){MODULES.forEach(m=>resetModuleProgress(r.id,m.id));}}} className="text-rose-400 text-xs hover:text-rose-300 transition" title="Reiniciar todos los módulos">🗑️ Todo</button>
+                      </td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+                <div className="px-4 py-2 text-xs text-slate-500">💡 Clic en cualquier puntaje para reiniciar ese módulo específico</div>
+              </div>
+            )}
+            {teacherTab==="dictations" && (
+              <div className="overflow-x-auto rounded-2xl border border-white/10">
+                <table className="w-full text-sm">
+                  <thead><tr className="bg-white/5 text-slate-400"><th className="text-left px-4 py-3">Alumno</th>{MODULES.map(m=><th key={m.id} className="text-center px-1 py-3 text-xs" title={m.title}>{m.emoji}</th>)}<th className="text-center px-4 py-3">Prom.</th></tr></thead>
+                  <tbody>{ranking.map((r,i)=>(
+                    <tr key={r.id} className={`border-t border-white/5 ${i%2===0?"bg-white/[0.02]":""}`}>
+                      <td className="px-4 py-2 font-medium text-sm">{r.name}</td>
+                      {MODULES.map(m=>{const d=(appState.dictations[r.id]||{})[m.id];return <td key={m.id} className="text-center px-1 py-2">{d!=null?<span className={`mono text-xs font-bold ${d.score>=80?"text-emerald-400":d.score>=50?"text-amber-400":"text-rose-400"}`}>{d.score}%</span>:<span className="text-slate-700 text-xs">·</span>}</td>;})}
+                      <td className="text-center px-4 py-2 font-bold mono accent text-sm">{r.da>0?`${r.da}%`:"—"}</td>
                     </tr>
                   ))}</tbody>
                 </table>
               </div>
             )}
-            {teacherTab === "dictations" && (
-              <div className="overflow-x-auto rounded-2xl border border-white/10">
-                <table className="w-full text-sm">
-                  <thead><tr className="bg-white/5 text-slate-400"><th className="text-left px-4 py-3">Alumno</th>{MODULES.map(m => <th key={m.id} className="text-center px-1 py-3 text-xs" title={m.title}>{m.emoji}</th>)}<th className="text-center px-4 py-3">Prom.</th></tr></thead>
-                  <tbody>{ranking.map((r, i) => (
-                    <tr key={r.id} className={`border-t border-white/5 ${i % 2 === 0 ? "bg-white/[0.02]" : ""}`}>
-                      <td className="px-4 py-2 font-medium text-sm">{r.name}</td>
-                      {MODULES.map(m => { const d = (appState.dictations[r.id] || {})[m.id]; return <td key={m.id} className="text-center px-1 py-2">{d != null ? <span className={`mono text-xs font-bold ${d.score >= 80 ? "text-emerald-400" : d.score >= 50 ? "text-amber-400" : "text-rose-400"}`}>{d.score}%</span> : <span className="text-slate-600 text-xs">—</span>}</td>; })}
-                      <td className="text-center px-4 py-2 font-bold mono accent text-sm">{r.da > 0 ? `${r.da}%` : "—"}</td>
-                    </tr>
-                  ))}</tbody>
-                </table>
-              </div>
-            )}
-            {teacherTab === "students" && (
+            {teacherTab==="students" && (
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="glass-dark rounded-2xl p-5">
                   <div className="mono text-xs text-slate-400 tracking-widest mb-4">AGREGAR ALUMNO</div>
                   <div className="space-y-3">
-                    <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
-                    <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm mono" />
+                    <input value={newStudentName} onChange={e=>setNewStudentName(e.target.value)} placeholder="Nombre" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
+                    <input value={newStudentCode} onChange={e=>setNewStudentCode(e.target.value)} placeholder="Código" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm mono" />
                     <button onClick={addStudent} className="btn-accent w-full px-4 py-3 text-sm">+ Agregar</button>
                   </div>
                 </div>
                 <div className="glass-dark rounded-2xl p-5">
                   <div className="mono text-xs text-slate-400 tracking-widest mb-4">ALUMNOS ({appState.students.length})</div>
-                  <div className="space-y-2 max-h-60 overflow-y-auto">{appState.students.map(s => (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">{appState.students.map(s=>(
                     <div key={s.id} className="flex items-center justify-between glass rounded-xl px-4 py-3">
                       <div>
-                        <div className="font-medium text-sm flex items-center gap-2">{s.name} {s.passwordChanged && <span className="badge badge-green" style={{fontSize:"9px"}}>🔑 pass propia</span>}</div>
+                        <div className="font-medium text-sm">{s.name} {s.passwordChanged&&<span className="badge badge-green" style={{fontSize:"9px"}}>🔑</span>}</div>
                         <div className="mono text-xs text-slate-500">{s.code}</div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {s.passwordChanged && <button onClick={() => { if (window.confirm("Resetear la contraseña de " + s.name + " al código original?")) resetStudentPassword(s.id); }} className="text-yellow-400 text-xs hover:text-yellow-300 transition">Resetear</button>}
-                        {!defaultStudents.some(d => d.id === s.id) && <button onClick={() => removeStudent(s.id)} className="text-rose-400 text-xs hover:text-rose-300">Eliminar</button>}
+                        {s.passwordChanged&&<button onClick={()=>{if(window.confirm("¿Resetear contraseña de "+s.name+"?"))resetStudentPassword(s.id);}} className="text-yellow-400 text-xs hover:text-yellow-300">Reset</button>}
+                        {!defaultStudents.some(d=>d.id===s.id)&&<button onClick={()=>removeStudent(s.id)} className="text-rose-400 text-xs hover:text-rose-300">Eliminar</button>}
                       </div>
                     </div>
                   ))}</div>
@@ -2242,45 +1681,38 @@ export default function Home() {
           </div>
         )}
 
-        {/* CATEGORIES */}
         <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
-          {CATEGORIES.map(c => <button key={c} onClick={() => setActiveCategory(c)} className={`tab whitespace-nowrap ${activeCategory === c ? "active" : ""}`}>{c}</button>)}
+          {CATEGORIES.map(c=><button key={c} onClick={()=>setActiveCategory(c)} className={`tab whitespace-nowrap ${activeCategory===c?"active":""}`}>{c}</button>)}
         </div>
 
-        {/* REVIEW MODE BANNER */}
         {reviewMode && (
           <div className="glass-accent rounded-2xl px-5 py-3 mb-4 flex items-center justify-between gap-3 flex-wrap ani">
             <div className="flex items-center gap-3">
               <span className="text-xl">🔁</span>
-              <div>
-                <div className="font-bold text-sm text-yellow-300">Modo Repaso Inteligente</div>
-                <div className="text-xs text-slate-400">{reviewModules.length} módulo{reviewModules.length !== 1 ? "s" : ""} para repasar · Los módulos amarillos necesitan práctica</div>
-              </div>
+              <div><div className="font-bold text-sm text-yellow-300">Modo Repaso</div><div className="text-xs text-slate-400">{reviewModules.length} módulo{reviewModules.length!==1?"s":""} para repasar</div></div>
             </div>
-            <button onClick={() => setReviewMode(false)} className="glass rounded-xl px-4 py-2 text-xs text-slate-300 hover:text-white transition">✕ Salir del repaso</button>
+            <button onClick={()=>setReviewMode(false)} className="glass rounded-xl px-4 py-2 text-xs text-slate-300 hover:text-white">✕ Salir</button>
           </div>
         )}
 
-        {/* MODULE GRID */}
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 mb-6">
-          {filtered.map(m => {
-            const p = sp[m.id]; const active = m.id === selectedModuleId;
+          {filtered.map(m=>{
+            const p=sp[m.id];const active=m.id===selectedModuleId;
             return (
-              <button key={m.id} onClick={() => setSelectedModuleId(m.id)} className={`module-card glass rounded-2xl p-3 text-left border ${active ? "active" : reviewMode && reviewModules.some(r => r.id === m.id) ? "needs-review border-yellow-500/30" : "border-white/5"}`}>
+              <button key={m.id} onClick={()=>setSelectedModuleId(m.id)} className={`module-card glass rounded-2xl p-3 text-left border ${active?"active":reviewMode&&reviewModules.some(r=>r.id===m.id)?"needs-review border-yellow-500/30":"border-white/5"}`}>
                 <div className="text-xl mb-1">{m.emoji}</div>
                 <div className="text-xs text-slate-400 mb-0.5">{m.category}</div>
                 <div className="font-bold text-xs leading-tight">{m.title}</div>
                 <div className="mt-2 flex items-center justify-between">
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${LEVEL_COLOR[m.level]}`} style={{ fontSize: "9px" }}>{m.level}</span>
-                  <span className={`mono text-xs font-bold ${p ? "accent" : "text-slate-600"}`}>{p ? `${p.score}/${p.total}` : "—"}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${LEVEL_COLOR[m.level]}`} style={{fontSize:"9px"}}>{m.level}</span>
+                  <span className={`mono text-xs font-bold ${p?"accent":"text-slate-600"}`}>{p?`${p.score}/${p.total}`:"—"}</span>
                 </div>
-                {p && <div className="mt-1.5 progress-bar"><div className="progress-fill" style={{ width: `${Math.round((p.score / p.total) * 100)}%` }} /></div>}
+                {p&&<div className="mt-1.5 progress-bar"><div className="progress-fill" style={{width:`${Math.round((p.score/p.total)*100)}%`}} /></div>}
               </button>
             );
           })}
         </div>
 
-        {/* CONTENT */}
         <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
           <div className="space-y-5">
             <div className="glass rounded-3xl p-5">
@@ -2288,45 +1720,54 @@ export default function Home() {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="badge badge-green">{mod.category}</span>
-                    <span className={`badge ${mod.level === "Básico" ? "badge-green" : mod.level === "Intermedio" ? "badge-yellow" : "badge-red"}`}>{mod.level}</span>
+                    <span className={`badge ${mod.level==="Básico"?"badge-green":mod.level==="Intermedio"?"badge-yellow":"badge-red"}`}>{mod.level}</span>
                   </div>
                   <h2 className="text-2xl font-bold">{mod.emoji} {mod.title}</h2>
                   <p className="mt-1 text-slate-400 text-sm">{mod.description}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-
                   <div className="glass rounded-xl px-3 py-1.5 text-xs"><span className="text-slate-400">Mejor: </span><span className="font-bold accent mono">{mp.score}/{mp.total}</span></div>
-                  {mp.attempts > 0 && <div className="glass rounded-xl px-3 py-1.5 text-xs"><span className="text-slate-400">Intentos: </span><span className="font-bold mono">{mp.attempts}</span></div>}
+                  {(mp.score > 0 || mp.completed || mp.attempts > 0) && (
+                    <button onClick={() => {
+                      if (window.confirm(`¿Reiniciar "${mod.title}"?\nPuntaje actual: ${mp.score}/${mp.total}\nEsto no se puede deshacer.`)) {
+                        resetModuleProgress(student!.id, selectedModuleId);
+                      }
+                    }} className="glass rounded-xl px-3 py-1.5 text-xs text-rose-400 hover:text-rose-300 transition border border-rose-500/20 hover:border-rose-500/50">
+                      🔄 Reiniciar
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2 mt-5 flex-wrap">
-                {(["reading", "quiz", "dictation", "vocab", "flashcards"] as const).map(s => (
-                  <button key={s} onClick={() => s === "quiz" ? startQuiz() : setSection(s)} className={`tab ${section === s ? "active" : ""}`}>
-                    {s === "reading" ? "📖 Lectura" : s === "quiz" ? "✏️ Quiz" : s === "dictation" ? "🎙 Dictado" : s === "vocab" ? "📝 Vocab" : "🃏 Flashcards"}
+                {(["reading","quiz","dictation","vocab","flashcards"] as const).map(s=>(
+                  <button key={s} onClick={()=>s==="quiz"?startQuiz():setSection(s)} className={`tab ${section===s?"active":""}`}>
+                    {s==="reading"?"📖 Lectura":s==="quiz"?"✏️ Quiz":s==="dictation"?"🎙 Dictado":s==="vocab"?"📝 Vocab":"🃏 Flashcards"}
                   </button>
                 ))}
               </div>
             </div>
 
-            {section === "reading" && (
+            {section==="reading" && (
               <div className="glass rounded-3xl p-6 ani">
                 <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
                   <h3 className="text-xl font-bold">{mod.readingTitle}</h3>
-                  <button onClick={() => speak(mod.reading.join(" "), 0.9)} className="glass rounded-xl px-4 py-2 text-sm text-slate-300 hover:text-white transition">🔊 Escuchar</button>
+                  <button onClick={()=>speak(mod.reading.join(" "),0.9)} className="glass rounded-xl px-4 py-2 text-sm text-slate-300 hover:text-white">🔊 Escuchar</button>
                 </div>
                 <div className="space-y-6">
-                  {mod.reading.map((p, i) => (
+                  {mod.reading.map((p,i)=>(
                     <div key={i} className="flex gap-4">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full accent-bg flex items-center justify-center text-xs font-black text-slate-900 mt-1">{i + 1}</div>
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full accent-bg flex items-center justify-center text-xs font-black text-slate-900 mt-1">{i+1}</div>
                       <p className="reading-text flex-1">{p}</p>
                     </div>
                   ))}
                 </div>
-                <button onClick={startQuiz} className="btn-accent mt-6 px-6 py-3 text-sm">Ir al quiz →</button>
+                <div className="mt-6 flex items-center gap-3 flex-wrap">
+                  <button onClick={startQuiz} className="btn-accent px-6 py-3 text-sm">Ir al quiz →</button>
+                </div>
               </div>
             )}
 
-            {section === "quiz" && (
+            {section==="quiz" && (
               <div className="glass rounded-3xl p-6 ani">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                   <h3 className="text-xl font-bold">Quiz de comprensión</h3>
@@ -2334,33 +1775,31 @@ export default function Home() {
                     <div className="relative w-12 h-12">
                       <svg className="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
                         <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
-                        <circle cx="24" cy="24" r="20" fill="none" stroke={timeLeft <= 10 ? "#f87171" : "#63CAB7"} strokeWidth="4"
-                          strokeDasharray={`${2 * Math.PI * 20}`} strokeDashoffset={`${2 * Math.PI * 20 * (1 - timeLeft / QUIZ_TIME)}`}
-                          style={{ transition: "stroke-dashoffset 0.5s linear" }} strokeLinecap="round" />
+                        <circle cx="24" cy="24" r="20" fill="none" stroke={timeLeft<=10?"#f87171":"#63CAB7"} strokeWidth="4"
+                          strokeDasharray={`${2*Math.PI*20}`} strokeDashoffset={`${2*Math.PI*20*(1-timeLeft/QUIZ_TIME)}`}
+                          style={{transition:"stroke-dashoffset 0.5s linear"}} strokeLinecap="round" />
                       </svg>
-                      <div className={`absolute inset-0 flex items-center justify-center mono text-xs font-bold ${timeLeft <= 10 ? "text-rose-400" : "accent"}`}>{timeLeft}</div>
+                      <div className={`absolute inset-0 flex items-center justify-center mono text-xs font-bold ${timeLeft<=10?"text-rose-400":"accent"}`}>{timeLeft}</div>
                     </div>
-                    <div className="glass rounded-xl px-4 py-2 mono text-sm font-bold accent">{qIdx + 1}/{mod.quiz.length}</div>
+                    <div className="glass rounded-xl px-4 py-2 mono text-sm font-bold accent">{qIdx+1}/{mod.quiz.length}</div>
                   </div>
                 </div>
-                <div className="progress-bar mb-5"><div className="progress-fill" style={{ width: `${((qIdx + (submitted ? 1 : 0)) / mod.quiz.length) * 100}%` }} /></div>
+                <div className="progress-bar mb-5"><div className="progress-fill" style={{width:`${((qIdx+(submitted?1:0))/mod.quiz.length)*100}%`}} /></div>
                 <div className="glass-dark rounded-2xl p-5">
                   <p className="text-lg font-semibold mb-4">{q.question}</p>
                   <div className="space-y-3">
-                    {q.options.map(opt => {
-                      const sel = selectedOption === opt; const ok = submitted && opt === q.answer; const bad = submitted && sel && opt !== q.answer;
-                      return <button key={opt} onClick={() => !submitted && setAns(opt)} disabled={submitted} className={`opt ${ok ? "ok" : bad ? "bad" : sel ? "sel" : ""}`}>{opt}</button>;
+                    {shuffledOpts.map(opt=>{
+                      const sel=selectedOption===opt;const ok=submitted&&opt===q.answer;const bad=submitted&&sel&&opt!==q.answer;
+                      return <button key={opt} onClick={()=>!submitted&&setAns(opt)} disabled={submitted} className={`opt ${ok?"ok":bad?"bad":sel?"sel":""}`}>{opt}</button>;
                     })}
                   </div>
                 </div>
                 {submitted && (
-                  <div className={`mt-4 rounded-2xl px-5 py-4 ani ${isOk ? "bg-emerald-900/30 border border-emerald-500/30" : "bg-rose-900/30 border border-rose-500/30"}`}>
+                  <div className={`mt-4 rounded-2xl px-5 py-4 ani ${isOk?"bg-emerald-900/30 border border-emerald-500/30":"bg-rose-900/30 border border-rose-500/30"}`}>
                     <div className="flex items-start gap-3">
-                      <span className="text-xl">{isOk ? "✅" : "❌"}</span>
+                      <span className="text-xl">{isOk?"✅":"❌"}</span>
                       <div>
-                        <div className={`font-bold text-sm ${isOk ? "text-emerald-300" : "text-rose-300"}`}>
-                          {isOk ? "¡Correcto!" : `Respuesta correcta: ${q.answer}`}
-                        </div>
+                        <div className={`font-bold text-sm ${isOk?"text-emerald-300":"text-rose-300"}`}>{isOk?"¡Correcto!": `Respuesta correcta: ${q.answer}`}</div>
                         {q.explanation && <div className="text-slate-300 text-sm mt-1 leading-6">{q.explanation}</div>}
                       </div>
                     </div>
@@ -2368,97 +1807,89 @@ export default function Home() {
                 )}
                 <div className="mt-4 flex items-center justify-between flex-wrap gap-4">
                   <div className="text-sm">{!submitted && <span className="text-slate-500">Elegí antes de que el tiempo se acabe.</span>}</div>
-                  {!submitted ? <button onClick={handleSubmit} disabled={!selectedOption} className="btn-accent px-6 py-3 text-sm">Comprobar</button>
-                    : <button onClick={handleNext} className="btn-accent px-6 py-3 text-sm">{qIdx < mod.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>}
+                  {!submitted?<button onClick={handleSubmit} disabled={!selectedOption} className="btn-accent px-6 py-3 text-sm">Comprobar</button>
+                    :<button onClick={handleNext} className="btn-accent px-6 py-3 text-sm">{qIdx<mod.quiz.length-1?"Siguiente →":"Finalizar ✓"}</button>}
                 </div>
               </div>
             )}
 
-            {section === "dictation" && (
+            {section==="dictation" && (
               <div className="glass rounded-3xl p-6 ani">
                 <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
                   <h3 className="text-xl font-bold">🎙 Dictado</h3>
-                  <button onClick={() => speak(mod.dictation, 0.75)} className="glass rounded-xl px-4 py-2 text-sm text-slate-300 hover:text-white transition">🔊 Reproducir</button>
+                  <button onClick={()=>speak(mod.dictation,0.75)} className="glass rounded-xl px-4 py-2 text-sm text-slate-300 hover:text-white">🔊 Reproducir</button>
                 </div>
                 <p className="text-slate-400 text-sm mb-4">Escuchá el audio y escribí la frase completa en español.</p>
-                <textarea value={dictText} onChange={e => setDictText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." className="w-full rounded-2xl bg-slate-800 border border-slate-700 text-white px-5 py-4 text-sm leading-7 resize-none" />
+                <textarea value={dictText} onChange={e=>setDictText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." className="w-full rounded-2xl bg-slate-800 border border-slate-700 text-white px-5 py-4 text-sm leading-7 resize-none" />
                 <button onClick={checkDict} className="btn-accent mt-4 px-6 py-3 text-sm">Corregir</button>
-                {(dictResult || curDict) && (() => { const r = dictResult || curDict!; return (
+                {(dictResult||curDict)&&(()=>{const r=dictResult||curDict!;return(
                   <div className="mt-5 glass-dark rounded-2xl p-5 space-y-3 ani">
                     <div className="flex items-center gap-3">
-                      <div className={`text-4xl font-black mono ${r.score >= 80 ? "text-emerald-400" : r.score >= 50 ? "text-amber-400" : "text-rose-400"}`}>{r.score}%</div>
-                      <div className="text-sm text-slate-400">{r.score === 100 ? "¡Perfecto! 🎉" : r.score >= 80 ? "¡Muy bien! 🌟" : r.score >= 50 ? "Buen intento 💪" : "Seguí practicando 📚"}</div>
+                      <div className={`text-4xl font-black mono ${r.score>=80?"text-emerald-400":r.score>=50?"text-amber-400":"text-rose-400"}`}>{r.score}%</div>
+                      <div className="text-sm text-slate-400">{r.score===100?"¡Perfecto! 🎉":r.score>=80?"¡Muy bien! 🌟":r.score>=50?"Buen intento 💪":"Seguí practicando 📚"}</div>
                     </div>
                     <div className="text-sm"><span className="text-slate-400">Frase modelo: </span><span className="text-slate-200 italic">{r.expected}</span></div>
                   </div>
-                ); })()}
+                );})()}
               </div>
             )}
 
-            {section === "vocab" && (
+            {section==="vocab" && (
               <div className="glass rounded-3xl p-6 ani">
                 <h3 className="text-xl font-bold mb-5">📝 Vocabulario clave</h3>
                 <div className="grid gap-3 md:grid-cols-2">
-                  {mod.vocab.map(v => (
-                    <div key={v.es} className="glass-dark rounded-2xl px-5 py-4 hover-lift" style={{ cursor: "default" }}>
+                  {mod.vocab.map(v=>(
+                    <div key={v.es} className="glass-dark rounded-2xl px-5 py-4 hover-lift">
                       <div className="flex justify-between items-start gap-4">
-                        <div>
-                          <div className="font-bold text-white">{v.es}</div>
-                          <div className="text-xs text-slate-500 mt-1 mono tracking-wider">🇦🇷 ESPAÑOL</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold accent">{v.pt}</div>
-                          <div className="text-xs text-slate-500 mt-1 mono tracking-wider">🇧🇷 PORTUGUÊS</div>
-                        </div>
+                        <div><div className="font-bold text-white">{v.es}</div><div className="text-xs text-slate-500 mt-1 mono">🇦🇷 ESPAÑOL</div></div>
+                        <div className="text-right"><div className="font-bold accent">{v.pt}</div><div className="text-xs text-slate-500 mt-1 mono">🇧🇷 PORTUGUÊS</div></div>
                       </div>
-                      <button onClick={() => speak(v.es, 0.85)} className="mt-3 text-xs text-slate-500 hover:accent transition">🔊 Escuchar en español</button>
+                      <button onClick={()=>speak(v.es,0.85)} className="mt-3 text-xs text-slate-500 hover:text-white">🔊 Escuchar</button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {section === "flashcards" && (
+            {section==="flashcards" && (
               <div className="glass rounded-3xl p-6 ani">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-xl font-bold">🃏 Flashcards</h3>
-                  <div className="glass rounded-xl px-4 py-2 mono text-sm accent">{fcIdx + 1}/{mod.vocab.length}</div>
+                  <div className="glass rounded-xl px-4 py-2 mono text-sm accent">{fcIdx+1}/{mod.vocab.length}</div>
                 </div>
                 <p className="text-slate-400 text-sm mb-5">Tocá la tarjeta para ver la traducción.</p>
-                <div className="fc" onClick={() => setFcFlipped(f => !f)}>
-                  <div className={`fc-inner ${fcFlipped ? "flip" : ""}`}>
+                <div className="fc" onClick={()=>setFcFlipped(f=>!f)}>
+                  <div className={`fc-inner ${fcFlipped?"flip":""}`}>
                     <div className="fc-face fc-front">{mod.vocab[fcIdx].es}</div>
                     <div className="fc-face fc-back">{mod.vocab[fcIdx].pt}</div>
                   </div>
                 </div>
                 <div className="flex gap-3 mt-5 justify-center">
-                  <button onClick={() => { setFcIdx(i => Math.max(0, i - 1)); setFcFlipped(false); }} disabled={fcIdx === 0} className="btn-accent px-5 py-3 text-sm">← Anterior</button>
-                  <button onClick={() => { setFcIdx(i => Math.min(mod.vocab.length - 1, i + 1)); setFcFlipped(false); }} disabled={fcIdx === mod.vocab.length - 1} className="btn-accent px-5 py-3 text-sm">Siguiente →</button>
+                  <button onClick={()=>{setFcIdx(i=>Math.max(0,i-1));setFcFlipped(false);}} disabled={fcIdx===0} className="btn-accent px-5 py-3 text-sm">← Anterior</button>
+                  <button onClick={()=>{setFcIdx(i=>Math.min(mod.vocab.length-1,i+1));setFcFlipped(false);}} disabled={fcIdx===mod.vocab.length-1} className="btn-accent px-5 py-3 text-sm">Siguiente →</button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* SIDEBAR */}
           <aside className="space-y-4">
             <div className="glass rounded-3xl p-5">
               <div className="mono text-xs text-slate-400 tracking-widest mb-3">MI PROGRESO</div>
               <div className="text-5xl font-black accent mono">{pct}%</div>
-              <div className="text-slate-400 text-sm mt-1">completado</div>
-              <div className="mt-4 progress-bar"><div className="progress-fill" style={{ width: `${pct}%` }} /></div>
+              <div className="mt-4 progress-bar"><div className="progress-fill" style={{width:`${pct}%`}} /></div>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="glass-dark rounded-2xl p-3"><div className="mono text-lg font-black">{completedMods}</div><div className="text-xs text-slate-400">Módulos</div></div>
                 <div className="glass-dark rounded-2xl p-3"><div className="mono text-lg font-black accent">{totalScore}</div><div className="text-xs text-slate-400">Puntos</div></div>
               </div>
-              {allDone && <button onClick={() => setShowCert(true)} className="btn-accent w-full mt-4 py-3 text-sm">🎓 Ver certificado</button>}
+              {allDone && <button onClick={()=>setShowCert(true)} className="btn-accent w-full mt-4 py-3 text-sm">🎓 Certificado</button>}
             </div>
             <div className="glass rounded-3xl p-5">
               <div className="mono text-xs text-slate-400 tracking-widest mb-3">🏆 RANKING</div>
               <div className="space-y-2">
-                {ranking.slice(0, 5).map((r, i) => (
-                  <div key={r.id} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${r.id === student.id ? "bg-white/10" : ""}`}>
-                    <span className={`text-sm font-bold w-6 ${i === 0 ? "m1" : i === 1 ? "m2" : i === 2 ? "m3" : "text-slate-500"}`}>{i < 3 ? ["🥇", "🥈", "🥉"][i] : `${i + 1}`}</span>
-                    <span className={`text-sm flex-1 ${r.id === student.id ? "text-white font-semibold" : "text-slate-300"}`}>{r.name}</span>
+                {ranking.slice(0,5).map((r,i)=>(
+                  <div key={r.id} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${r.id===student.id?"bg-white/10":""}`}>
+                    <span className={`text-sm font-bold w-6 ${i===0?"m1":i===1?"m2":i===2?"m3":"text-slate-500"}`}>{i<3?["🥇","🥈","🥉"][i]:`${i+1}`}</span>
+                    <span className={`text-sm flex-1 ${r.id===student.id?"text-white font-semibold":"text-slate-300"}`}>{r.name}</span>
                     <span className="mono text-xs font-bold accent">{r.pts}</span>
                   </div>
                 ))}
@@ -2467,13 +1898,13 @@ export default function Home() {
             <div className="glass rounded-3xl p-5">
               <div className="mono text-xs text-slate-400 tracking-widest mb-3">MÓDULOS</div>
               <div className="space-y-1 max-h-72 overflow-y-auto">
-                {MODULES.map(m => {
-                  const p = sp[m.id]; const isActive = m.id === selectedModuleId;
+                {MODULES.map(m=>{
+                  const p=sp[m.id];const isActive=m.id===selectedModuleId;
                   return (
-                    <button key={m.id} onClick={() => setSelectedModuleId(m.id)} className={`w-full flex items-center gap-2 rounded-xl px-3 py-2 text-left transition ${isActive ? "bg-white/10" : "hover:bg-white/5"}`}>
+                    <button key={m.id} onClick={()=>setSelectedModuleId(m.id)} className={`w-full flex items-center gap-2 rounded-xl px-3 py-2 text-left transition ${isActive?"bg-white/10":"hover:bg-white/5"}`}>
                       <span className="text-sm">{m.emoji}</span>
-                      <div className="flex-1 min-w-0"><div className={`text-xs font-medium truncate ${isActive ? "text-white" : "text-slate-300"}`}>{m.title}</div></div>
-                      {p ? <span className="mono text-xs font-bold accent">{p.score}/{p.total}</span> : <span className="text-slate-600 text-xs">—</span>}
+                      <div className="flex-1 min-w-0"><div className={`text-xs font-medium truncate ${isActive?"text-white":"text-slate-300"}`}>{m.title}</div></div>
+                      {p?<span className="mono text-xs font-bold accent">{p.score}/{p.total}</span>:<span className="text-slate-600 text-xs">—</span>}
                     </button>
                   );
                 })}
