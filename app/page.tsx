@@ -623,7 +623,443 @@ const MODULES: ModuleType[] = [
     ],
     dictation: "Los falsos cognados son palabras parecidas en español y portugués con significados diferentes, y son una fuente frecuente de malentendidos profesionales.",
   },
+  // ══ LABORATORIO (nuevos) ══
+  {
+    id: "urinalisis", title: "Análisis de orina", level: "Básico", category: "Laboratorio", emoji: "🔭",
+    description: "Examen físico, químico y microscópico del sedimento urinario.",
+    readingTitle: "Lo que revela una muestra de orina",
+    reading: [
+      "El uroanálisis o análisis completo de orina es uno de los análisis más informativos y económicos de la medicina de laboratorio. Con una sola muestra y un proceso relativamente sencillo, permite obtener datos sobre el funcionamiento del riñón, el estado de hidratación, la presencia de infección urinaria, alteraciones metabólicas como diabetes o cetosis, y patologías renales como glomerulonefritis o síndrome nefrótico.",
+      "El análisis se divide en tres componentes complementarios. El examen físico evalúa características observables a simple vista: el color, la transparencia o turbidez y el olor. Una orina muy oscura y concentrada puede indicar deshidratación o daño hepático. Una orina turbia sugiere presencia de bacterias, leucocitos o cristales. El examen químico se realiza mediante tiras reactivas que detectan glucosa, proteínas, sangre, leucocitos, nitritos, cetonas, bilirrubina, urobilinógeno y pH.",
+      "El examen microscópico del sedimento es el más informativo pero también el más técnico. Después de centrifugar la muestra, se deposita el sedimento en un portaobjetos y se examina al microscopio. Los elementos que pueden observarse incluyen eritrocitos, leucocitos, células epiteliales de distintos orígenes, cilindros renales de diferentes tipos, cristales de diversas composiciones, bacterias, levaduras y parásitos.",
+      "Los cilindros renales merecen especial atención porque son elementos exclusivos del riñón: se forman en los túbulos renales y su presencia indica que algo está ocurriendo a nivel renal. Los cilindros hialinos pueden aparecer en condiciones normales o con deshidratación leve. Los cilindros granulosos o céreos sugieren daño renal significativo. Los cilindros eritrocitarios son altamente específicos de glomerulonefritis activa.",
+      "La fase preanalítica del uroanálisis tiene sus propias particularidades. La muestra debe procesarse dentro de las dos horas posteriores a la recolección, porque después de ese tiempo los elementos celulares comienzan a degradarse, el pH cambia por crecimiento bacteriano y los resultados pueden ser completamente diferentes. La primera orina de la mañana es la más concentrada y la más representativa para detectar proteinuria, glucosuria y elementos celulares.",
+    ],
+    vocab: [
+      { es: "sedimento urinario", pt: "sedimento urinário" }, { es: "cilindro renal", pt: "cilindro renal" },
+      { es: "proteinuria", pt: "proteinúria" }, { es: "glucosuria", pt: "glicosúria" },
+      { es: "tira reactiva", pt: "fita reagente" }, { es: "turbidez", pt: "turbidez" },
+    ],
+    quiz: [
+      { question: "¿Qué tres componentes tiene el análisis completo de orina?", options: ["Solo físico y químico", "Físico, químico y microscópico del sedimento", "Solo microscópico y químico", "Solo físico y microscópico"], answer: "Físico, químico y microscópico del sedimento" },
+      { question: "¿Qué puede indicar una orina muy oscura y concentrada?", options: ["Buena hidratación", "Deshidratación o daño hepático", "Infección bacteriana", "Solo un artefacto del recipiente"], answer: "Deshidratación o daño hepático" },
+      { question: "¿Qué detectan las tiras reactivas?", options: ["Solo glucosa y proteínas", "Glucosa, proteínas, sangre, leucocitos, nitritos, cetonas, bilirrubina y pH", "Solo bacterias y levaduras", "Solo pH y color"], answer: "Glucosa, proteínas, sangre, leucocitos, nitritos, cetonas, bilirrubina y pH" },
+      { question: "¿Por qué los cilindros renales son clínicamente importantes?", options: ["Son normales y no tienen significado", "Son exclusivos del riñón e indican que algo ocurre a nivel renal", "Solo aparecen en personas sanas", "Son artefactos del proceso analítico"], answer: "Son exclusivos del riñón e indican que algo ocurre a nivel renal" },
+      { question: "¿Qué indica la presencia de cilindros eritrocitarios?", options: ["Infección bacteriana", "Glomerulonefritis activa", "Deshidratación leve", "Diabetes no controlada"], answer: "Glomerulonefritis activa" },
+      { question: "¿Cuánto tiempo máximo puede pasar antes de procesar la muestra?", options: ["24 horas refrigerada", "Dos horas desde la recolección", "Solo 30 minutos", "Hasta 6 horas a temperatura ambiente"], answer: "Dos horas desde la recolección" },
+      { question: "¿Por qué se prefiere la primera orina de la mañana?", options: ["Por ser más fácil de obtener", "Es la más concentrada y representativa para detectar alteraciones", "Tiene menos bacterias contaminantes", "Es más fácil de centrifugar"], answer: "Es la más concentrada y representativa para detectar alteraciones" },
+      { question: "¿Qué sugiere una orina turbia?", options: ["Buena hidratación", "Presencia de bacterias, leucocitos o cristales", "Alta concentración de glucosa", "Ausencia de elementos celulares"], answer: "Presencia de bacterias, leucocitos o cristales" },
+    ],
+    dictation: "El análisis de orina evalúa características físicas, químicas y microscópicas y debe procesarse dentro de las dos horas de recolección.",
+  },
+  {
+    id: "inmunologia", title: "Inmunología y serología", level: "Intermedio", category: "Laboratorio", emoji: "🛡️",
+    description: "Anticuerpos, antígenos y técnicas inmunoserológicas en el laboratorio.",
+    readingTitle: "El sistema que guarda memoria",
+    reading: [
+      "La inmunología de laboratorio estudia la respuesta inmune del organismo y la utiliza como herramienta diagnóstica. Cuando el cuerpo entra en contacto con un agente extraño, ya sea un virus, una bacteria o una proteína anormal, desarrolla una respuesta que incluye la producción de anticuerpos específicos. Esos anticuerpos persisten en la sangre durante meses o años y pueden detectarse mediante técnicas serológicas.",
+      "El principio fundamental de la mayoría de las técnicas inmunoserológicas es la reacción antígeno-anticuerpo. Esta reacción es altamente específica: un anticuerpo reconoce y se une a un antígeno particular con gran selectividad. Las técnicas de laboratorio aprovechan esa especificidad para detectar la presencia de anticuerpos específicos contra un agente infeccioso o la presencia de antígenos de ese agente en la muestra del paciente.",
+      "Entre las técnicas más utilizadas se encuentran el ELISA, que usa enzimas unidas al anticuerpo o al antígeno para generar una señal colorimétrica medible; la inmunofluorescencia, que usa fluorocromos para visualizar la unión antígeno-anticuerpo al microscopio; la quimioluminiscencia, que es la base de los analizadores automáticos modernos de alta sensibilidad; y las pruebas rápidas de inmunocromatografía, que son las tiras reactivas de resultado visible a simple vista en pocos minutos.",
+      "La interpretación de los resultados serológicos requiere comprender el concepto de ventana inmunológica: el período que transcurre desde la infección hasta que el organismo produce suficientes anticuerpos como para ser detectados. Durante ese período, la persona está infectada pero su resultado serológico puede ser negativo. Por eso, una serología negativa en un paciente con sospecha clínica fuerte no siempre descarta la infección.",
+      "Los marcadores serológicos también permiten distinguir una infección aguda de una pasada o una reinfección. Las inmunoglobulinas de clase IgM son las primeras en aparecer después de un contacto antigénico y desaparecen en semanas o meses. Las IgG son las de memoria y persisten durante años. Un resultado IgM positivo con IgG negativo sugiere infección aguda reciente, mientras que IgG positivo con IgM negativo sugiere exposición pasada.",
+    ],
+    vocab: [
+      { es: "anticuerpo", pt: "anticorpo" }, { es: "antígeno", pt: "antígeno" },
+      { es: "ELISA", pt: "ELISA" }, { es: "ventana inmunológica", pt: "janela imunológica" },
+      { es: "IgM / IgG", pt: "IgM / IgG" }, { es: "sensibilidad / especificidad", pt: "sensibilidade / especificidade" },
+    ],
+    quiz: [
+      { question: "¿Cuál es el principio fundamental de las técnicas inmunoserológicas?", options: ["La reacción enzima-sustrato", "La reacción antígeno-anticuerpo altamente específica", "La precipitación de proteínas", "La centrifugación diferencial"], answer: "La reacción antígeno-anticuerpo altamente específica" },
+      { question: "¿Qué técnica usa enzimas para generar una señal colorimétrica?", options: ["Inmunofluorescencia", "ELISA", "Inmunocromatografía", "Quimioluminiscencia"], answer: "ELISA" },
+      { question: "¿Qué es la ventana inmunológica?", options: ["El período de mayor contagiosidad", "El tiempo desde la infección hasta que los anticuerpos son detectables", "El período de recuperación clínica", "El tiempo de vida de los anticuerpos en sangre"], answer: "El tiempo desde la infección hasta que los anticuerpos son detectables" },
+      { question: "¿Qué sugiere un resultado IgM positivo con IgG negativo?", options: ["Infección pasada con inmunidad", "Infección aguda reciente", "Ausencia de contacto previo", "Resultado indeterminado sin significado"], answer: "Infección aguda reciente" },
+      { question: "¿Qué sugiere IgG positivo con IgM negativo?", options: ["Infección activa aguda", "Exposición pasada con memoria inmunológica", "Falla del sistema inmune", "Contaminación de la muestra"], answer: "Exposición pasada con memoria inmunológica" },
+      { question: "¿Por qué una serología negativa no siempre descarta infección?", options: ["Porque los equipos son poco sensibles", "Porque el paciente puede estar en ventana inmunológica", "Porque los anticuerpos no se detectan en sangre", "Porque la muestra puede ser de orina"], answer: "Porque el paciente puede estar en ventana inmunológica" },
+      { question: "¿Qué ventaja tienen las pruebas rápidas de inmunocromatografía?", options: ["Mayor sensibilidad que ELISA", "Resultado visible a simple vista en pocos minutos sin equipos especiales", "Cuantificación precisa del anticuerpo", "Menor costo por unidad que otras técnicas"], answer: "Resultado visible a simple vista en pocos minutos sin equipos especiales" },
+      { question: "¿Cuánto tiempo persisten las IgG en sangre?", options: ["Solo días tras la infección", "Semanas o hasta dos meses", "Años, son los anticuerpos de memoria", "Exactamente seis meses"], answer: "Años, son los anticuerpos de memoria" },
+    ],
+    dictation: "Las IgM indican infección aguda reciente mientras que las IgG representan memoria inmunológica de exposiciones pasadas.",
+  },
+  {
+    id: "marcadores-cardiacos", title: "Marcadores cardíacos", level: "Avanzado", category: "Laboratorio", emoji: "❤️",
+    description: "Troponina, CK-MB y BNP en el diagnóstico de eventos cardiovasculares.",
+    readingTitle: "Cuando el corazón deja huella en la sangre",
+    reading: [
+      "Los marcadores cardíacos son proteínas o enzimas que normalmente se encuentran dentro de las células del músculo cardíaco y que se liberan al torrente sanguíneo cuando esas células sufren daño. Su detección en sangre a concentraciones elevadas es una señal de lesión miocárdica y tiene un rol central en el diagnóstico del infarto agudo de miocardio y otras patologías cardíacas.",
+      "La troponina cardíaca, en sus formas T e I, es actualmente el marcador de elección para el diagnóstico de infarto agudo de miocardio. Su alta especificidad por el tejido cardíaco la hace superior a marcadores anteriores. Las troponinas comienzan a elevarse entre tres y seis horas después del inicio del daño miocárdico, alcanzan su pico entre doce y veinticuatro horas y pueden permanecer elevadas hasta catorce días. Las generaciones más nuevas de troponina de alta sensibilidad permiten detectar elevaciones mínimas mucho antes.",
+      "La CK-MB, una isoenzima de la creatinquinasa, fue el marcador estándar antes de la troponina. Aunque ha sido desplazada para el diagnóstico de infarto, sigue siendo útil para detectar reinfartos, porque sus niveles vuelven a la normalidad más rápidamente que la troponina. También se usa para estimar el tamaño del infarto a través del análisis de su curva de elevación y descenso.",
+      "El BNP o péptido natriurético cerebral y su precursor NT-proBNP son marcadores de estrés mecánico del ventrículo. Se elevan cuando el corazón trabaja bajo una presión o volumen excesivos, como ocurre en la insuficiencia cardíaca. Su medición es útil tanto para el diagnóstico de insuficiencia cardíaca como para evaluar la respuesta al tratamiento y estratificar el riesgo en pacientes con disnea.",
+      "La interpretación de los marcadores cardíacos siempre debe realizarse en el contexto clínico del paciente y en función del tiempo transcurrido desde el inicio de los síntomas. Una troponina normal en las primeras dos horas de síntomas no descarta infarto. La estrategia diagnóstica actual incluye mediciones seriadas en el tiempo para evaluar la cinética del marcador. El laboratorio tiene la responsabilidad de comunicar los resultados críticos de forma inmediata y documentada.",
+    ],
+    vocab: [
+      { es: "troponina", pt: "troponina" }, { es: "infarto agudo de miocardio", pt: "infarto agudo do miocárdio" },
+      { es: "CK-MB", pt: "CK-MB" }, { es: "BNP / NT-proBNP", pt: "BNP / NT-proBNP" },
+      { es: "insuficiencia cardíaca", pt: "insuficiência cardíaca" }, { es: "marcador de daño miocárdico", pt: "marcador de dano miocárdico" },
+    ],
+    quiz: [
+      { question: "¿Por qué la troponina cardíaca es el marcador de elección para infarto?", options: ["Porque es más barata", "Por su alta especificidad por tejido cardíaco y su sensibilidad", "Porque se eleva antes que cualquier otro marcador", "Porque no se ve afectada por ejercicio físico"], answer: "Por su alta especificidad por tejido cardíaco y su sensibilidad" },
+      { question: "¿Cuándo comienza a elevarse la troponina tras el daño miocárdico?", options: ["Inmediatamente al inicio del daño", "Entre 3 y 6 horas después del inicio del daño", "Solo después de 24 horas", "A las 48 horas"], answer: "Entre 3 y 6 horas después del inicio del daño" },
+      { question: "¿Por qué la CK-MB sigue siendo útil a pesar de la troponina?", options: ["Es más específica que la troponina", "Vuelve a la normalidad más rápido y sirve para detectar reinfartos", "Tiene mayor sensibilidad diagnóstica", "Es el único marcador cuantificable"], answer: "Vuelve a la normalidad más rápido y sirve para detectar reinfartos" },
+      { question: "¿Qué indica una elevación de BNP o NT-proBNP?", options: ["Infarto agudo de miocardio", "Estrés mecánico ventricular como en insuficiencia cardíaca", "Daño renal agudo", "Infección bacteriana severa"], answer: "Estrés mecánico ventricular como en insuficiencia cardíaca" },
+      { question: "¿Una troponina normal descarta infarto en las primeras 2 horas?", options: ["Sí, siempre descarta infarto", "No, porque el marcador puede no haberse elevado aún", "Sí, con las troponinas de alta sensibilidad siempre", "Solo si se acompaña de ECG normal"], answer: "No, porque el marcador puede no haberse elevado aún" },
+      { question: "¿Qué estrategia diagnóstica es la correcta para marcadores cardíacos?", options: ["Una sola medición es suficiente", "Mediciones seriadas en el tiempo para evaluar la cinética del marcador", "Solo medir al ingreso del paciente", "Medir solo si el ECG es anormal"], answer: "Mediciones seriadas en el tiempo para evaluar la cinética del marcador" },
+      { question: "¿Cuánto tiempo puede permanecer elevada la troponina tras un infarto?", options: ["Solo 24 horas", "Hasta 14 días", "Solo 6 horas", "Exactamente 3 días"], answer: "Hasta 14 días" },
+      { question: "¿Cuál es la responsabilidad del laboratorio ante resultados críticos de troponina?", options: ["Esperar la solicitud del médico", "Comunicarlos de forma inmediata y documentada", "Incluirlos solo en el informe impreso", "Solo si supera 10 veces el valor normal"], answer: "Comunicarlos de forma inmediata y documentada" },
+    ],
+    dictation: "La troponina cardíaca es el marcador de elección para el diagnóstico de infarto y debe medirse de forma seriada en el tiempo.",
+  },
+  // ══ GESTIÓN (nuevos) ══
+  {
+    id: "iso15189", title: "ISO 15189", level: "Avanzado", category: "Gestión", emoji: "🏅",
+    description: "Requisitos de la norma internacional para laboratorios clínicos.",
+    readingTitle: "El estándar que define la excelencia",
+    reading: [
+      "La norma ISO 15189 es el estándar internacional que establece los requisitos específicos de calidad y competencia para los laboratorios clínicos. Fue desarrollada por la Organización Internacional de Normalización y está diseñada específicamente para el contexto del laboratorio médico, a diferencia de la ISO 17025, que es más amplia y aplica a laboratorios de ensayo en general. Su implementación y la certificación basada en ella es reconocida como la referencia de excelencia a nivel mundial.",
+      "La norma está estructurada en dos grandes bloques de requisitos: los requisitos de gestión y los requisitos técnicos. Los requisitos de gestión incluyen aspectos como la organización, el sistema de gestión de la calidad, el control de documentos y registros, la gestión de no conformidades, las acciones correctivas y preventivas, las auditorías internas y la revisión por la dirección. Los requisitos técnicos abordan el personal, las instalaciones, los equipos, los procesos preanalíticos, analíticos y postanalíticos, y la garantía de calidad.",
+      "Uno de los conceptos centrales de la ISO 15189 es el enfoque en el paciente. El laboratorio no es solo un proveedor de datos numéricos: es un actor clave en la cadena de atención al paciente. La norma exige que el laboratorio establezca canales de comunicación efectivos con los médicos, que informe resultados críticos de manera oportuna y que asegure que el informe final sea comprensible y útil para la toma de decisiones clínicas.",
+      "La acreditación bajo ISO 15189 es un proceso formal en el que un organismo evaluador independiente verifica que el laboratorio cumple con todos los requisitos de la norma. Es diferente de la certificación ISO 9001, que evalúa el sistema de gestión pero no la competencia técnica específica. La acreditación ISO 15189 implica una evaluación de pares: los evaluadores son profesionales con experiencia en laboratorio clínico.",
+      "Implementar ISO 15189 no es solo cumplir con una lista de requisitos formales. Es adoptar una cultura de mejora continua en la que cada proceso es documentado, medido, evaluado y mejorado de manera sistemática. Los laboratorios que han recorrido ese camino reportan mejoras concretas en la calidad de sus resultados, en la satisfacción de sus clientes y en la motivación de su personal. La norma es un medio, no un fin.",
+    ],
+    vocab: [
+      { es: "acreditación", pt: "acreditação" }, { es: "norma ISO 15189", pt: "norma ISO 15189" },
+      { es: "requisito técnico", pt: "requisito técnico" }, { es: "revisión por la dirección", pt: "análise crítica pela direção" },
+      { es: "mejora continua", pt: "melhoria contínua" }, { es: "evaluación de pares", pt: "avaliação por pares" },
+    ],
+    quiz: [
+      { question: "¿Para qué tipo de laboratorio fue diseñada específicamente la ISO 15189?", options: ["Para laboratorios industriales de control de calidad", "Para laboratorios clínicos médicos específicamente", "Para laboratorios ambientales", "Para cualquier tipo de laboratorio de ensayo"], answer: "Para laboratorios clínicos médicos específicamente" },
+      { question: "¿Cuáles son los dos grandes bloques de requisitos de la ISO 15189?", options: ["Recursos humanos y equipamiento", "Requisitos de gestión y requisitos técnicos", "Documentación y control de calidad", "Procesos analíticos y postanalíticos"], answer: "Requisitos de gestión y requisitos técnicos" },
+      { question: "¿Cuál es el concepto central de la ISO 15189 diferenciador?", options: ["La rentabilidad del laboratorio", "El enfoque en el paciente como actor clave de la cadena de atención", "La velocidad de procesamiento", "La reducción de costos operativos"], answer: "El enfoque en el paciente como actor clave de la cadena de atención" },
+      { question: "¿Qué diferencia la acreditación ISO 15189 de la certificación ISO 9001?", options: ["Son equivalentes y se usan indistintamente", "La 15189 evalúa competencia técnica específica; la 9001 solo el sistema de gestión", "La 9001 es más exigente técnicamente", "Solo difieren en el costo del proceso"], answer: "La 15189 evalúa competencia técnica específica; la 9001 solo el sistema de gestión" },
+      { question: "¿Quiénes son los evaluadores en una acreditación ISO 15189?", options: ["Auditores financieros generales", "Profesionales con experiencia en laboratorio clínico", "Funcionarios del gobierno de salud", "Solo personal del organismo acreditador sin experiencia técnica"], answer: "Profesionales con experiencia en laboratorio clínico" },
+      { question: "¿Qué exige la norma respecto a los resultados críticos?", options: ["Incluirlos solo en el informe impreso", "Informarlos de manera oportuna al médico", "Solo documentarlos internamente", "Repetirlos antes de comunicarlos"], answer: "Informarlos de manera oportuna al médico" },
+      { question: "¿Qué reportan los laboratorios que implementan ISO 15189?", options: ["Solo mejoras en documentación formal", "Mejoras en calidad, satisfacción del cliente y motivación del personal", "Solo reducción de costos operativos", "Solo mejoras en tiempos de respuesta"], answer: "Mejoras en calidad, satisfacción del cliente y motivación del personal" },
+      { question: "¿La ISO 15189 es un fin en sí misma?", options: ["Sí, cumplirla es el objetivo principal", "No, es un medio para adoptar una cultura de mejora continua", "Sí, el certificado es lo que importa", "Depende del tipo de laboratorio"], answer: "No, es un medio para adoptar una cultura de mejora continua" },
+    ],
+    dictation: "La ISO 15189 establece requisitos de calidad y competencia para laboratorios clínicos con enfoque en el paciente y en la mejora continua.",
+  },
+  {
+    id: "gestion-riesgos", title: "Gestión de riesgos", level: "Avanzado", category: "Gestión", emoji: "⚡",
+    description: "Identificación, evaluación y mitigación de riesgos en el laboratorio.",
+    readingTitle: "Antes de que ocurra",
+    reading: [
+      "La gestión de riesgos en el laboratorio clínico es el conjunto de actividades sistemáticas para identificar qué puede salir mal, evaluar qué tan probable y grave sería si ocurriera, y decidir qué hacer para reducir esa probabilidad o ese impacto. No se trata de eliminar todos los riesgos, porque eso sería imposible: se trata de gestionarlos de forma consciente y priorizada.",
+      "El proceso comienza con la identificación de riesgos. Esta actividad debe involucrar al personal que trabaja directamente en los procesos, porque son ellos quienes conocen los puntos donde algo puede fallar. Algunas técnicas útiles son la lluvia de ideas estructurada, el análisis de incidentes pasados, el análisis de modo de falla y efecto (AMFE) y la revisión de alertas de seguridad de proveedores y organismos reguladores.",
+      "Una vez identificados los riesgos, se los evalúa en dos dimensiones: probabilidad de ocurrencia y severidad del impacto. El producto de ambas dimensiones da una estimación del nivel de riesgo. Los riesgos de alta probabilidad y alto impacto son prioritarios e inaceptables sin controles. Los de baja probabilidad y bajo impacto pueden monitorearse sin acción inmediata. La matriz de riesgo es la herramienta visual más utilizada para esta evaluación.",
+      "Para cada riesgo significativo se definen controles o barreras. Un control puede ser preventivo, si actúa reduciendo la probabilidad de que el evento ocurra, o mitigador, si actúa reduciendo el impacto cuando ya ocurrió. Lo ideal es tener controles en ambas dimensiones. Por ejemplo, ante el riesgo de error de identificación de muestras, un control preventivo es el sistema de código de barras; un control mitigador es la revisión de coherencia antes de liberar resultados.",
+      "La gestión de riesgos no es un evento puntual: es un proceso continuo que debe revisarse periódicamente y actualizarse cuando se incorporan nuevos procesos, equipos o personal. Los eventos adversos y los incidentes casi adversos son fuentes de información muy valiosas porque revelan dónde fallaron los controles existentes. Un laboratorio que aprende de sus incidentes y actualiza su mapa de riesgos en consecuencia está practicando gestión de riesgos de verdad.",
+    ],
+    vocab: [
+      { es: "riesgo", pt: "risco" }, { es: "probabilidad de ocurrencia", pt: "probabilidade de ocorrência" },
+      { es: "severidad del impacto", pt: "severidade do impacto" }, { es: "matriz de riesgo", pt: "matriz de risco" },
+      { es: "control preventivo", pt: "controle preventivo" }, { es: "AMFE", pt: "AMFE (Análise de Modo de Falha e Efeito)" },
+    ],
+    quiz: [
+      { question: "¿Cuál es el objetivo de la gestión de riesgos?", options: ["Eliminar absolutamente todos los riesgos posibles", "Gestionar los riesgos de forma consciente y priorizada", "Solo documentar los incidentes ocurridos", "Reducir los costos del laboratorio"], answer: "Gestionar los riesgos de forma consciente y priorizada" },
+      { question: "¿Por qué debe involucrar al personal operativo la identificación de riesgos?", options: ["Por requisito formal de la norma", "Porque conocen directamente los puntos donde algo puede fallar", "Para motivarlos con actividades nuevas", "Solo para cumplir con el procedimiento"], answer: "Porque conocen directamente los puntos donde algo puede fallar" },
+      { question: "¿Qué dos dimensiones evalúa la matriz de riesgo?", options: ["Costo y tiempo de resolución", "Probabilidad de ocurrencia y severidad del impacto", "Frecuencia histórica y personal involucrado", "Tipo de proceso y área responsable"], answer: "Probabilidad de ocurrencia y severidad del impacto" },
+      { question: "¿Qué tipo de control actúa reduciendo la probabilidad del evento?", options: ["Control mitigador", "Control preventivo", "Control correctivo", "Control detectivo"], answer: "Control preventivo" },
+      { question: "¿Qué tipo de control actúa reduciendo el impacto cuando el evento ya ocurrió?", options: ["Control preventivo", "Control mitigador", "Control documental", "Control de calibración"], answer: "Control mitigador" },
+      { question: "¿Qué es el AMFE?", options: ["Una norma de acreditación", "Análisis de modo de falla y efecto para identificar riesgos sistemáticamente", "Un indicador de calidad", "Un tipo de auditoría externa"], answer: "Análisis de modo de falla y efecto para identificar riesgos sistemáticamente" },
+      { question: "¿Cuándo debe revisarse el mapa de riesgos?", options: ["Solo cuando ocurre un incidente grave", "Periódicamente y cuando se incorporan nuevos procesos, equipos o personal", "Solo una vez al año en la revisión por la dirección", "Solo cuando lo pide el organismo acreditador"], answer: "Periódicamente y cuando se incorporan nuevos procesos, equipos o personal" },
+      { question: "¿Qué revelan los incidentes casi adversos?", options: ["Que el sistema de calidad no funciona", "Dónde fallaron los controles existentes, siendo fuente de mejora", "Que el personal no está capacitado", "Solo estadísticas de seguridad"], answer: "Dónde fallaron los controles existentes, siendo fuente de mejora" },
+    ],
+    dictation: "La gestión de riesgos evalúa la probabilidad y el impacto de cada evento para priorizar controles preventivos y mitigadores.",
+  },
+  {
+    id: "documentacion", title: "Documentación y procedimientos", level: "Básico", category: "Gestión", emoji: "📝",
+    description: "Gestión documental, procedimientos operativos y control de versiones.",
+    readingTitle: "Si no está escrito, no existe",
+    reading: [
+      "En un sistema de calidad, hay una premisa fundamental: si algo no está documentado, desde el punto de vista de la calidad, no existe. Esto no significa que el conocimiento no exista en la cabeza del analista más experimentado, sino que ese conocimiento no es transferible, verificable ni reproducible de forma confiable por otras personas o en otras circunstancias. La documentación transforma el conocimiento individual en conocimiento institucional.",
+      "Los documentos de un sistema de calidad se organizan en una jerarquía. En el nivel superior están los documentos estratégicos como el manual de calidad, que describe los compromisos y políticas generales de la organización. En el nivel intermedio están los procedimientos, que describen cómo se realiza cada proceso de forma general. En el nivel operativo están las instrucciones de trabajo, que describen paso a paso cómo ejecutar una tarea específica.",
+      "Los procedimientos operativos estándar, conocidos como POE o SOP por sus siglas en inglés, son el corazón de la documentación técnica del laboratorio. Un POE bien redactado debe responder claramente a las siguientes preguntas: ¿qué se hace?, ¿quién lo hace?, ¿cuándo se hace?, ¿con qué materiales y equipos?, ¿cómo se hace paso a paso?, ¿qué se hace cuando algo sale mal? y ¿cómo se registra?",
+      "El control de versiones es un aspecto crítico de la gestión documental. Cuando un procedimiento se actualiza, la versión anterior debe retirarse de circulación y archivarse como documento obsoleto. Si un analista sigue trabajando con una versión desactualizada, puede estar siguiendo instrucciones que ya no corresponden al proceso actual, lo que genera un riesgo real de error. El sistema documental debe garantizar que siempre esté disponible solo la versión vigente.",
+      "La aprobación y revisión periódica de los documentos es otro requisito clave. Cada documento debe tener asignado un propietario responsable de mantenerlo actualizado. La frecuencia de revisión depende del tipo de documento y de la estabilidad del proceso que describe, pero en general los POE técnicos deben revisarse al menos cada dos años o cuando ocurre un cambio significativo en el proceso.",
+    ],
+    vocab: [
+      { es: "procedimiento operativo estándar (POE)", pt: "procedimento operacional padrão (POP)" },
+      { es: "control de versiones", pt: "controle de versão" }, { es: "documento obsoleto", pt: "documento obsoleto" },
+      { es: "manual de calidad", pt: "manual da qualidade" }, { es: "instrucción de trabajo", pt: "instrução de trabalho" },
+      { es: "aprobación de documentos", pt: "aprovação de documentos" },
+    ],
+    quiz: [
+      { question: "¿Por qué se dice 'si no está escrito no existe' en calidad?", options: ["Por exigencia burocrática solamente", "Porque el conocimiento no documentado no es transferible ni verificable", "Porque los auditores no ven lo que no está escrito", "Solo aplica a resultados de análisis"], answer: "Porque el conocimiento no documentado no es transferible ni verificable" },
+      { question: "¿Qué describe el manual de calidad?", options: ["Los pasos específicos de cada análisis", "Los compromisos y políticas generales de la organización", "Las instrucciones de mantenimiento de equipos", "Los registros de control interno"], answer: "Los compromisos y políticas generales de la organización" },
+      { question: "¿Qué preguntas debe responder un POE bien redactado?", options: ["Solo qué se hace y quién lo hace", "Qué, quién, cuándo, con qué, cómo, qué hacer si falla y cómo registrar", "Solo cómo se hace paso a paso", "Solo quién lo hace y cuándo"], answer: "Qué, quién, cuándo, con qué, cómo, qué hacer si falla y cómo registrar" },
+      { question: "¿Qué debe ocurrir con la versión anterior cuando se actualiza un procedimiento?", options: ["Puede seguir usándose hasta que se agote", "Debe retirarse de circulación y archivarse como documento obsoleto", "Solo debe anotarse la fecha de cambio", "Puede mantenerse como referencia paralela"], answer: "Debe retirarse de circulación y archivarse como documento obsoleto" },
+      { question: "¿Qué riesgo genera trabajar con un procedimiento desactualizado?", options: ["Solo problemas de archivo documental", "Seguir instrucciones que ya no corresponden al proceso actual y generar errores", "Solo inconvenientes formales en auditorías", "Ningún riesgo real si el analista es experimentado"], answer: "Seguir instrucciones que ya no corresponden al proceso actual y generar errores" },
+      { question: "¿Con qué frecuencia deben revisarse los POE técnicos como mínimo?", options: ["Cada cinco años o cuando se recuerde", "Al menos cada dos años o cuando ocurre un cambio significativo", "Solo cuando hay una auditoría programada", "Cada mes sin excepción"], answer: "Al menos cada dos años o cuando ocurre un cambio significativo" },
+      { question: "¿Qué diferencia hay entre un procedimiento y una instrucción de trabajo?", options: ["Son sinónimos usados indistintamente", "El procedimiento describe el proceso general; la instrucción detalla paso a paso una tarea específica", "La instrucción es más estratégica que el procedimiento", "Solo difieren en el formato del documento"], answer: "El procedimiento describe el proceso general; la instrucción detalla paso a paso una tarea específica" },
+      { question: "¿Qué transforma la documentación según el texto?", options: ["El conocimiento individual en conocimiento institucional transferible", "Los procedimientos en resultados analíticos", "Los errores en oportunidades de mejora", "Los datos en información clínica"], answer: "El conocimiento individual en conocimiento institucional transferible" },
+    ],
+    dictation: "Un procedimiento operativo estándar bien redactado responde qué se hace, quién lo hace, cómo se hace y qué se hace cuando algo sale mal.",
+  },
+  // ══ COMUNICACIÓN (nuevos) ══
+  {
+    id: "llamada-urgente", title: "Llamada urgente al médico", level: "Intermedio", category: "Comunicación", emoji: "🚨",
+    description: "Protocolo y lenguaje para comunicar resultados críticos por teléfono.",
+    readingTitle: "La llamada que no puede esperar",
+    reading: [
+      "Hay resultados de laboratorio que no pueden esperar a que el médico revise el informe en el sistema. Son los llamados valores críticos o de pánico: resultados tan extremos que indican una amenaza inmediata para la vida del paciente y que requieren comunicación verbal directa con el médico o con el responsable del cuidado del paciente. El protocolo de comunicación de valores críticos es uno de los procedimientos más importantes del laboratorio.",
+      "La lista de valores críticos varía según el tipo de laboratorio, la población que atiende y las guías de las sociedades científicas relevantes. Algunos ejemplos universalmente aceptados son: glucosa menor a 40 mg/dL o mayor a 500 mg/dL, potasio menor a 2.5 o mayor a 6.5 mEq/L, hemoglobina menor a 7 g/dL en adultos, recuento de plaquetas menor a 20.000 o mayor a un millón por microlitro, y troponina muy elevada en contexto agudo.",
+      "El procedimiento estándar para comunicar un valor crítico implica varios pasos específicos. El analista debe verificar el resultado antes de llamar, confirmando la identidad de la muestra y descartando errores preanalíticos como hemólisis que puedan explicar falsamente el valor. Luego llama al médico solicitante o, si no está disponible, al médico responsable del paciente o al servicio de guardia. Debe identificarse con nombre y cargo.",
+      "Durante la llamada, el analista comunica el nombre del paciente, el número de muestra o solicitud, el análisis y el resultado, indica que se trata de un valor crítico, y espera confirmación verbal de que el médico recibió y entendió la información. Esa confirmación es fundamental: no alcanza con dejar un mensaje en el contestador ni enviar un correo. La comunicación debe ser en tiempo real y verificada.",
+      "Todo el proceso debe quedar documentado en el registro de valores críticos: fecha y hora de detección, resultado, nombre del analista que llamó, nombre del médico que recibió la llamada, hora de la llamada y confirmación de recepción. Si no se puede contactar al médico después de varios intentos, debe escalarse siguiendo el procedimiento establecido. La trazabilidad de esa comunicación puede tener consecuencias legales y asistenciales.",
+    ],
+    vocab: [
+      { es: "valor crítico / de pánico", pt: "valor crítico / de pânico" }, { es: "protocolo de comunicación", pt: "protocolo de comunicação" },
+      { es: "escalar", pt: "escalar / acionar" }, { es: "confirmar recepción", pt: "confirmar recebimento" },
+      { es: "guardia / servicio de urgencias", pt: "plantão / pronto-socorro" }, { es: "trazabilidad de comunicación", pt: "rastreabilidade da comunicação" },
+    ],
+    quiz: [
+      { question: "¿Por qué existen los protocolos de valores críticos?", options: ["Por exigencia burocrática solamente", "Porque ciertos resultados indican amenaza inmediata para la vida y no pueden esperar", "Para reducir la carga de trabajo del analista", "Solo para cumplir con la acreditación"], answer: "Porque ciertos resultados indican amenaza inmediata para la vida y no pueden esperar" },
+      { question: "¿Qué debe verificar el analista antes de llamar?", options: ["Que el médico esté en su consultorio", "El resultado y la identidad de la muestra descartando errores preanalíticos", "Solo que el resultado esté fuera de rango", "Que el sistema registró el resultado"], answer: "El resultado y la identidad de la muestra descartando errores preanalíticos" },
+      { question: "¿Es suficiente dejar un mensaje de voz o correo para comunicar un valor crítico?", options: ["Sí, si queda registrado", "No, la comunicación debe ser en tiempo real y verificada verbalmente", "Sí, si es fuera del horario habitual", "Solo si el médico no tiene disponibilidad inmediata"], answer: "No, la comunicación debe ser en tiempo real y verificada verbalmente" },
+      { question: "¿Qué información debe comunicar el analista durante la llamada?", options: ["Solo el resultado y el nombre del paciente", "Nombre del paciente, número de muestra, análisis, resultado y confirmación de que es valor crítico", "Solo el análisis y el resultado numérico", "Solo el nombre del paciente y su diagnóstico previo"], answer: "Nombre del paciente, número de muestra, análisis, resultado y confirmación de que es valor crítico" },
+      { question: "¿Qué debe documentarse en el registro de valores críticos?", options: ["Solo la fecha y el resultado", "Fecha, hora, resultado, analista, médico contactado, hora de llamada y confirmación", "Solo el nombre del médico y el resultado", "Solo si el médico hizo algún cambio en el tratamiento"], answer: "Fecha, hora, resultado, analista, médico contactado, hora de llamada y confirmación" },
+      { question: "¿Qué se hace si no se puede contactar al médico solicitante?", options: ["Se deja el resultado en el sistema y se espera", "Se escala siguiendo el procedimiento: médico responsable, guardia o supervisor", "Se cancela el resultado hasta que el médico llame", "Se informa al día siguiente en el informe"], answer: "Se escala siguiendo el procedimiento: médico responsable, guardia o supervisor" },
+      { question: "¿Es un valor crítico de glucosa 300 mg/dL?", options: ["Sí, siempre es crítico", "No, el rango crítico típico es menor a 40 o mayor a 500 mg/dL", "Depende solo de la edad del paciente", "Sí, cualquier glucosa elevada es crítica"], answer: "No, el rango crítico típico es menor a 40 o mayor a 500 mg/dL" },
+      { question: "¿Por qué la trazabilidad de la comunicación puede tener consecuencias legales?", options: ["Solo por requisito de la norma de calidad", "Porque documenta si se actuó correctamente ante una emergencia clínica", "Solo si el paciente hace una queja formal", "No tiene consecuencias legales reales"], answer: "Porque documenta si se actuó correctamente ante una emergencia clínica" },
+    ],
+    dictation: "La comunicación de valores críticos debe ser verbal, en tiempo real, verificada y documentada con nombre, hora y confirmación del médico.",
+  },
+  {
+    id: "presentaciones", title: "Presentaciones técnicas", level: "Intermedio", category: "Comunicación", emoji: "📊",
+    description: "Estructura y lenguaje para presentar datos e informes técnicos en español.",
+    readingTitle: "Los datos que hablan solos",
+    reading: [
+      "Una presentación técnica es mucho más que mostrar diapositivas con datos y gráficos. Es la oportunidad de transformar información compleja en una narrativa clara que guíe al oyente desde el problema hasta la solución, desde los datos hasta las conclusiones, desde el análisis hasta la acción. El español técnico tiene sus propias convenciones para estructurar este tipo de comunicación.",
+      "La estructura básica de una presentación técnica efectiva sigue una lógica narrativa de cuatro partes. La primera es el contexto: ¿por qué existe esta presentación? ¿Qué problema o pregunta motiva el análisis? La segunda es el desarrollo: los datos, el análisis y los hallazgos. La tercera es la conclusión: ¿qué dicen los datos? ¿Qué respuesta dan a la pregunta inicial? La cuarta es la recomendación o próximo paso: ¿qué debería hacerse con esta información?",
+      "El lenguaje de las presentaciones técnicas en español tiene fórmulas específicas que conviene conocer. Para introducir el tema: 'El objetivo de esta presentación es...', 'Voy a presentarles los resultados de...'. Para presentar datos: 'Como puede observarse en este gráfico...', 'Los datos muestran que...', 'Cabe destacar que...'. Para transitar entre secciones: 'Pasando ahora a...', 'En cuanto a...', 'A continuación veremos...'. Para concluir: 'En resumen...', 'Como conclusión...', 'Esto nos lleva a recomendar...'.",
+      "Los gráficos y tablas son herramientas poderosas si se usan bien. Cada elemento visual debe tener un título claro, fuentes identificadas si los datos son externos, y los ejes o columnas perfectamente etiquetados. Antes de mostrar un gráfico, el presentador debe anticipar al oyente qué está a punto de ver y qué debe buscar. Después de mostrarlo, debe señalar explícitamente el hallazgo principal, sin asumir que el oyente lo identificó solo.",
+      "El manejo de preguntas es una de las partes más desafiantes de una presentación técnica en un segundo idioma. Algunas frases útiles para ganar tiempo: 'Es una pregunta muy pertinente...', 'Déjenme asegurarme de entender bien la pregunta...'. Para pedir aclaración: '¿Podría reformular la pregunta?', '¿Se refiere específicamente a...?'. Para respuestas que requieren más información: 'No tengo ese dato aquí pero puedo verificarlo y enviarlo después de la reunión.'",
+    ],
+    vocab: [
+      { es: "diapositiva", pt: "slide" }, { es: "hallazgo", pt: "achado / constatação" },
+      { es: "gráfico / tabla", pt: "gráfico / tabela" }, { es: "conclusión", pt: "conclusão" },
+      { es: "próximo paso", pt: "próximo passo" }, { es: "cabe destacar", pt: "cabe destacar / vale ressaltar" },
+    ],
+    quiz: [
+      { question: "¿Cuáles son las cuatro partes de una presentación técnica efectiva?", options: ["Introducción, datos, cierre y preguntas", "Contexto, desarrollo, conclusión y recomendación", "Objetivo, metodología, resultados y bibliografía", "Problema, solución, evidencia y resumen"], answer: "Contexto, desarrollo, conclusión y recomendación" },
+      { question: "¿Cómo se introduce el tema en una presentación en español?", options: ["Comenzando directamente con los datos", "Con frases como 'El objetivo de esta presentación es...' o 'Voy a presentarles...'", "Con un agradecimiento al público siempre", "Con una pregunta retórica obligatoriamente"], answer: "Con frases como 'El objetivo de esta presentación es...' o 'Voy a presentarles...'" },
+      { question: "¿Cómo se anticipa un gráfico correctamente?", options: ["Solo mostrándolo sin comentario previo", "Diciendo al oyente qué está a punto de ver y qué debe buscar", "Leyendo todos los datos del gráfico en voz alta", "Solo con un título grande en la diapositiva"], answer: "Diciendo al oyente qué está a punto de ver y qué debe buscar" },
+      { question: "¿Qué frase sirve para transitar entre secciones?", options: ["'En resumen...' o 'Como conclusión...'", "'Pasando ahora a...' o 'En cuanto a...' o 'A continuación veremos...'", "'El objetivo es...' o 'Voy a presentar...'", "'Como puede observarse...' o 'Los datos muestran...'"], answer: "'Pasando ahora a...' o 'En cuanto a...' o 'A continuación veremos...'" },
+      { question: "¿Cómo se puede ganar tiempo al recibir una pregunta difícil?", options: ["Respondiendo directamente aunque no se sepa", "Con frases como 'Es una pregunta muy pertinente...' o 'Déjenme asegurarme de entender bien...'", "Ignorando la pregunta y continuando", "Diciendo que el tiempo se acabó"], answer: "Con frases como 'Es una pregunta muy pertinente...' o 'Déjenme asegurarme de entender bien...'" },
+      { question: "¿Qué debe incluir un gráfico técnico bien elaborado?", options: ["Solo los datos más importantes", "Título claro, fuentes identificadas y ejes perfectamente etiquetados", "Solo el título y los colores del laboratorio", "Solo los números sin contexto visual"], answer: "Título claro, fuentes identificadas y ejes perfectamente etiquetados" },
+      { question: "¿Qué se dice cuando no se tiene el dato que pidieron?", options: ["Se inventa un dato aproximado", "'No tengo ese dato aquí pero puedo verificarlo y enviarlo después'", "'Esa pregunta no corresponde a esta presentación'", "Se ignora la pregunta"], answer: "'No tengo ese dato aquí pero puedo verificarlo y enviarlo después'" },
+      { question: "¿Qué transforma una presentación de datos en una narrativa efectiva?", options: ["Usar muchas diapositivas y colores llamativos", "Una estructura lógica que guía desde el problema hasta la acción", "Hablar rápido para cubrir más información", "Leer exactamente lo que dice cada diapositiva"], answer: "Una estructura lógica que guía desde el problema hasta la acción" },
+    ],
+    dictation: "Una presentación técnica efectiva tiene contexto, desarrollo, conclusión y recomendación, y usa fórmulas específicas del español formal.",
+  },
+  // ══ TECNOLOGÍA (nuevos) ══
+  {
+    id: "backup", title: "Backup y recuperación", level: "Intermedio", category: "Tecnología", emoji: "💾",
+    description: "Estrategias de respaldo de datos y planes de recuperación ante desastres.",
+    readingTitle: "El día que todo se borró",
+    reading: [
+      "Un viernes por la tarde, después de una tormenta eléctrica que afectó la zona industrial donde estaba ubicado el laboratorio, el servidor principal dejó de responder. Cuando el técnico de TI llegó al día siguiente, confirmó lo que todos temían: el disco duro del servidor había fallado por una sobretensión y los datos de las últimas tres semanas, incluyendo todos los resultados de pacientes del período, habían sido perdidos. El laboratorio no tenía una estrategia de backup actualizada.",
+      "Un backup o copia de seguridad es una copia de los datos críticos almacenada en un lugar diferente al original, de manera que si el original falla o se corrompe, los datos pueden recuperarse. La frecuencia del backup, el tipo de backup y el lugar donde se almacena la copia son los tres parámetros fundamentales de cualquier estrategia de respaldo.",
+      "Existen tres tipos principales de backup. El backup completo copia todos los datos seleccionados en cada ejecución: es el más sencillo de restaurar pero el que más espacio y tiempo consume. El backup incremental copia solo los datos que cambiaron desde el último backup (completo o incremental): es rápido pero la restauración requiere aplicar todos los incrementales en orden. El backup diferencial copia todo lo que cambió desde el último backup completo: equilibra velocidad y simplicidad de restauración.",
+      "La regla 3-2-1 es el estándar de buenas prácticas en backup: mantener tres copias de los datos, en dos tipos de medios diferentes, con una copia en una ubicación geográfica diferente. Hoy en día, esa tercera copia en ubicación diferente suele ser la nube. Los servicios de almacenamiento en la nube para entornos empresariales ofrecen redundancia, cifrado y acceso desde cualquier lugar.",
+      "Pero un backup sin prueba de recuperación no es un backup confiable. Es habitual que los laboratorios realicen backups regularmente y descubran que no pueden restaurarlos cuando los necesitan, porque el proceso de restauración nunca fue probado. Las pruebas periódicas de recuperación, en las que se restaura el backup en un ambiente de prueba y se verifica la integridad de los datos, son tan importantes como el backup mismo.",
+    ],
+    vocab: [
+      { es: "copia de seguridad / backup", pt: "backup / cópia de segurança" }, { es: "restauración", pt: "restauração" },
+      { es: "backup incremental", pt: "backup incremental" }, { es: "regla 3-2-1", pt: "regra 3-2-1" },
+      { es: "almacenamiento en la nube", pt: "armazenamento em nuvem" }, { es: "integridad de datos", pt: "integridade de dados" },
+    ],
+    quiz: [
+      { question: "¿Qué es un backup?", options: ["Un sistema de antivirus", "Una copia de los datos críticos almacenada en un lugar diferente al original", "Un programa para acelerar el servidor", "Un tipo de base de datos especial"], answer: "Una copia de los datos críticos almacenada en un lugar diferente al original" },
+      { question: "¿Qué copia el backup incremental?", options: ["Todos los datos en cada ejecución", "Solo los datos que cambiaron desde el último backup", "Solo los datos del último mes", "Una muestra aleatoria de los datos"], answer: "Solo los datos que cambiaron desde el último backup" },
+      { question: "¿Qué establece la regla 3-2-1?", options: ["3 servidores, 2 técnicos, 1 contraseña", "3 copias en 2 tipos de medios con 1 copia en ubicación geográfica diferente", "3 backups diarios, 2 semanales, 1 mensual", "Backup cada 3 horas, revisión cada 2 días, restauración cada mes"], answer: "3 copias en 2 tipos de medios con 1 copia en ubicación geográfica diferente" },
+      { question: "¿Qué diferencia hay entre backup incremental y diferencial?", options: ["Son exactamente iguales", "El incremental copia desde el último backup de cualquier tipo; el diferencial desde el último completo", "El diferencial es más lento de realizar", "Solo difieren en el medio de almacenamiento"], answer: "El incremental copia desde el último backup de cualquier tipo; el diferencial desde el último completo" },
+      { question: "¿Por qué un backup sin prueba de recuperación no es confiable?", options: ["Porque los datos se corrompen automáticamente", "Porque puede ser imposible restaurarlo cuando se necesita sin haberlo probado antes", "Porque los auditores lo exigen", "Solo por una cuestión de procedimiento formal"], answer: "Porque puede ser imposible restaurarlo cuando se necesita sin haberlo probado antes" },
+      { question: "¿Qué tipo de backup es más sencillo de restaurar?", options: ["El incremental", "El diferencial", "El completo", "El basado en snapshots"], answer: "El completo" },
+      { question: "¿Qué ventaja ofrece la nube como destino de backup?", options: ["Es siempre más barata que los medios físicos", "Ofrece redundancia, cifrado y acceso desde cualquier lugar", "Elimina la necesidad de backups locales", "Solo sirve para datos no críticos"], answer: "Ofrece redundancia, cifrado y acceso desde cualquier lugar" },
+      { question: "¿Cuándo se descubrió que no había backup actualizado en el caso del texto?", options: ["Durante la auditoría anual", "Cuando el servidor falló y se perdieron los datos de tres semanas", "Antes del incidente por una alerta preventiva", "Durante una prueba de recuperación rutinaria"], answer: "Cuando el servidor falló y se perdieron los datos de tres semanas" },
+    ],
+    dictation: "La regla 3-2-1 establece mantener tres copias de los datos en dos tipos de medios con una copia en ubicación geográfica diferente.",
+  },
+  {
+    id: "redes", title: "Redes y conectividad", level: "Intermedio", category: "Tecnología", emoji: "🌐",
+    description: "Infraestructura de red, conectividad de equipos y resolución de problemas.",
+    readingTitle: "Cuando los equipos no se hablan",
+    reading: [
+      "La infraestructura de red es el sistema nervioso del laboratorio moderno. Sin una red estable y bien configurada, los equipos analíticos no pueden enviar resultados al LIMS, los analistas no pueden acceder al sistema de gestión, y los clientes no pueden recibir sus informes. A pesar de su importancia crítica, la red suele ser un componente invisible que solo recibe atención cuando falla.",
+      "Una red de laboratorio típica incluye varios componentes físicos y lógicos. Los switches conectan los dispositivos dentro del laboratorio y gestionan el tráfico de datos entre ellos. El router conecta la red interna del laboratorio con el exterior, ya sea internet o la red del hospital. Los cables de red o las conexiones inalámbricas son el medio físico de transmisión. Los firewalls protegen la red de accesos no autorizados desde el exterior.",
+      "La segmentación de la red es una práctica importante en laboratorios con equipos médicos conectados. Consiste en dividir la red en zonas separadas según el tipo de dispositivo y el nivel de seguridad requerido. Los equipos analíticos críticos pueden estar en un segmento separado del resto de la red administrativa, lo que limita el impacto de un incidente de seguridad en un segmento sobre el otro.",
+      "Cuando un analista reporta que un equipo no puede conectarse al LIMS, el diagnóstico comienza con preguntas básicas: ¿el problema afecta a todos los equipos o solo a uno? ¿El cable está conectado físicamente? ¿El equipo tiene dirección IP asignada correctamente? ¿El servidor del LIMS está accesible desde otros dispositivos? Este proceso de descarte sistemático es mucho más eficiente que intentar soluciones al azar.",
+      "El monitoreo proactivo de la red es una práctica que permite detectar problemas antes de que afecten a los usuarios. Herramientas de monitoreo de red pueden alertar automáticamente cuando un dispositivo pierde conectividad, cuando el uso del ancho de banda supera un umbral o cuando la latencia entre dos puntos aumenta de forma anormal. Esas alertas tempranas permiten actuar antes de que el problema sea percibido por el personal de laboratorio.",
+    ],
+    vocab: [
+      { es: "red / infraestructura de red", pt: "rede / infraestrutura de rede" }, { es: "switch / router", pt: "switch / roteador" },
+      { es: "dirección IP", pt: "endereço IP" }, { es: "firewall", pt: "firewall" },
+      { es: "ancho de banda", pt: "largura de banda" }, { es: "latencia", pt: "latência" },
+    ],
+    quiz: [
+      { question: "¿Por qué la red es el 'sistema nervioso' del laboratorio moderno?", options: ["Porque es el componente más caro", "Porque sin ella los equipos no pueden comunicarse con el LIMS ni los clientes recibir informes", "Porque es lo más visible de la infraestructura", "Solo por una metáfora técnica sin implicaciones reales"], answer: "Porque sin ella los equipos no pueden comunicarse con el LIMS ni los clientes recibir informes" },
+      { question: "¿Qué hace un switch en la red del laboratorio?", options: ["Conecta el laboratorio con internet", "Conecta los dispositivos internos y gestiona el tráfico de datos entre ellos", "Protege contra accesos no autorizados", "Asigna direcciones IP automáticamente"], answer: "Conecta los dispositivos internos y gestiona el tráfico de datos entre ellos" },
+      { question: "¿Qué es la segmentación de red?", options: ["Dividir el ancho de banda entre usuarios", "Separar la red en zonas según tipo de dispositivo y nivel de seguridad", "Instalar múltiples routers en paralelo", "Limitar la velocidad de ciertos dispositivos"], answer: "Separar la red en zonas según tipo de dispositivo y nivel de seguridad" },
+      { question: "¿Cuál es el primer paso diagnóstico ante un problema de conectividad?", options: ["Reiniciar todos los equipos de la red", "Determinar si el problema afecta a todos o solo a un dispositivo específico", "Llamar al proveedor de internet", "Reinstalar el software de red"], answer: "Determinar si el problema afecta a todos o solo a un dispositivo específico" },
+      { question: "¿Qué protege el firewall?", options: ["Los datos ante fallos del disco duro", "La red de accesos no autorizados desde el exterior", "Los equipos de sobretensiones eléctricas", "Los cables de daños físicos"], answer: "La red de accesos no autorizados desde el exterior" },
+      { question: "¿Qué ventaja tiene el monitoreo proactivo de red?", options: ["Elimina la necesidad de técnicos de TI", "Permite detectar problemas antes de que afecten a los usuarios", "Aumenta automáticamente el ancho de banda", "Reemplaza al firewall en la seguridad"], answer: "Permite detectar problemas antes de que afecten a los usuarios" },
+      { question: "¿Qué verifica el técnico al diagnosticar un problema de conectividad?", options: ["Solo que el cable esté conectado", "Cable físico, dirección IP correcta y accesibilidad del servidor desde otros dispositivos", "Solo que el LIMS esté funcionando", "Solo la configuración del firewall"], answer: "Cable físico, dirección IP correcta y accesibilidad del servidor desde otros dispositivos" },
+      { question: "¿Por qué la red suele recibir atención solo cuando falla?", options: ["Porque es un componente secundario del laboratorio", "Porque es un componente invisible cuando funciona correctamente", "Porque es muy difícil de monitorear de forma proactiva", "Porque el personal de TI tiene otras prioridades"], answer: "Porque es un componente invisible cuando funciona correctamente" },
+    ],
+    dictation: "La infraestructura de red conecta los equipos analíticos con el LIMS y debe monitorearse proactivamente para detectar problemas antes de que afecten al laboratorio.",
+  },
+  {
+    id: "base-datos", title: "Base de datos del laboratorio", level: "Avanzado", category: "Tecnología", emoji: "🗄️",
+    description: "Gestión, consultas y mantenimiento de bases de datos en entornos de laboratorio.",
+    readingTitle: "El orden detrás de los datos",
+    reading: [
+      "Cada resultado que produce el laboratorio forma parte de una base de datos. Detrás de la interfaz visual del LIMS o del sistema de gestión existe una estructura de tablas relacionadas que almacena millones de registros: pacientes, muestras, análisis, resultados, controles, usuarios, equipos y registros de auditoría. Entender los conceptos básicos de cómo funciona esa base de datos es fundamental para cualquier profesional que trabaje con sistemas de información en el laboratorio.",
+      "Las bases de datos relacionales, que son las más usadas en sistemas de laboratorio, organizan los datos en tablas con filas y columnas. Cada tabla almacena un tipo específico de información: una tabla de pacientes, una tabla de muestras, una tabla de resultados. Las tablas se relacionan entre sí mediante claves: la clave primaria identifica de forma única cada registro dentro de su tabla, y la clave foránea establece la relación con otra tabla.",
+      "El lenguaje SQL (Structured Query Language) es la herramienta estándar para interactuar con bases de datos relacionales. Con SQL se pueden hacer consultas para extraer datos, inserciones para agregar registros nuevos, actualizaciones para modificar datos existentes y eliminaciones. Una consulta SQL básica para obtener los resultados de un paciente específico podría ser: SELECT análisis, resultado, fecha FROM resultados WHERE paciente_id = 12345.",
+      "El mantenimiento de la base de datos incluye actividades como la depuración de registros duplicados, el archivado de datos históricos para mantener el rendimiento del sistema, la verificación de la integridad referencial (que no existan resultados sin muestra asociada, por ejemplo), y las actualizaciones periódicas del sistema gestor.",
+      "La seguridad de la base de datos tiene múltiples capas. A nivel de red, el servidor de base de datos no debería estar accesible directamente desde internet. A nivel de aplicación, cada usuario del sistema debería tener solo los permisos necesarios para su rol. A nivel de datos, la información sensible de los pacientes debería estar cifrada en reposo. Y a nivel de auditoría, todas las operaciones de lectura, escritura y modificación deberían quedar registradas con usuario y marca de tiempo.",
+    ],
+    vocab: [
+      { es: "base de datos relacional", pt: "banco de dados relacional" }, { es: "tabla / registro", pt: "tabela / registro" },
+      { es: "clave primaria", pt: "chave primária" }, { es: "consulta SQL", pt: "consulta SQL" },
+      { es: "integridad referencial", pt: "integridade referencial" }, { es: "cifrado en reposo", pt: "criptografia em repouso" },
+    ],
+    quiz: [
+      { question: "¿Cómo se organizan los datos en una base de datos relacional?", options: ["En archivos de texto plano", "En tablas con filas y columnas relacionadas entre sí por claves", "En documentos XML independientes", "En carpetas jerárquicas por fecha"], answer: "En tablas con filas y columnas relacionadas entre sí por claves" },
+      { question: "¿Qué es la clave primaria?", options: ["La contraseña del administrador", "El identificador único de cada registro dentro de su tabla", "El nombre del campo más importante", "El primer campo de cada tabla"], answer: "El identificador único de cada registro dentro de su tabla" },
+      { question: "¿Qué lenguaje se usa para interactuar con bases de datos relacionales?", options: ["HTML", "Python exclusivamente", "SQL (Structured Query Language)", "XML"], answer: "SQL (Structured Query Language)" },
+      { question: "¿Qué hace la instrucción SELECT en SQL?", options: ["Elimina registros de la tabla", "Extrae y muestra datos que cumplen una condición", "Crea una nueva tabla", "Actualiza registros existentes"], answer: "Extrae y muestra datos que cumplen una condición" },
+      { question: "¿Qué verifica la integridad referencial?", options: ["Que las contraseñas sean seguras", "Que no existan registros huérfanos sin su referencia obligatoria", "Que los datos estén cifrados", "Que los backups estén actualizados"], answer: "Que no existan registros huérfanos sin su referencia obligatoria" },
+      { question: "¿Por qué el servidor de base de datos no debería ser accesible directamente desde internet?", options: ["Por razones de velocidad de conexión", "Para proteger los datos sensibles de los pacientes de accesos externos no autorizados", "Porque los servidores no tienen conexión a internet", "Solo por requisito formal de seguridad"], answer: "Para proteger los datos sensibles de los pacientes de accesos externos no autorizados" },
+      { question: "¿Qué incluye el mantenimiento de la base de datos?", options: ["Solo hacer backups periódicos", "Depuración de duplicados, archivado histórico, verificación de integridad y actualizaciones", "Solo actualizar el sistema operativo del servidor", "Solo verificar que el espacio en disco sea suficiente"], answer: "Depuración de duplicados, archivado histórico, verificación de integridad y actualizaciones" },
+      { question: "¿Qué debe quedar registrado en la auditoría de base de datos?", options: ["Solo los errores del sistema", "Todas las operaciones de lectura, escritura y modificación con usuario y marca de tiempo", "Solo las modificaciones de datos de pacientes", "Solo las consultas del administrador"], answer: "Todas las operaciones de lectura, escritura y modificación con usuario y marca de tiempo" },
+    ],
+    dictation: "Las bases de datos relacionales organizan los datos en tablas conectadas por claves y se consultan mediante el lenguaje SQL.",
+  },
+  // ══ GRAMÁTICA (nuevos) ══
+  {
+    id: "preterito", title: "Pretérito perfecto e indefinido", level: "Intermedio", category: "Gramática", emoji: "⏰",
+    description: "Los dos pasados más importantes del español y cuándo usar cada uno.",
+    readingTitle: "Lo que ya ocurrió: ¿cuándo y cómo contarlo?",
+    reading: [
+      "El español tiene dos tiempos verbales que expresan acciones pasadas y que a menudo generan confusión en hablantes de portugués: el pretérito perfecto compuesto (he hecho, ha ocurrido, hemos revisado) y el pretérito perfecto simple o indefinido (hice, ocurrió, revisamos). En portugués también existen ambas formas, pero su uso no coincide exactamente con el español, lo que genera errores frecuentes.",
+      "El pretérito perfecto compuesto (con haber + participio) se usa para acciones pasadas que tienen una conexión con el presente. Puede ser porque ocurrieron en un período de tiempo que todavía no ha terminado ('Esta semana hemos recibido tres muestras rechazadas'), porque sus resultados o efectos siguen siendo relevantes ahora ('El equipo ha fallado dos veces este mes'), o porque el hablante las siente como cercanas al momento presente.",
+      "El pretérito indefinido se usa para acciones pasadas que el hablante percibe como terminadas y separadas del presente. Se usa con marcadores temporales de tiempo cerrado: 'ayer', 'la semana pasada', 'en 2022', 'hace tres meses'. Por ejemplo: 'Ayer el control falló en el turno de la tarde' o 'El mes pasado implementamos el nuevo procedimiento de recepción'.",
+      "Hay una diferencia geográfica importante que conviene conocer: en España se usa el pretérito perfecto compuesto con mucha frecuencia para acciones recientes, incluso con marcadores como 'hoy' o 'esta mañana'. En Latinoamérica, incluida Argentina, el indefinido se usa mucho más ampliamente, incluso para acciones muy recientes. Por eso, en el contexto laboral del laboratorio en Argentina, es completamente natural decir 'hoy llegué tarde' en lugar de 'hoy he llegado tarde'.",
+      "En el lenguaje técnico del laboratorio, el indefinido es el tiempo dominante para narrar incidentes y hallazgos: 'El control superó el límite de advertencia', 'El analista detectó una inconsistencia', 'El equipo rechazó la calibración'. El perfecto compuesto se usa más para informar estados actuales derivados de acciones pasadas: 'El equipo ha sido recalibrado', 'Los resultados han sido validados', 'El procedimiento ha sido actualizado'.",
+    ],
+    vocab: [
+      { es: "pretérito perfecto compuesto", pt: "pretérito perfeito composto" }, { es: "pretérito indefinido", pt: "pretérito perfeito simples" },
+      { es: "el control falló", pt: "o controle falhou" }, { es: "hemos recibido", pt: "recebemos / temos recebido" },
+      { es: "fue detectado", pt: "foi detectado" }, { es: "ha sido validado", pt: "foi validado / tem sido validado" },
+    ],
+    quiz: [
+      { question: "¿Cuándo se usa el pretérito perfecto compuesto en España?", options: ["Solo para acciones muy antiguas", "Para acciones recientes o con conexión al presente, incluso con 'hoy'", "Solo con marcadores de tiempo cerrado", "Para acciones que ocurrirán en el futuro"], answer: "Para acciones recientes o con conexión al presente, incluso con 'hoy'" },
+      { question: "¿Con qué marcadores temporales se usa el indefinido?", options: ["Hoy, esta semana, este mes", "Ayer, la semana pasada, hace tres meses, en 2022", "Siempre, normalmente, a veces", "Mañana, después, en el futuro"], answer: "Ayer, la semana pasada, hace tres meses, en 2022" },
+      { question: "¿Cuál es la forma correcta del pretérito indefinido de 'fallar' en tercera persona?", options: ["ha fallado", "falló", "fallaba", "falla"], answer: "falló" },
+      { question: "¿Qué frase usa correctamente el pretérito perfecto compuesto?", options: ["Ayer el equipo ha fallado", "El equipo ha sido recalibrado esta mañana", "La semana pasada hemos implementado el procedimiento", "Hace un mes el control ha superado el límite"], answer: "El equipo ha sido recalibrado esta mañana" },
+      { question: "¿En Latinoamérica cómo se prefiere expresar acciones recientes?", options: ["Con el pretérito perfecto compuesto siempre", "Con el indefinido, incluso para acciones del mismo día", "Con el imperfecto", "Con el presente de indicativo"], answer: "Con el indefinido, incluso para acciones del mismo día" },
+      { question: "¿Qué tiempo domina en la narración de incidentes técnicos?", options: ["El presente de indicativo", "El pretérito indefinido para narrar lo que ocurrió", "El imperfecto para describir el contexto", "El futuro para indicar consecuencias"], answer: "El pretérito indefinido para narrar lo que ocurrió" },
+      { question: "¿Cuál es la forma de 'haber' en pretérito perfecto para 'nosotros'?", options: ["hemos", "habemos", "habremos", "habíamos"], answer: "hemos" },
+      { question: "¿Qué frase expresa un estado actual resultado de una acción pasada?", options: ["El control falló ayer", "Los resultados han sido validados", "Ayer recibimos las muestras", "La semana pasada implementamos el cambio"], answer: "Los resultados han sido validados" },
+    ],
+    dictation: "El pretérito indefinido narra acciones pasadas cerradas mientras que el perfecto compuesto expresa estados actuales derivados de acciones pasadas.",
+  },
+  {
+    id: "subjuntivo", title: "Subjuntivo básico", level: "Avanzado", category: "Gramática", emoji: "🎯",
+    description: "El modo subjuntivo en contextos técnicos: deseos, dudas y recomendaciones.",
+    readingTitle: "El modo de lo que podría ser",
+    reading: [
+      "El subjuntivo es el aspecto gramatical del español que más desafíos presenta para los hablantes de portugués, no porque no exista en portugués (el subjuntivo portugués es muy rico), sino porque los contextos de uso no siempre coinciden exactamente. El subjuntivo expresa contenidos que no son afirmaciones directas sobre la realidad: deseos, dudas, posibilidades, recomendaciones, emociones y negaciones de hechos.",
+      "En el contexto técnico del laboratorio, el subjuntivo aparece constantemente en recomendaciones y procedimientos. 'Se recomienda que el operador verifique los controles antes de comenzar la corrida.' 'Es necesario que la muestra llegue refrigerada.' 'Es importante que el resultado sea comunicado al médico de guardia.' La estructura es siempre la misma: una expresión impersonal o de recomendación en indicativo, seguida de 'que' y un verbo en subjuntivo.",
+      "Las expresiones impersonales que exigen subjuntivo son muy frecuentes en el lenguaje técnico: es necesario que, es importante que, es conveniente que, es fundamental que, se recomienda que, se requiere que, es posible que, es probable que. Cada una de estas expresiones requiere que el verbo de la cláusula siguiente esté en subjuntivo presente.",
+      "El subjuntivo también aparece con verbos de comunicación usados en forma negativa: 'No creo que el reactivo esté vencido' (duda), 'No es seguro que el resultado sea correcto' (incertidumbre). Y con expresiones temporales que hacen referencia a eventos futuros: 'Cuando llegue la muestra, verifique la temperatura', 'Hasta que el control no sea aceptable, no libere los resultados'.",
+      "Un error muy frecuente de los hablantes de portugués es usar el infinitivo personal de portugués donde el español requiere el subjuntivo. En portugués es correcto decir 'é necessário verificarmos os controles', con infinitivo flexionado. En español la estructura equivalente es 'es necesario que verifiquemos los controles', con subjuntivo. El infinitivo no flexionado también existe en español ('es necesario verificar'), pero cuando hay un sujeto explícito de la acción, el subjuntivo es obligatorio.",
+    ],
+    vocab: [
+      { es: "es necesario que + subjuntivo", pt: "é necessário que + subjuntivo" },
+      { es: "se recomienda que + subjuntivo", pt: "recomenda-se que + subjuntivo" },
+      { es: "cuando llegue (subjuntivo)", pt: "quando chegar (subjuntivo futuro)" },
+      { es: "no creo que + subjuntivo", pt: "não acho que + subjuntivo" },
+      { es: "es posible que + subjuntivo", pt: "é possível que + subjuntivo" },
+      { es: "hasta que no sea", pt: "até que não seja" },
+    ],
+    quiz: [
+      { question: "¿Cuándo se usa el subjuntivo en español?", options: ["Solo para el futuro", "Para deseos, dudas, posibilidades, recomendaciones y negaciones de hechos", "Solo en preguntas formales", "Para describir acciones pasadas"], answer: "Para deseos, dudas, posibilidades, recomendaciones y negaciones de hechos" },
+      { question: "¿Qué estructura exige subjuntivo en contextos técnicos?", options: ["Expresión en indicativo + que + verbo en subjuntivo", "Solo con el verbo 'recomendar' en primera persona", "Con cualquier verbo seguido de 'que'", "Solo en oraciones negativas"], answer: "Expresión en indicativo + que + verbo en subjuntivo" },
+      { question: "¿Cuál de estas expresiones exige subjuntivo?", options: ["El analista verifica que...", "Es necesario que...", "El resultado muestra que...", "El médico confirma que..."], answer: "Es necesario que..." },
+      { question: "¿Cómo se dice correctamente en español 'é necessário verificarmos os controles'?", options: ["Es necesario verificaremos los controles", "Es necesario que verifiquemos los controles", "Es necesario verificar los controles nosotros", "Es necesario verificamos los controles"], answer: "Es necesario que verifiquemos los controles" },
+      { question: "¿Por qué 'no creo que el reactivo esté vencido' usa subjuntivo?", options: ["Porque es una negación que expresa duda, no afirmación de un hecho", "Porque 'creer' siempre exige subjuntivo", "Solo porque es una oración negativa", "Por ninguna razón gramatical específica"], answer: "Porque es una negación que expresa duda, no afirmación de un hecho" },
+      { question: "¿Cuándo usa subjuntivo la expresión temporal 'cuando'?", options: ["Siempre, en todos los contextos", "Cuando hace referencia a un evento futuro o hipotético", "Solo cuando el sujeto es diferente en las dos oraciones", "Nunca, siempre usa indicativo"], answer: "Cuando hace referencia a un evento futuro o hipotético" },
+      { question: "¿Cómo se conjuga 'verificar' en subjuntivo presente para 'el analista'?", options: ["verifica", "verificará", "verifique", "verificase"], answer: "verifique" },
+      { question: "¿Qué diferencia al subjuntivo del indicativo fundamentalmente?", options: ["El tiempo al que refieren", "El indicativo afirma realidades; el subjuntivo expresa subjetividad, posibilidad o dependencia", "Solo el nivel de formalidad", "El sujeto de la oración"], answer: "El indicativo afirma realidades; el subjuntivo expresa subjetividad, posibilidad o dependencia" },
+    ],
+    dictation: "Es necesario que el analista verifique los controles antes de procesar las muestras y que comunique cualquier desviación al supervisor.",
+  },
+  {
+    id: "imperativo", title: "Imperativo y órdenes", level: "Intermedio", category: "Gramática", emoji: "📢",
+    description: "Cómo dar instrucciones, órdenes y recomendaciones en español técnico.",
+    readingTitle: "Instrucciones que se entienden",
+    reading: [
+      "El imperativo es el modo verbal que se usa para dar órdenes, instrucciones y recomendaciones directas. En el contexto del laboratorio, aparece constantemente en procedimientos operativos, instrucciones de equipos, protocolos de seguridad y comunicaciones internas. Saber usar el imperativo correctamente es fundamental para redactar procedimientos claros y para comunicar instrucciones de forma efectiva.",
+      "En español, el imperativo tiene formas distintas según el nivel de formalidad. Para instrucciones técnicas formales, como las de un POE o una instrucción de seguridad, se usa la forma de 'usted' (tercera persona del singular) o 'ustedes' (tercera persona del plural). Estas formas son iguales al subjuntivo presente: 'Verifique el nivel del reactivo antes de comenzar', 'Coloque la muestra en posición vertical', 'Etiqueten los tubos inmediatamente'.",
+      "Para instrucciones más informales o directas entre colegas, se usa la forma de 'tú' (segunda persona del singular). Esta forma es diferente para cada verbo: verbos en -ar forman el imperativo quitando la -r del infinitivo (verificar → verifica), y verbos en -er/-ir forman el imperativo igual que la tercera persona del presente de indicativo (leer → lee, escribir → escribe). Hay irregulares frecuentes: decir → di, hacer → haz, ir → ve, poner → pon.",
+      "Una dificultad específica para hablantes de portugués es el uso de los pronombres con el imperativo. En español, con el imperativo afirmativo, el pronombre va siempre después del verbo y unido a él (enclítico): 'Escríbalo en el registro', 'Comuníqueselo al médico', 'Verifíquelos antes de procesar'. Con el imperativo negativo, el pronombre va antes del verbo: 'No lo escriba aún', 'No se lo comunique por correo'.",
+      "En los procedimientos operativos del laboratorio, el imperativo de 'usted' en tercera persona es la convención estándar. Esto crea un texto impersonal y formal que no identifica a ningún operador específico pero da instrucciones precisas: 'Encienda el equipo y espere la señal de listo. Introduzca los controles en el orden establecido. Registre los resultados antes de continuar. Si el control falla, suspenda la corrida y consulte el procedimiento de no conformidades.'",
+    ],
+    vocab: [
+      { es: "verificar → verifique (usted)", pt: "verificar → verifique (você)" },
+      { es: "registrar → registre", pt: "registrar → registre" },
+      { es: "comunicar → comuníqueselo", pt: "comunicar → comunique-o" },
+      { es: "no lo procese aún", pt: "não o processe ainda" },
+      { es: "coloque / etiquete", pt: "coloque / etiquete" },
+      { es: "imperativo de cortesía (usted)", pt: "imperativo de cortesia (você/senhor)" },
+    ],
+    quiz: [
+      { question: "¿Qué forma del imperativo se usa en los POE técnicos formales?", options: ["La forma de 'tú' informal", "La forma de 'usted' (tercera persona), igual al subjuntivo presente", "Solo el infinitivo sin flexión", "La forma de 'vosotros'"], answer: "La forma de 'usted' (tercera persona), igual al subjuntivo presente" },
+      { question: "¿Cómo se forma el imperativo de 'verificar' para 'usted'?", options: ["verifica", "verificas", "verifique", "verificará"], answer: "verifique" },
+      { question: "¿Cómo se forma el imperativo de 'hacer' para 'tú'?", options: ["hace", "haz", "hazas", "haces"], answer: "haz" },
+      { question: "¿Dónde va el pronombre con el imperativo afirmativo?", options: ["Antes del verbo siempre", "Después del verbo, unido a él (enclítico)", "Separado del verbo por una coma", "Al principio de la oración"], answer: "Después del verbo, unido a él (enclítico)" },
+      { question: "¿Dónde va el pronombre con el imperativo negativo?", options: ["Después del verbo igual que en el afirmativo", "Antes del verbo", "Al final de la oración", "No se puede usar pronombre con imperativo negativo"], answer: "Antes del verbo" },
+      { question: "¿Cómo se dice correctamente 'escríbelo' en forma de cortesía (usted)?", options: ["escribe lo", "escríbalo", "lo escriba", "escríbelo siempre"], answer: "escríbalo" },
+      { question: "¿Cómo se forma el imperativo de 'ir' para 'tú'?", options: ["iras", "ves", "ve", "ira"], answer: "ve" },
+      { question: "¿Por qué el imperativo de 'usted' es igual al subjuntivo presente?", options: ["Por coincidencia histórica sin regla", "Porque el imperativo de cortesía se deriva del subjuntivo en español", "Solo para verbos irregulares", "No son iguales, es un error frecuente"], answer: "Porque el imperativo de cortesía se deriva del subjuntivo en español" },
+    ],
+    dictation: "En los procedimientos técnicos se usa el imperativo de usted: verifique, registre, comunique y coloque son las formas más frecuentes.",
+  },
+  {
+    id: "voz-pasiva", title: "Voz pasiva", level: "Avanzado", category: "Gramática", emoji: "🔃",
+    description: "Voz pasiva con ser y pasiva refleja con se en textos técnicos.",
+    readingTitle: "Cuando el sujeto no importa tanto",
+    reading: [
+      "La voz pasiva es una construcción gramatical que permite presentar una acción sin especificar quién la realiza, poniendo el foco en el objeto que recibe la acción. En el lenguaje técnico del laboratorio, es extremadamente frecuente porque muchas veces lo que importa es qué se hizo, no quién lo hizo: 'La muestra fue procesada', 'Los controles fueron validados', 'El procedimiento fue actualizado'. Esta objetividad impersonal es una característica del lenguaje científico y técnico.",
+      "En español existen dos formas principales de construir la voz pasiva. La primera es la pasiva con ser: sujeto + ser (conjugado) + participio. Por ejemplo: 'La muestra fue analizada por el analista del turno mañana.' El participio concuerda en género y número con el sujeto: 'El resultado fue validado' (masculino singular), 'Las muestras fueron procesadas' (femenino plural). El agente puede mencionarse o no con la preposición 'por'.",
+      "La segunda forma es la pasiva refleja con se, que es mucho más frecuente en el español hablado y escrito de uso cotidiano, especialmente cuando no se menciona al agente. Se forma con se + verbo en tercera persona. 'Se procesaron las muestras', 'Se validó el resultado', 'Se detectó una desviación'. Esta construcción es equivalente a la pasiva con ser pero más natural y fluida.",
+      "Una diferencia importante con el portugués es que en español la pasiva con ser es menos frecuente en el habla cotidiana que en el lenguaje escrito formal. En el lenguaje técnico de informes y procedimientos, la pasiva con ser es completamente apropiada. En cambio, en comunicaciones más informales como correos o conversaciones, la pasiva refleja con se es más natural.",
+      "Los errores más frecuentes de hablantes de portugués con la voz pasiva en español incluyen: no hacer concordar el participio con el sujeto ('las muestras fue analizado' en lugar de 'fueron analizadas'), confundir la pasiva con ser con la construcción estar + participio (que expresa estado resultante y no acción), y usar 'tener' como auxiliar de pasiva, que existe en portugués informal pero no en español estándar.",
+    ],
+    vocab: [
+      { es: "fue analizado / fueron analizadas", pt: "foi analisado / foram analisadas" },
+      { es: "se procesaron las muestras", pt: "as amostras foram processadas" },
+      { es: "fue detectado por el equipo", pt: "foi detectado pela equipe" },
+      { es: "está validado (estado)", pt: "está validado (estado)" },
+      { es: "fue validado (acción)", pt: "foi validado (ação)" },
+      { es: "se recomienda / se requiere", pt: "recomenda-se / requer-se" },
+    ],
+    quiz: [
+      { question: "¿Por qué la voz pasiva es frecuente en el lenguaje técnico?", options: ["Por ser más fácil de conjugar", "Porque pone el foco en qué se hizo, no en quién lo hizo, dando objetividad", "Por exigencia de la norma ISO", "Solo por convención histórica sin razón funcional"], answer: "Porque pone el foco en qué se hizo, no en quién lo hizo, dando objetividad" },
+      { question: "¿Cómo se construye la pasiva con ser?", options: ["se + verbo en tercera persona", "sujeto + ser + participio (que concuerda con el sujeto)", "sujeto + estar + participio", "solo con verbos en infinitivo"], answer: "sujeto + ser + participio (que concuerda con el sujeto)" },
+      { question: "¿Cuál es correcta para 'las muestras' en pasiva con ser?", options: ["Las muestras fue procesada", "Las muestras fueron procesadas", "Las muestras fue procesadas", "Las muestras fueron procesado"], answer: "Las muestras fueron procesadas" },
+      { question: "¿Cómo se construye la pasiva refleja?", options: ["ser + participio sin sujeto", "se + verbo en tercera persona", "estar + participio + por", "haber + participio"], answer: "se + verbo en tercera persona" },
+      { question: "¿Qué diferencia hay entre 'fue validado' y 'está validado'?", options: ["Son exactamente iguales en significado", "'Fue validado' expresa la acción; 'está validado' expresa el estado resultante", "'Está validado' es más formal", "Solo difieren en el tiempo verbal"], answer: "'Fue validado' expresa la acción; 'está validado' expresa el estado resultante" },
+      { question: "¿En qué contexto es más natural la pasiva con ser?", options: ["En conversaciones informales cotidianas", "En lenguaje escrito técnico y formal como informes y procedimientos", "En mensajes por WhatsApp", "En presentaciones orales ante clientes"], answer: "En lenguaje escrito técnico y formal como informes y procedimientos" },
+      { question: "¿Cómo se menciona al agente en la pasiva con ser?", options: ["Con la preposición 'de'", "Con la preposición 'por'", "Con la preposición 'con'", "No se puede mencionar el agente en la pasiva"], answer: "Con la preposición 'por'" },
+      { question: "¿Qué error es muy frecuente de hablantes de portugués con la voz pasiva?", options: ["Usar demasiado la pasiva refleja", "No concordar el participio en género y número con el sujeto", "Usar ser cuando corresponde estar siempre", "Omitir el agente innecesariamente"], answer: "No concordar el participio en género y número con el sujeto" },
+    ],
+    dictation: "En los informes técnicos se usa frecuentemente la voz pasiva: los resultados fueron validados, las muestras fueron procesadas y la desviación fue documentada.",
+  },
 ];
+
 
 
 const defaultStudents: Student[] = [
@@ -891,49 +1327,66 @@ export default function Home() {
   };
 
   const CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-    * { font-family: 'Sora', sans-serif; box-sizing: border-box; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    .glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); }
-    .glass-dark { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px); }
-    .accent { color: #63CAB7; }
-    .btn-accent { background: linear-gradient(135deg,#63CAB7,#4aab97); color: #0f1923; font-weight:700; border-radius:12px; transition:all 0.2s; }
-    .btn-accent:hover { opacity:0.9; transform:translateY(-1px); }
-    input,textarea { outline:none; transition:all 0.2s; }
-    input:focus,textarea:focus { border-color:#63CAB7!important; box-shadow:0 0 0 3px rgba(99,202,183,0.15); }
-    .module-card:hover { border-color:rgba(99,202,183,0.4)!important; transform:translateY(-2px); }
-    .module-card { transition:all 0.2s; }
-    .module-card.active { background:linear-gradient(135deg,rgba(99,202,183,0.15),rgba(74,171,151,0.1)); border-color:#63CAB7!important; }
-    .progress-bar { height:6px; border-radius:99px; background:rgba(255,255,255,0.1); overflow:hidden; }
-    .progress-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#63CAB7,#4aab97); transition:width 0.6s ease; }
-    .section-tab { transition:all 0.2s; cursor:pointer; border-radius:10px; padding:8px 16px; font-size:13px; font-weight:600; }
-    .section-tab.active { background:#63CAB7; color:#0f1923; }
-    .section-tab:not(.active) { color:#94a3b8; }
-    .section-tab:not(.active):hover { color:#fff; background:rgba(255,255,255,0.08); }
-    .option-btn { transition:all 0.18s; border:1.5px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px 16px; text-align:left; width:100%; background:rgba(255,255,255,0.04); color:#e2e8f0; cursor:pointer; }
-    .option-btn:hover:not(:disabled) { border-color:rgba(99,202,183,0.5); background:rgba(99,202,183,0.07); }
-    .option-btn.selected { border-color:#63CAB7; background:rgba(99,202,183,0.1); }
-    .option-btn.correct { border-color:#63CAB7; background:rgba(99,202,183,0.2); color:#63CAB7; font-weight:600; }
-    .option-btn.wrong { border-color:#f87171; background:rgba(248,113,113,0.1); color:#f87171; }
-    ::-webkit-scrollbar { width:6px; }
-    ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'DM Mono', monospace; }
+    :root {
+      --teal: #2DD4BF; --teal-dim: rgba(45,212,191,0.1); --teal-glow: 0 0 32px rgba(45,212,191,0.2);
+      --rose: #FB7185; --amber: #FBBF24; --violet: #A78BFA; --blue: #60A5FA;
+      --bg: #060A12; --surface: rgba(255,255,255,0.04); --surface-h: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.07); --border-a: rgba(45,212,191,0.3);
+      --text: #E2E8F0; --text-dim: #475569; --text-mid: #94A3B8;
+    }
+    body,html { background: var(--bg); }
+    .glass { background: rgba(12,18,32,0.65); border: 1px solid var(--border); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); }
+    .glass-dark { background: rgba(4,8,18,0.75); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); }
+    .accent { color: var(--teal); }
+    .btn-accent { background: linear-gradient(135deg,var(--teal),#0ea5a0); color: #030d10; font-weight: 700; border-radius: 14px; transition: all 0.2s cubic-bezier(.4,0,.2,1); box-shadow: 0 4px 20px rgba(45,212,191,0.18); letter-spacing: 0.01em; }
+    .btn-accent:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(45,212,191,0.32); }
+    input,textarea { outline: none; transition: all 0.2s; color: var(--text); }
+    input:focus,textarea:focus { border-color: var(--teal)!important; box-shadow: 0 0 0 3px rgba(45,212,191,0.1); }
+    .module-card { transition: all 0.22s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
+    .module-card:hover { border-color: var(--border-a)!important; transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+    .module-card.active { background: linear-gradient(135deg,rgba(45,212,191,0.12),rgba(14,165,160,0.05)); border-color: var(--teal)!important; box-shadow: 0 0 0 1px rgba(45,212,191,0.15), var(--teal-glow); }
+    .progress-bar { height: 3px; background: rgba(255,255,255,0.05); overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg,var(--teal),#67e8f9); transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+    .progress-bar-thick { height: 8px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .progress-fill-thick { height: 100%; border-radius: 99px; background: linear-gradient(90deg,var(--teal),#67e8f9); transition: width 0.7s cubic-bezier(.4,0,.2,1); box-shadow: 0 0 12px rgba(45,212,191,0.35); }
+    .section-tab { transition: all 0.18s; cursor: pointer; border-radius: 10px; padding: 7px 14px; font-size: 13px; font-weight: 600; letter-spacing: 0.01em; white-space: nowrap; }
+    .section-tab.active { background: var(--teal); color: #030d10; box-shadow: 0 4px 14px rgba(45,212,191,0.28); }
+    .section-tab:not(.active) { color: var(--text-mid); }
+    .section-tab:not(.active):hover { color: var(--text); background: var(--surface-h); }
+    .option-btn { transition: all 0.15s; border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 18px; text-align: left; width: 100%; background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; line-height: 1.55; }
+    .option-btn:hover:not(:disabled) { border-color: var(--border-a); background: var(--teal-dim); }
+    .option-btn.selected { border-color: var(--teal); background: var(--teal-dim); }
+    .option-btn.correct { border-color: var(--teal); background: rgba(45,212,191,0.14); color: var(--teal); font-weight: 600; }
+    .option-btn.wrong { border-color: var(--rose); background: rgba(251,113,133,0.1); color: var(--rose); }
+    .cat-lab { background: rgba(45,212,191,0.1); color: #2DD4BF; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
+    .cat-ges { background: rgba(251,191,36,0.1); color: #FBBF24; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
+    .cat-com { background: rgba(167,139,250,0.1); color: #A78BFA; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
+    .cat-tec { background: rgba(96,165,250,0.1); color: #60A5FA; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
+    .cat-gra { background: rgba(251,113,133,0.1); color: #FB7185; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
+    .ani { animation: fadeUp 0.28s ease both; }
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);border-radius:99px}
   `;
 
-  if (loadStatus === "loading") return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+    <div className="min-h-screen text-white flex items-center justify-center" style={{background:"#060A12"}}>
       <div className="text-center"><div className="text-2xl font-bold">Cargando Aula Controllab...</div><div className="text-slate-400 mt-2 text-sm">Sincronizando progreso en la nube ☁️</div></div>
     </div>
   );
 
   if (loadStatus === "error") return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center px-6">
+    <div className="min-h-screen text-white flex items-center justify-center px-6" style={{background:"#060A12"}}>
       <div className="max-w-xl text-center"><div className="text-2xl font-bold text-rose-400">Error al cargar los datos</div><p className="text-slate-300 mt-3">Revisá las variables de Supabase y la tabla <code>aula_controllab_state</code>.</p></div>
     </div>
   );
 
   if (!currentStudent) return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{background:"radial-gradient(ellipse 80% 60% at 50% -10%, rgba(45,212,191,0.07) 0%, transparent 60%), #060A12"}}>
       <style>{CSS + `
         .btn-primary { background:linear-gradient(135deg,#63CAB7,#4aab97); color:#0f1923; font-weight:600; }
         .btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
@@ -989,7 +1442,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className="min-h-screen text-white" style={{background:"radial-gradient(ellipse 80% 60% at 50% -10%, rgba(45,212,191,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(96,165,250,0.05) 0%, transparent 50%), #060A12"}}>
       <style>{CSS}</style>
       <header className="sticky top-0 z-50 glass-dark border-b border-white/5">
         <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
@@ -1254,9 +1707,24 @@ export default function Home() {
               <div className="mono text-xs text-slate-400 tracking-widest mb-4">CONSEJO DEL DÍA</div>
               <p className="text-sm text-slate-300 leading-6">💡 Cuando uses términos técnicos con un cliente, la <span className="accent font-semibold">claridad</span> siempre es más importante que la complejidad del vocabulario.</p>
             </div>
+            {/* ── SPOTIFY ── */}
+            <div className="rounded-3xl overflow-hidden" style={{background:"linear-gradient(135deg,rgba(30,215,96,0.07),rgba(0,0,0,0.5))",border:"1px solid rgba(30,215,96,0.18)"}}>
+              <div className="px-5 pt-4 pb-2 flex items-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                <span className="text-xs font-700 text-white tracking-wide">Escuchá mientras estudiás</span>
+              </div>
+              <iframe
+                style={{borderRadius:"0 0 24px 24px"}}
+                src="https://open.spotify.com/embed/playlist/37i9dQZF1DX3LyU02BhDVu?utm_source=generator&theme=0"
+                width="100%" height="152" frameBorder="0"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+              />
+            </div>
           </aside>
         </div>
       </div>
     </div>
   );
 }
+
