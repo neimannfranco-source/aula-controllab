@@ -1391,65 +1391,102 @@ export default function Home() {
     .ani { animation: fadeUp 0.28s ease both; }
   `;
 
+
+  // ─── STYLE TOKENS ───────────────────────────────────────────────────────────
+  const BG = "#060b14";
+  const TEAL = "#2DD4BF";
+  const TEAL_DIM = "rgba(45,212,191,0.1)";
+  const SURFACE = "rgba(14,22,40,0.75)";
+  const SURFACE_D = "rgba(5,10,20,0.85)";
+  const BORDER = "rgba(255,255,255,0.08)";
+  const BORDER_A = "rgba(45,212,191,0.35)";
+  const TEXT = "#E2E8F0";
+  const TEXT_MID = "#94A3B8";
+  const TEXT_DIM = "#475569";
+  const FONT = "'Plus Jakarta Sans',system-ui,sans-serif";
+  const MONO = "'DM Mono',monospace";
+
+  const glass = { background: SURFACE, border: `1px solid ${BORDER}`, backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" };
+  const glassDark = { background: SURFACE_D, border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)" };
+  const card = (active: boolean) => ({ ...glass, borderRadius: 16, padding: 16, textAlign: "left" as const, cursor: "pointer", transition: "all 0.2s ease", border: `1px solid ${active ? TEAL : BORDER}`, background: active ? "linear-gradient(135deg,rgba(45,212,191,0.13),rgba(14,165,160,0.04))" : SURFACE, boxShadow: active ? `0 0 0 1px rgba(45,212,191,0.15), 0 0 28px rgba(45,212,191,0.15)` : "none", width: "100%" });
+  const btnAccent = { background: `linear-gradient(135deg,${TEAL},#0ea5a0)`, color: "#021010", fontWeight: 700, borderRadius: 14, border: "none", cursor: "pointer", padding: "11px 22px", fontSize: 14, fontFamily: FONT, letterSpacing: "0.01em", boxShadow: "0 4px 20px rgba(45,212,191,0.2)", transition: "all 0.2s ease" };
+  const tab = (active: boolean) => ({ borderRadius: 10, padding: "7px 15px", fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", transition: "all 0.18s", fontFamily: FONT, background: active ? TEAL : "rgba(255,255,255,0.06)", color: active ? "#021010" : TEXT_MID, boxShadow: active ? "0 4px 14px rgba(45,212,191,0.28)" : "none", whiteSpace: "nowrap" as const });
+  const input = { background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, borderRadius: 12, color: TEXT, padding: "12px 16px", width: "100%", fontSize: 14, fontFamily: FONT, outline: "none" };
+  const levelBadge = (l: string) => ({ borderRadius: 99, padding: "3px 10px", fontSize: 11, fontWeight: 700, fontFamily: FONT, background: l==="Básico"?"rgba(52,211,153,0.12)":l==="Intermedio"?"rgba(251,191,36,0.12)":"rgba(251,113,133,0.12)", color: l==="Básico"?"#34d399":l==="Intermedio"?"#fbbf24":"#fb7185" });
+  const catColor = (c: string) => c==="Laboratorio"?TEAL:c==="Gestión"?"#fbbf24":c==="Comunicación"?"#a78bfa":c==="Tecnología"?"#60a5fa":"#fb7185";
+  const optBtn = (sel: boolean, correct: boolean, wrong: boolean) => ({ transition: "all 0.15s", border: `1.5px solid ${correct?TEAL:wrong?"#fb7185":sel?TEAL:BORDER}`, borderRadius: 14, padding: "14px 18px", textAlign: "left" as const, width: "100%", background: correct?"rgba(45,212,191,0.15)":wrong?"rgba(251,113,133,0.1)":sel?TEAL_DIM:"rgba(255,255,255,0.03)", color: correct?TEAL:wrong?"#fb7185":TEXT, cursor: "pointer", fontSize: 14, lineHeight: 1.55, fontFamily: FONT, fontWeight: correct?700:400 });
+
+  const mainBg = { background: `radial-gradient(ellipse 80% 50% at 50% -5%, rgba(45,212,191,0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 85% 85%, rgba(96,165,250,0.04) 0%, transparent 50%), ${BG}`, minHeight: "100vh", color: TEXT, fontFamily: FONT };
+
   if (loadStatus === "loading") return (
-    <div className="min-h-screen text-white flex items-center justify-center" style={{background:"#060b14"}}>
-      <div className="text-center"><div className="text-2xl font-bold">Cargando Aula Controllab...</div><div className="text-slate-400 mt-2 text-sm">Sincronizando progreso en la nube ☁️</div></div>
+    <div style={{...mainBg, display:"flex", alignItems:"center", justifyContent:"center"}}>
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:22,fontWeight:700,fontFamily:FONT}}>Cargando Aula Controllab...</div>
+        <div style={{color:TEXT_MID,marginTop:8,fontSize:14,fontFamily:FONT}}>Sincronizando progreso en la nube ☁️</div>
+      </div>
     </div>
   );
 
   if (loadStatus === "error") return (
-    <div className="min-h-screen text-white flex items-center justify-center px-6" style={{background:"#060b14"}}>
-      <div className="max-w-xl text-center"><div className="text-2xl font-bold text-rose-400">Error al cargar los datos</div><p className="text-slate-300 mt-3">Revisá las variables de Supabase y la tabla <code>aula_controllab_state</code>.</p></div>
+    <div style={{...mainBg, display:"flex", alignItems:"center", justifyContent:"center", padding:"0 24px"}}>
+      <div style={{maxWidth:480,textAlign:"center"}}>
+        <div style={{fontSize:22,fontWeight:700,color:"#fb7185",fontFamily:FONT}}>Error al cargar los datos</div>
+        <p style={{color:"#cbd5e1",marginTop:12,fontFamily:FONT}}>Revisá las variables de Supabase y la tabla <code>aula_controllab_state</code>.</p>
+      </div>
     </div>
   );
 
   if (!currentStudent) return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{background:"radial-gradient(ellipse 80% 50% at 50% -5%, rgba(45,212,191,0.08) 0%, transparent 60%), #060b14"}}>
-      <style>{CSS + `
-        .btn-primary { background:linear-gradient(135deg,#63CAB7,#4aab97); color:#0f1923; font-weight:600; }
-        .btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
-        .glow { box-shadow:0 0 40px rgba(99,202,183,0.15); }
-      `}</style>
-      <div className="w-full max-w-5xl">
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="glass rounded-3xl p-8 md:p-10 glow">
-            <div className="mono text-xs tracking-widest text-slate-400 mb-4">CONTROLLAB · ES-PT</div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">Aula<br/><span className="accent">Controllab</span></h1>
-            <p className="mt-4 text-slate-300 leading-7">Plataforma de español técnico para el equipo Controllab. El progreso queda guardado en la nube.</p>
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              {[{num:MODULES.length,label:"Módulos",sub:"Lab · Gestión · TI · Com. · Gram."},{num:appState.students.length,label:"Alumnos",sub:"Guardados en nube"},{num:"☁️",label:"Progreso",sub:"Multidispositivo"},{num:"🎧",label:"Audio TTS",sub:"Lectura y dictado"}].map(item=>(
-                <div key={item.label} className="glass rounded-2xl p-4">
-                  <div className="text-2xl font-bold text-white mono">{item.num}</div>
-                  <div className="text-sm font-semibold text-white mt-1">{item.label}</div>
-                  <div className="text-xs text-slate-400 mt-0.5">{item.sub}</div>
+    <div style={{...mainBg, display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 16px"}}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap'); input:focus{border-color:${TEAL}!important;box-shadow:0 0 0 3px rgba(45,212,191,0.12)!important;outline:none!important;}`}</style>
+      <div style={{width:"100%",maxWidth:960}}>
+        <div style={{display:"grid",gap:32,gridTemplateColumns:"repeat(auto-fit,minmax(380px,1fr))"}}>
+          {/* LEFT */}
+          <div style={{...glass,borderRadius:28,padding:"40px 40px",boxShadow:"0 0 60px rgba(45,212,191,0.08)"}}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:TEXT_DIM,marginBottom:16,fontFamily:MONO}}>CONTROLLAB · ES-PT</div>
+            <h1 style={{fontSize:48,fontWeight:800,lineHeight:1.1,fontFamily:FONT,margin:0}}>
+              Aula<br/><span style={{color:TEAL}}>Controllab</span>
+            </h1>
+            <p style={{marginTop:16,color:"#94a3b8",lineHeight:1.7,fontFamily:FONT}}>Plataforma de español técnico para el equipo Controllab. El progreso queda guardado en la nube.</p>
+            <div style={{marginTop:32,display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+              {[{n:MODULES.length,l:"Módulos",s:"Lab · Gestión · TI · Com. · Gram."},{n:appState.students.length,l:"Alumnos",s:"Guardados en nube"},{n:"☁️",l:"Progreso",s:"Multidispositivo"},{n:"🎧",l:"Audio TTS",s:"Lectura y dictado"}].map(i=>(
+                <div key={i.l} style={{...glass,borderRadius:16,padding:16}}>
+                  <div style={{fontSize:24,fontWeight:800,color:TEXT,fontFamily:MONO}}>{i.n}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:TEXT,marginTop:4,fontFamily:FONT}}>{i.l}</div>
+                  <div style={{fontSize:11,color:TEXT_DIM,marginTop:2,fontFamily:FONT}}>{i.s}</div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="glass rounded-3xl p-8 md:p-10">
-            <div className="mono text-xs tracking-widest text-slate-400 mb-4">INGRESO</div>
-            <h2 className="text-2xl font-bold text-white">Entrar como alumno</h2>
-            <p className="mt-2 text-slate-400 text-sm">El avance queda guardado aunque entres desde otro dispositivo.</p>
-            <div className="mt-8 space-y-4">
-              <div><label className="block text-sm text-slate-300 mb-2 font-medium">Usuario</label>
-                <input value={loginName} onChange={e=>setLoginName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Ej: Marília" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 transition"/></div>
-              <div><label className="block text-sm text-slate-300 mb-2 font-medium">Contraseña</label>
-                <input value={loginCode} onChange={e=>setLoginCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Tu contraseña" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 mono transition"/></div>
-              {loginError && <p className="text-rose-400 text-sm">{loginError}</p>}
-              {saveError && <p className="text-amber-400 text-sm">{saveError}</p>}
-              <button onClick={login} className="btn-primary w-full rounded-xl px-5 py-3.5 text-sm transition">Ingresar →</button>
+          {/* RIGHT */}
+          <div style={{...glass,borderRadius:28,padding:"40px 40px"}}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:TEXT_DIM,marginBottom:16,fontFamily:MONO}}>INGRESO</div>
+            <h2 style={{fontSize:26,fontWeight:800,fontFamily:FONT,margin:0}}>Entrar como alumno</h2>
+            <p style={{marginTop:8,color:TEXT_MID,fontSize:14,fontFamily:FONT}}>El avance queda guardado aunque entres desde otro dispositivo.</p>
+            <div style={{marginTop:32,display:"flex",flexDirection:"column",gap:16}}>
+              <div>
+                <label style={{display:"block",fontSize:13,color:"#cbd5e1",marginBottom:8,fontWeight:500,fontFamily:FONT}}>Usuario</label>
+                <input style={input} value={loginName} onChange={e=>setLoginName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Ej: Marília"/>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:13,color:"#cbd5e1",marginBottom:8,fontWeight:500,fontFamily:FONT}}>Contraseña</label>
+                <input style={{...input,fontFamily:MONO}} value={loginCode} onChange={e=>setLoginCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Tu contraseña"/>
+              </div>
+              {loginError&&<p style={{color:"#fb7185",fontSize:13,fontFamily:FONT}}>{loginError}</p>}
+              {saveError&&<p style={{color:"#fbbf24",fontSize:13,fontFamily:FONT}}>{saveError}</p>}
+              <button style={btnAccent} onClick={login}>Ingresar →</button>
             </div>
-            <div className="mt-6 glass rounded-2xl p-5">
-              <div className="mono text-xs text-slate-400 tracking-widest mb-3">PANEL DEL PROFE</div>
-              <button onClick={handleProfessorClick} className="w-full text-left text-sm text-slate-300 hover:text-white transition flex justify-between items-center">
-                <span>🔐 Acceso al panel de gestión</span><span className="text-slate-500">{showProfessorPanel?"▲":"▼"}</span>
+            <div style={{...glass,borderRadius:20,padding:20,marginTop:24}}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:TEXT_DIM,marginBottom:12,fontFamily:MONO}}>PANEL DEL PROFE</div>
+              <button onClick={handleProfessorClick} style={{background:"none",border:"none",color:TEXT_MID,cursor:"pointer",fontSize:14,fontFamily:FONT,width:"100%",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span>🔐 Acceso al panel de gestión</span><span style={{color:TEXT_DIM}}>{showProfessorPanel?"▲":"▼"}</span>
               </button>
-              {showProfessorPanel && professorUnlocked && (
-                <div className="mt-4 space-y-3">
-                  <input value={newStudentName} onChange={e=>setNewStudentName(e.target.value)} placeholder="Nombre del alumno" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm"/>
-                  <input value={newStudentCode} onChange={e=>setNewStudentCode(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm mono"/>
-                  <button onClick={addStudent} className="w-full rounded-xl border border-slate-600 text-slate-200 px-4 py-2.5 text-sm hover:bg-slate-700 transition">+ Agregar alumno</button>
-                  <button onClick={resetAllStudents} className="w-full rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 px-4 py-2.5 text-sm hover:bg-rose-500/20 transition">Reset total de todos los alumnos</button>
+              {showProfessorPanel&&professorUnlocked&&(
+                <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:10}}>
+                  <input style={input} value={newStudentName} onChange={e=>setNewStudentName(e.target.value)} placeholder="Nombre del alumno"/>
+                  <input style={{...input,fontFamily:MONO}} value={newStudentCode} onChange={e=>setNewStudentCode(e.target.value)} placeholder="Contraseña"/>
+                  <button onClick={addStudent} style={{...btnAccent,textAlign:"center"}}>+ Agregar alumno</button>
+                  <button onClick={resetAllStudents} style={{background:"rgba(251,113,133,0.1)",border:"1px solid rgba(251,113,133,0.3)",color:"#fb7185",borderRadius:12,padding:"10px 16px",cursor:"pointer",fontSize:13,fontFamily:FONT}}>Reset total de todos los alumnos</button>
                 </div>
               )}
             </div>
@@ -1459,112 +1496,126 @@ export default function Home() {
     </div>
   );
 
+  // ─── MAIN APP ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen text-white" style={{background:"radial-gradient(ellipse 80% 50% at 50% -5%, rgba(45,212,191,0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 85% 85%, rgba(96,165,250,0.04) 0%, transparent 50%), #060b14"}}>
-      <style>{CSS}</style>
-      <header className="sticky top-0 z-50 glass-dark border-b border-white/5">
-        <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+    <div style={mainBg}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap'); *{font-family:'Plus Jakarta Sans',system-ui,sans-serif!important;box-sizing:border-box} .mono-f{font-family:'DM Mono',monospace!important} input:focus,textarea:focus{border-color:${TEAL}!important;box-shadow:0 0 0 3px rgba(45,212,191,0.12)!important;outline:none!important} ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:99px}`}</style>
+
+      {/* HEADER */}
+      <div style={{position:"sticky",top:0,zIndex:50,...glassDark,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+        <div style={{maxWidth:1600,margin:"0 auto",padding:"14px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap" as const}}>
+          <div style={{display:"flex",alignItems:"center",gap:24}}>
             <div>
-              <div className="mono text-xs text-slate-500 tracking-widest">CONTROLLAB</div>
-              <div className="font-bold text-lg leading-tight">Hola, <span className="accent">{currentStudent.name}</span> 👋</div>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:"0.1em",color:TEXT_DIM,fontFamily:MONO}}>CONTROLLAB</div>
+              <div style={{fontWeight:700,fontSize:17,lineHeight:1.2}}>Hola, <span style={{color:TEAL}}>{currentStudent.name}</span> 👋</div>
             </div>
-            <div className="hidden md:flex items-center gap-3 ml-4">
-              <div className="glass rounded-xl px-4 py-2 text-sm"><span className="text-slate-400">Progreso </span><span className="font-bold accent">{overallPercent}%</span></div>
-              <div className="glass rounded-xl px-4 py-2 text-sm"><span className="text-slate-400">Puntaje </span><span className="font-bold">{totalBestScore}<span className="text-slate-500">/{totalQuestions}</span></span></div>
-              <div className="glass rounded-xl px-4 py-2 text-sm"><span className="text-slate-400">Módulos </span><span className="font-bold">{completedModules}<span className="text-slate-500">/{MODULES.length}</span></span></div>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap" as const}}>
+              {[{l:"Progreso",v:`${overallPercent}%`,c:TEAL},{l:"Puntaje",v:`${totalBestScore}/${totalQuestions}`,c:TEXT},{l:"Módulos",v:`${completedModules}/${MODULES.length}`,c:TEXT}].map(x=>(
+                <div key={x.l} style={{...glass,borderRadius:12,padding:"7px 14px",fontSize:13}}>
+                  <span style={{color:TEXT_MID}}>{x.l} </span><span style={{fontWeight:700,color:x.c,fontFamily:MONO}}>{x.v}</span>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap justify-end">
-            <button onClick={resetCurrentModule} className="glass rounded-xl px-4 py-2.5 text-sm text-amber-300 hover:bg-white/10 transition">🔄 Reset módulo</button>
-            <button onClick={handleProfessorClick} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition">{showProfessorPanel?"✕ Panel":"📊 Panel profe"}</button>
-            <button onClick={logout} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition">Salir →</button>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap" as const}}>
+            {[{l:"🔄 Reset módulo",fn:resetCurrentModule,c:"#fbbf24"},{l:showProfessorPanel?"✕ Panel":"📊 Panel profe",fn:handleProfessorClick,c:TEXT_MID},{l:"Salir →",fn:logout,c:TEXT_MID}].map(b=>(
+              <button key={b.l} onClick={b.fn} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:b.c,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,fontWeight:600}}>{b.l}</button>
+            ))}
           </div>
         </div>
-        <div className="progress-bar mx-6 mb-3" style={{borderRadius:0}}><div className="progress-fill" style={{width:`${overallPercent}%`}}/></div>
-      </header>
+        {/* Progress bar */}
+        <div style={{height:3,background:"rgba(255,255,255,0.05)"}}>
+          <div style={{height:"100%",width:`${overallPercent}%`,background:`linear-gradient(90deg,${TEAL},#67e8f9)`,boxShadow:"0 0 10px rgba(45,212,191,0.4)",transition:"width 0.7s ease"}}/>
+        </div>
+      </div>
 
-      <div className="max-w-screen-2xl mx-auto px-6 py-8">
-        {saveError && <div className="mb-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 px-4 py-3 text-sm">{saveError}</div>}
+      <div style={{maxWidth:1600,margin:"0 auto",padding:"32px 24px"}}>
+        {saveError&&<div style={{marginBottom:16,borderRadius:16,border:"1px solid rgba(251,191,36,0.3)",background:"rgba(251,191,36,0.08)",color:"#fbbf24",padding:"12px 16px",fontSize:13,fontFamily:FONT}}>{saveError}</div>}
 
-        {showProfessorPanel && professorUnlocked && (
-          <div className="glass rounded-3xl p-6 mb-8">
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-              <div><div className="mono text-xs text-slate-400 tracking-widest mb-1">PANEL DEL PROFESOR</div><h2 className="text-xl font-bold">Gestión y seguimiento</h2></div>
-              <div className="flex gap-2 flex-wrap">
-                {(["progress","students","dictations"] as const).map(tab=>(
-                  <button key={tab} onClick={()=>setTeacherTab(tab)} className={`section-tab ${teacherTab===tab?"active":""}`}>
-                    {tab==="progress"?"📊 Progreso":tab==="students"?"👥 Alumnos":"🎙 Dictados"}
-                  </button>
+        {/* PROFESSOR PANEL */}
+        {showProfessorPanel&&professorUnlocked&&(
+          <div style={{...glass,borderRadius:24,padding:24,marginBottom:32}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap" as const,gap:16}}>
+              <div>
+                <div style={{fontSize:10,fontWeight:700,letterSpacing:"0.1em",color:TEXT_DIM,marginBottom:4,fontFamily:MONO}}>PANEL DEL PROFESOR</div>
+                <h2 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>Gestión y seguimiento</h2>
+              </div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap" as const}}>
+                {(["progress","students","dictations"] as const).map(t=>(
+                  <button key={t} onClick={()=>setTeacherTab(t)} style={tab(teacherTab===t)}>{t==="progress"?"📊 Progreso":t==="students"?"👥 Alumnos":"🎙 Dictados"}</button>
                 ))}
-                <button onClick={resetAllStudents} className="rounded-xl px-4 py-2 text-sm font-semibold bg-rose-500/15 text-rose-300 border border-rose-400/20 hover:bg-rose-500/25 transition">Reset total</button>
+                <button onClick={resetAllStudents} style={{borderRadius:12,padding:"7px 15px",fontSize:13,fontWeight:600,background:"rgba(251,113,133,0.12)",color:"#fb7185",border:"1px solid rgba(251,113,133,0.2)",cursor:"pointer",fontFamily:FONT}}>Reset total</button>
               </div>
             </div>
 
-            {teacherTab==="progress" && (
-              <div className="overflow-x-auto rounded-2xl border border-white/10">
-                <table className="w-full text-sm">
-                  <thead><tr className="bg-white/5 text-slate-400">
-                    <th className="text-left px-4 py-3 font-semibold">Alumno</th>
-                    {MODULES.map(m=><th key={m.id} className="text-center px-1 py-3 font-semibold text-xs" title={m.title}>{m.emoji}</th>)}
-                    <th className="text-center px-4 py-3 font-semibold">Total</th>
-                    <th className="text-center px-4 py-3 font-semibold">%</th>
-                    <th className="text-center px-4 py-3 font-semibold">Reset</th>
+            {teacherTab==="progress"&&(
+              <div style={{overflowX:"auto" as const,borderRadius:16,border:`1px solid ${BORDER}`}}>
+                <table style={{width:"100%",fontSize:13,borderCollapse:"collapse" as const,fontFamily:FONT}}>
+                  <thead><tr style={{background:"rgba(255,255,255,0.04)",color:TEXT_MID}}>
+                    <th style={{textAlign:"left",padding:"12px 16px",fontWeight:600}}>Alumno</th>
+                    {MODULES.map(m=><th key={m.id} style={{textAlign:"center",padding:"12px 4px",fontSize:12,fontWeight:600}} title={m.title}>{m.emoji}</th>)}
+                    <th style={{textAlign:"center",padding:"12px 16px",fontWeight:600}}>Total</th>
+                    <th style={{textAlign:"center",padding:"12px 16px",fontWeight:600}}>%</th>
+                    <th style={{textAlign:"center",padding:"12px 16px",fontWeight:600}}>Reset</th>
                   </tr></thead>
                   <tbody>{professorRows.map((row,i)=>(
-                    <tr key={row.id} className={`border-t border-white/5 ${i%2===0?"bg-white/[0.02]":""}`}>
-                      <td className="px-4 py-3 font-medium">{row.name}</td>
+                    <tr key={row.id} style={{borderTop:`1px solid rgba(255,255,255,0.05)`,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}>
+                      <td style={{padding:"10px 16px",fontWeight:500}}>{row.name}</td>
                       {MODULES.map(m=>{const p=(appState.progress[row.id]||{})[m.id];return(
-                        <td key={m.id} className="text-center px-1 py-2">
-                          {p?<button onClick={()=>{if(window.confirm(`¿Reiniciar ${m.title} de ${row.name}?`))resetStudentModule(row.id,m.id);}} className="accent font-bold mono text-xs hover:text-rose-400 transition" title="Clic para reiniciar">{p.score}/{p.total}</button>:<span className="text-slate-600">—</span>}
+                        <td key={m.id} style={{textAlign:"center",padding:"8px 4px"}}>
+                          {p?<button onClick={()=>{if(window.confirm(`¿Reiniciar ${m.title} de ${row.name}?`))resetStudentModule(row.id,m.id);}} style={{background:"none",border:"none",color:TEAL,fontWeight:700,fontFamily:MONO,fontSize:12,cursor:"pointer"}}>{p.score}/{p.total}</button>:<span style={{color:TEXT_DIM}}>—</span>}
                         </td>);})}
-                      <td className="text-center px-4 py-3 font-bold accent mono">{row.bestScore}/{totalQuestions}</td>
-                      <td className="text-center px-4 py-3"><span className={`text-xs font-bold px-2 py-1 rounded-full ${row.completedMods===MODULES.length?"bg-emerald-900 text-emerald-300":row.completedMods>0?"bg-amber-900 text-amber-300":"bg-slate-700 text-slate-400"}`}>{Math.round((row.completedMods/MODULES.length)*100)}%</span></td>
-                      <td className="text-center px-4 py-2"><button onClick={()=>resetStudentAll(row.id,row.name)} className="text-rose-400 text-xs hover:text-rose-300 transition">🗑️ Todo</button></td>
+                      <td style={{textAlign:"center",padding:"10px 16px",fontWeight:700,color:TEAL,fontFamily:MONO}}>{row.bestScore}/{totalQuestions}</td>
+                      <td style={{textAlign:"center",padding:"10px 16px"}}>
+                        <span style={{fontSize:12,fontWeight:700,padding:"3px 8px",borderRadius:99,background:row.completedMods===MODULES.length?"rgba(52,211,153,0.12)":row.completedMods>0?"rgba(251,191,36,0.12)":"rgba(71,85,105,0.3)",color:row.completedMods===MODULES.length?"#34d399":row.completedMods>0?"#fbbf24":TEXT_MID}}>{Math.round((row.completedMods/MODULES.length)*100)}%</span>
+                      </td>
+                      <td style={{textAlign:"center",padding:"8px 16px"}}>
+                        <button onClick={()=>resetStudentAll(row.id,row.name)} style={{background:"none",border:"none",color:"#fb7185",fontSize:12,cursor:"pointer",fontFamily:FONT}}>🗑️ Todo</button>
+                      </td>
                     </tr>
                   ))}</tbody>
                 </table>
-                <div className="px-4 py-2 text-xs text-slate-500">💡 Clic en cualquier puntaje para reiniciar ese módulo específico</div>
+                <div style={{padding:"8px 16px",fontSize:12,color:TEXT_DIM,fontFamily:FONT}}>💡 Clic en cualquier puntaje para reiniciar ese módulo</div>
               </div>
             )}
 
-            {teacherTab==="dictations" && (
-              <div className="overflow-x-auto rounded-2xl border border-white/10">
-                <table className="w-full text-sm">
-                  <thead><tr className="bg-white/5 text-slate-400">
-                    <th className="text-left px-4 py-3 font-semibold">Alumno</th>
-                    {MODULES.map(m=><th key={m.id} className="text-center px-1 py-3 font-semibold text-xs" title={m.title}>{m.emoji}</th>)}
-                    <th className="text-center px-4 py-3 font-semibold">Promedio</th>
+            {teacherTab==="dictations"&&(
+              <div style={{overflowX:"auto" as const,borderRadius:16,border:`1px solid ${BORDER}`}}>
+                <table style={{width:"100%",fontSize:13,borderCollapse:"collapse" as const,fontFamily:FONT}}>
+                  <thead><tr style={{background:"rgba(255,255,255,0.04)",color:TEXT_MID}}>
+                    <th style={{textAlign:"left",padding:"12px 16px",fontWeight:600}}>Alumno</th>
+                    {MODULES.map(m=><th key={m.id} style={{textAlign:"center",padding:"12px 4px",fontSize:12}} title={m.title}>{m.emoji}</th>)}
+                    <th style={{textAlign:"center",padding:"12px 16px",fontWeight:600}}>Promedio</th>
                   </tr></thead>
                   <tbody>{professorRows.map((row,i)=>(
-                    <tr key={row.id} className={`border-t border-white/5 ${i%2===0?"bg-white/[0.02]":""}`}>
-                      <td className="px-4 py-3 font-medium">{row.name}</td>
-                      {MODULES.map(m=>{const d=(appState.dictations[row.id]||{})[m.id];return<td key={m.id} className="text-center px-1 py-2">{d!=null?<span className={`mono text-xs font-bold ${d.score>=80?"text-emerald-400":d.score>=50?"text-amber-400":"text-rose-400"}`}>{d.score}%</span>:<span className="text-slate-600">—</span>}</td>;})}
-                      <td className="text-center px-4 py-3 font-bold mono accent">{row.dictAvg!=null?`${row.dictAvg}%`:"—"}</td>
+                    <tr key={row.id} style={{borderTop:`1px solid rgba(255,255,255,0.05)`,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}>
+                      <td style={{padding:"10px 16px",fontWeight:500}}>{row.name}</td>
+                      {MODULES.map(m=>{const d=(appState.dictations[row.id]||{})[m.id];return<td key={m.id} style={{textAlign:"center",padding:"8px 4px"}}>{d!=null?<span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:d.score>=80?"#34d399":d.score>=50?"#fbbf24":"#fb7185"}}>{d.score}%</span>:<span style={{color:TEXT_DIM}}>—</span>}</td>;})}
+                      <td style={{textAlign:"center",padding:"10px 16px",fontWeight:700,color:TEAL,fontFamily:MONO}}>{row.dictAvg!=null?`${row.dictAvg}%`:"—"}</td>
                     </tr>
                   ))}</tbody>
                 </table>
               </div>
             )}
 
-            {teacherTab==="students" && (
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="glass-dark rounded-2xl p-5">
-                  <div className="mono text-xs text-slate-400 tracking-widest mb-4">AGREGAR ALUMNO</div>
-                  <div className="space-y-3">
-                    <input value={newStudentName} onChange={e=>setNewStudentName(e.target.value)} placeholder="Nombre" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm"/>
-                    <input value={newStudentCode} onChange={e=>setNewStudentCode(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm mono"/>
-                    <button onClick={addStudent} className="btn-accent w-full px-4 py-3 text-sm">+ Agregar</button>
-                    <button onClick={resetAllStudents} className="w-full rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 px-4 py-3 text-sm hover:bg-rose-500/20 transition">Resetear todos</button>
+            {teacherTab==="students"&&(
+              <div style={{display:"grid",gap:24,gridTemplateColumns:"1fr 1fr"}}>
+                <div style={{...glassDark,borderRadius:20,padding:20}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:TEXT_DIM,marginBottom:16,fontFamily:MONO}}>AGREGAR ALUMNO</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                    <input style={input} value={newStudentName} onChange={e=>setNewStudentName(e.target.value)} placeholder="Nombre"/>
+                    <input style={{...input,fontFamily:MONO}} value={newStudentCode} onChange={e=>setNewStudentCode(e.target.value)} placeholder="Contraseña"/>
+                    <button onClick={addStudent} style={{...btnAccent,textAlign:"center",padding:"11px 16px"}}>+ Agregar</button>
+                    <button onClick={resetAllStudents} style={{background:"rgba(251,113,133,0.1)",border:"1px solid rgba(251,113,133,0.3)",color:"#fb7185",borderRadius:12,padding:"10px 16px",cursor:"pointer",fontSize:13,fontFamily:FONT}}>Resetear todos</button>
                   </div>
                 </div>
-                <div className="glass-dark rounded-2xl p-5">
-                  <div className="mono text-xs text-slate-400 tracking-widest mb-4">ALUMNOS REGISTRADOS</div>
-                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                <div style={{...glassDark,borderRadius:20,padding:20}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:TEXT_DIM,marginBottom:16,fontFamily:MONO}}>ALUMNOS REGISTRADOS</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:8,maxHeight:320,overflowY:"auto" as const}}>
                     {appState.students.map(s=>(
-                      <div key={s.id} className="flex items-center justify-between glass rounded-xl px-4 py-3">
-                        <div><div className="font-medium text-sm">{s.name}</div><div className="mono text-xs text-slate-500">{s.code}</div></div>
-                        {!defaultStudents.some(d=>d.id===s.id)?<button onClick={()=>removeStudent(s.id)} className="text-rose-400 hover:text-rose-300 text-xs transition">Eliminar</button>:<span className="text-xs text-slate-500">Base</span>}
+                      <div key={s.id} style={{...glass,borderRadius:12,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                        <div><div style={{fontWeight:600,fontSize:14}}>{s.name}</div><div style={{fontSize:12,color:TEXT_DIM,fontFamily:MONO}}>{s.code}</div></div>
+                        {!defaultStudents.some(d=>d.id===s.id)?<button onClick={()=>removeStudent(s.id)} style={{background:"none",border:"none",color:"#fb7185",cursor:"pointer",fontSize:12,fontFamily:FONT}}>Eliminar</button>:<span style={{fontSize:12,color:TEXT_DIM}}>Base</span>}
                       </div>
                     ))}
                   </div>
@@ -1574,124 +1625,142 @@ export default function Home() {
           </div>
         )}
 
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
-          {CATEGORIES.map(cat=><button key={cat} onClick={()=>setActiveCategory(cat)} className={`section-tab whitespace-nowrap ${activeCategory===cat?"active":""}`}>{cat}</button>)}
+        {/* CATEGORY TABS */}
+        <div style={{display:"flex",gap:8,marginBottom:24,overflowX:"auto" as const,paddingBottom:4}}>
+          {CATEGORIES.map(cat=><button key={cat} onClick={()=>setActiveCategory(cat)} style={tab(activeCategory===cat)}>{cat}</button>)}
         </div>
 
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 mb-8">
+        {/* MODULE GRID */}
+        <div style={{display:"grid",gap:12,gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",marginBottom:32}}>
           {filteredModules.map(module=>{
             const prog=studentProgress[module.id]; const active=module.id===selectedModuleId;
-            const catClass = module.category==="Laboratorio"?"cat-lab":module.category==="Gestión"?"cat-ges":module.category==="Comunicación"?"cat-com":module.category==="Tecnología"?"cat-tec":"cat-gra";
             return(
-              <button key={module.id} onClick={()=>setSelectedModuleId(module.id)} className={`module-card glass rounded-2xl p-4 text-left border ${active?"active":"border-white/5"}`}>
-                <div className="text-xl mb-2">{module.emoji}</div>
-                <div className={`text-xs mb-1 font-bold ${catClass}`}>{module.category}</div>
-                <div className="font-bold text-sm leading-tight text-white">{module.title}</div>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className={LEVEL_COLOR[module.level]}>{module.level}</span>
-                  <span className={`mono text-xs font-bold ${prog?"accent":"text-slate-600"}`}>{prog?`${prog.score}/${prog.total}`:"—"}</span>
+              <button key={module.id} onClick={()=>setSelectedModuleId(module.id)} style={card(active)}>
+                <div style={{fontSize:22,marginBottom:8}}>{module.emoji}</div>
+                <div style={{fontSize:11,fontWeight:700,color:catColor(module.category),marginBottom:4,fontFamily:MONO,letterSpacing:"0.05em",textTransform:"uppercase" as const}}>{module.category}</div>
+                <div style={{fontWeight:700,fontSize:13,lineHeight:1.3,color:TEXT}}>{module.title}</div>
+                <div style={{marginTop:12,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <span style={levelBadge(module.level)}>{module.level}</span>
+                  <span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:prog?TEAL:TEXT_DIM}}>{prog?`${prog.score}/${prog.total}`:"—"}</span>
                 </div>
-                {prog&&<div className="progress-bar-card"><div className="progress-fill-card" style={{width:`${Math.round((prog.score/prog.total)*100)}%`}}/></div>}
+                {prog&&(
+                  <div style={{marginTop:10,height:4,borderRadius:99,background:"rgba(255,255,255,0.07)",overflow:"hidden"}}>
+                    <div style={{height:"100%",borderRadius:99,background:`linear-gradient(90deg,${TEAL},#67e8f9)`,width:`${Math.round((prog.score/prog.total)*100)}%`,transition:"width 0.7s ease"}}/>
+                  </div>
+                )}
               </button>
             );
           })}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-          <div className="space-y-6">
-            <div className="glass rounded-3xl p-6">
-              <div className="flex items-start justify-between gap-4 flex-wrap">
+        {/* MAIN CONTENT */}
+        <div style={{display:"grid",gap:24,gridTemplateColumns:"1fr 360px",alignItems:"start"}}>
+          <div style={{display:"flex",flexDirection:"column",gap:20}}>
+
+            {/* MODULE HEADER */}
+            <div style={{...glass,borderRadius:24,padding:24}}>
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,flexWrap:"wrap" as const}}>
                 <div>
-                  <div className="mono text-xs text-slate-400 tracking-widest mb-1">{selectedModule.category.toUpperCase()}</div>
-                  <h2 className="text-3xl font-bold">{selectedModule.emoji} {selectedModule.title}</h2>
-                  <p className="mt-2 text-slate-400 text-sm">{selectedModule.description}</p>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",color:catColor(selectedModule.category),marginBottom:6,fontFamily:MONO,textTransform:"uppercase" as const}}>{selectedModule.category}</div>
+                  <h2 style={{fontSize:28,fontWeight:800,margin:0,fontFamily:FONT}}>{selectedModule.emoji} {selectedModule.title}</h2>
+                  <p style={{marginTop:8,color:TEXT_MID,fontSize:14,fontFamily:FONT}}>{selectedModule.description}</p>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${LEVEL_COLOR[selectedModule.level]}`}>{selectedModule.level}</span>
-                  <div className="glass rounded-xl px-4 py-2 text-sm"><span className="text-slate-400">Mejor: </span><span className="font-bold accent mono">{moduleProgress.score}/{moduleProgress.total}</span></div>
-                  {moduleProgress.attempts>0&&<div className="glass rounded-xl px-4 py-2 text-sm"><span className="text-slate-400">Intentos: </span><span className="font-bold mono">{moduleProgress.attempts}</span></div>}
+                <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" as const}}>
+                  <span style={levelBadge(selectedModule.level)}>{selectedModule.level}</span>
+                  <div style={{...glass,borderRadius:12,padding:"8px 14px",fontSize:13}}>
+                    <span style={{color:TEXT_MID}}>Mejor: </span><span style={{fontWeight:700,color:TEAL,fontFamily:MONO}}>{moduleProgress.score}/{moduleProgress.total}</span>
+                  </div>
+                  {moduleProgress.attempts>0&&<div style={{...glass,borderRadius:12,padding:"8px 14px",fontSize:13}}>
+                    <span style={{color:TEXT_MID}}>Intentos: </span><span style={{fontWeight:700,fontFamily:MONO}}>{moduleProgress.attempts}</span>
+                  </div>}
                   {!!studentProgress[selectedModuleId]&&(
-                    <button onClick={resetCurrentModule} className="rounded-xl px-4 py-2 text-sm font-semibold bg-rose-500/15 text-rose-300 border border-rose-400/20 hover:bg-rose-500/25 transition">🔄 Reiniciar</button>
+                    <button onClick={resetCurrentModule} style={{borderRadius:12,padding:"8px 14px",fontSize:13,fontWeight:600,background:"rgba(251,113,133,0.1)",color:"#fb7185",border:"1px solid rgba(251,113,133,0.2)",cursor:"pointer",fontFamily:FONT}}>🔄 Reiniciar</button>
                   )}
                 </div>
               </div>
-              <div className="flex gap-2 mt-6 flex-wrap">
+              <div style={{display:"flex",gap:8,marginTop:24,flexWrap:"wrap" as const}}>
                 {(["reading","quiz","dictation","vocab"] as const).map(sec=>(
-                  <button key={sec} onClick={()=>setActiveSection(sec)} className={`section-tab ${activeSection===sec?"active":""}`}>
+                  <button key={sec} onClick={()=>setActiveSection(sec)} style={tab(activeSection===sec)}>
                     {sec==="reading"?"📖 Lectura":sec==="quiz"?"✏️ Quiz":sec==="dictation"?"🎙 Dictado":"📝 Vocabulario"}
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* READING */}
             {activeSection==="reading"&&(
-              <div className="glass rounded-3xl p-6 md:p-8">
-                <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                  <h3 className="text-xl font-bold">{selectedModule.readingTitle}</h3>
-                  <button onClick={()=>speak(selectedModule.reading.join(" "),0.9)} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-2">🔊 <span>Escuchar</span></button>
+              <div style={{...glass,borderRadius:24,padding:32}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:28,flexWrap:"wrap" as const,gap:12}}>
+                  <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>{selectedModule.readingTitle}</h3>
+                  <button onClick={()=>speak(selectedModule.reading.join(" "),0.9)} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:TEXT_MID,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,display:"flex",alignItems:"center",gap:8}}>🔊 Escuchar</button>
                 </div>
-                <div className="space-y-5">
-                  {selectedModule.reading.map((para,i)=><p key={i} className="reading-p">{para}</p>)}
+                <div style={{display:"flex",flexDirection:"column",gap:20}}>
+                  {selectedModule.reading.map((para,i)=><p key={i} style={{lineHeight:1.9,color:"#cbd5e1",fontSize:15,margin:0,fontFamily:FONT}}>{para}</p>)}
                 </div>
-                <button onClick={()=>setActiveSection("quiz")} className="btn-accent mt-8 px-6 py-3 text-sm">Ir al quiz →</button>
+                <button onClick={()=>setActiveSection("quiz")} style={{...btnAccent,marginTop:32,display:"inline-block"}}>Ir al quiz →</button>
               </div>
             )}
 
+            {/* QUIZ */}
             {activeSection==="quiz"&&(
-              <div className="glass rounded-3xl p-6 md:p-8">
-                <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                  <h3 className="text-xl font-bold">Comprensión</h3>
-                  <div className="glass rounded-xl px-4 py-2 mono text-sm font-bold accent">{currentQuestionIndex+1}/{selectedModule.quiz.length}</div>
+              <div style={{...glass,borderRadius:24,padding:32}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap" as const,gap:12}}>
+                  <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>Comprensión</h3>
+                  <div style={{...glass,borderRadius:12,padding:"8px 16px",fontFamily:MONO,fontSize:14,fontWeight:700,color:TEAL}}>{currentQuestionIndex+1}/{selectedModule.quiz.length}</div>
                 </div>
-                <div className="progress-bar mb-6"><div className="progress-fill" style={{width:`${((currentQuestionIndex+(submitted?1:0))/selectedModule.quiz.length)*100}%`}}/></div>
-                <div className="glass-dark rounded-2xl p-6">
-                  <p className="text-lg font-semibold mb-5 leading-7">{currentQuestion.question}</p>
-                  <div className="space-y-3">
+                <div style={{height:3,background:"rgba(255,255,255,0.06)",borderRadius:99,marginBottom:28,overflow:"hidden"}}>
+                  <div style={{height:"100%",width:`${((currentQuestionIndex+(submitted?1:0))/selectedModule.quiz.length)*100}%`,background:`linear-gradient(90deg,${TEAL},#67e8f9)`,transition:"width 0.4s ease",borderRadius:99}}/>
+                </div>
+                <div style={{...glassDark,borderRadius:20,padding:24}}>
+                  <p style={{fontSize:16,fontWeight:600,marginBottom:20,lineHeight:1.6,fontFamily:FONT}}>{currentQuestion.question}</p>
+                  <div style={{display:"flex",flexDirection:"column",gap:10}}>
                     {shuffledOpts.map(option=>{
                       const sel=selectedOption===option; const correct=submitted&&option===currentQuestion.answer; const wrong=submitted&&sel&&option!==currentQuestion.answer;
-                      return <button key={option} onClick={()=>!submitted&&setAnswerMemory(option)} disabled={submitted} className={`option-btn ${correct?"correct":wrong?"wrong":sel?"selected":""}`}>{option}</button>;
+                      return <button key={option} onClick={()=>!submitted&&setAnswerMemory(option)} disabled={submitted} style={optBtn(sel,correct,wrong)}>{option}</button>;
                     })}
                   </div>
                 </div>
-                <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
-                  <div className="text-sm">
-                    {submitted?(isCorrect?<span className="text-emerald-400 font-semibold">✓ ¡Correcto!</span>:<span className="text-rose-400">✗ Respuesta correcta: <strong className="text-white">{currentQuestion.answer}</strong></span>):<span className="text-slate-400">Elegí una opción.</span>}
+                <div style={{marginTop:24,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap" as const,gap:16}}>
+                  <div style={{fontSize:14,fontFamily:FONT}}>
+                    {submitted?(isCorrect?<span style={{color:"#34d399",fontWeight:600}}>✓ ¡Correcto!</span>:<span style={{color:"#fb7185"}}>✗ Respuesta: <strong style={{color:TEXT}}>{currentQuestion.answer}</strong></span>):<span style={{color:TEXT_MID}}>Elegí una opción.</span>}
                   </div>
-                  {!submitted?<button onClick={handleSubmit} disabled={!selectedOption} className="btn-accent px-6 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed">Comprobar</button>
-                  :<button onClick={handleNext} className="btn-accent px-6 py-3 text-sm">{currentQuestionIndex<selectedModule.quiz.length-1?"Siguiente →":"Finalizar ✓"}</button>}
+                  {!submitted?<button onClick={handleSubmit} disabled={!selectedOption} style={{...btnAccent,opacity:selectedOption?1:0.4}}>Comprobar</button>
+                  :<button onClick={handleNext} style={btnAccent}>{currentQuestionIndex<selectedModule.quiz.length-1?"Siguiente →":"Finalizar ✓"}</button>}
                 </div>
               </div>
             )}
 
+            {/* DICTATION */}
             {activeSection==="dictation"&&(
-              <div className="glass rounded-3xl p-6 md:p-8">
-                <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                  <h3 className="text-xl font-bold">🎙 Dictado</h3>
-                  <button onClick={()=>speak(selectedModule.dictation,0.75)} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-2">🔊 Reproducir</button>
+              <div style={{...glass,borderRadius:24,padding:32}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap" as const,gap:12}}>
+                  <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>🎙 Dictado</h3>
+                  <button onClick={()=>speak(selectedModule.dictation,0.75)} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:TEXT_MID,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,display:"flex",alignItems:"center",gap:8}}>🔊 Reproducir</button>
                 </div>
-                <p className="text-slate-400 text-sm mb-5 leading-6">Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.</p>
-                <textarea value={dictationText} onChange={e=>setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." className="w-full rounded-2xl bg-slate-800 border border-slate-700 text-white px-5 py-4 text-sm leading-7 resize-none"/>
-                <button onClick={checkDictation} className="btn-accent mt-4 px-6 py-3 text-sm">Corregir dictado</button>
+                <p style={{color:TEXT_MID,fontSize:14,marginBottom:20,lineHeight:1.6,fontFamily:FONT}}>Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.</p>
+                <textarea value={dictationText} onChange={e=>setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." style={{...input,resize:"none" as const,lineHeight:1.7,borderRadius:16,padding:"16px 20px"}}/>
+                <button onClick={checkDictation} style={{...btnAccent,marginTop:16,display:"inline-block"}}>Corregir dictado</button>
                 {(dictationResult||currentDictation)&&(()=>{const r=dictationResult||currentDictation!;return(
-                  <div className="mt-6 glass-dark rounded-2xl p-5 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`text-3xl font-black mono ${r.score>=80?"text-emerald-400":r.score>=50?"text-amber-400":"text-rose-400"}`}>{r.score}%</div>
-                      <div className="text-sm text-slate-400">{r.score===100?"¡Perfecto! 🎉":r.score>=80?"¡Muy bien!":r.score>=50?"Buen intento":"Seguí practicando"}</div>
+                  <div style={{...glassDark,borderRadius:20,padding:20,marginTop:20,display:"flex",flexDirection:"column",gap:12}}>
+                    <div style={{display:"flex",alignItems:"center",gap:12}}>
+                      <div style={{fontSize:32,fontWeight:800,fontFamily:MONO,color:r.score>=80?"#34d399":r.score>=50?"#fbbf24":"#fb7185"}}>{r.score}%</div>
+                      <div style={{fontSize:14,color:TEXT_MID,fontFamily:FONT}}>{r.score===100?"¡Perfecto! 🎉":r.score>=80?"¡Muy bien!":r.score>=50?"Buen intento":"Seguí practicando"}</div>
                     </div>
-                    <div className="text-sm"><span className="text-slate-400">Frase modelo: </span><span className="text-slate-200 italic">{r.expected}</span></div>
+                    <div style={{fontSize:14,fontFamily:FONT}}><span style={{color:TEXT_MID}}>Frase modelo: </span><span style={{color:"#cbd5e1",fontStyle:"italic"}}>{r.expected}</span></div>
                   </div>
                 );})()}
               </div>
             )}
 
+            {/* VOCAB */}
             {activeSection==="vocab"&&(
-              <div className="glass rounded-3xl p-6 md:p-8">
-                <h3 className="text-xl font-bold mb-6">📝 Vocabulario clave</h3>
-                <div className="grid gap-3 md:grid-cols-2">
+              <div style={{...glass,borderRadius:24,padding:32}}>
+                <h3 style={{fontSize:20,fontWeight:700,marginBottom:24,fontFamily:FONT}}>📝 Vocabulario clave</h3>
+                <div style={{display:"grid",gap:12,gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))"}}>
                   {selectedModule.vocab.map(item=>(
-                    <div key={item.es} className="glass-dark rounded-2xl px-5 py-4 flex justify-between items-center gap-4">
-                      <div><div className="font-semibold">{item.es}</div><div className="text-xs text-slate-500 mt-0.5">Español</div></div>
-                      <div className="text-right"><div className="font-semibold accent">{item.pt}</div><div className="text-xs text-slate-500 mt-0.5">Portugués</div></div>
+                    <div key={item.es} style={{...glassDark,borderRadius:16,padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",gap:16}}>
+                      <div><div style={{fontWeight:600,fontSize:14,fontFamily:FONT}}>{item.es}</div><div style={{fontSize:11,color:TEXT_DIM,marginTop:2,fontFamily:FONT}}>Español</div></div>
+                      <div style={{textAlign:"right" as const}}><div style={{fontWeight:600,fontSize:14,color:TEAL,fontFamily:FONT}}>{item.pt}</div><div style={{fontSize:11,color:TEXT_DIM,marginTop:2,fontFamily:FONT}}>Portugués</div></div>
                     </div>
                   ))}
                 </div>
@@ -1699,50 +1768,60 @@ export default function Home() {
             )}
           </div>
 
-          <aside className="space-y-5">
-            <div className="glass rounded-3xl p-6">
-              <div className="mono text-xs text-slate-400 tracking-widest mb-4">MI PROGRESO</div>
-              <div className="text-5xl font-black accent mono">{overallPercent}%</div>
-              <div className="text-slate-400 text-sm mt-1">completado</div>
-              <div className="mt-5 progress-bar"><div className="progress-fill" style={{width:`${overallPercent}%`}}/></div>
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="glass-dark rounded-2xl p-3"><div className="mono text-lg font-black">{completedModules}</div><div className="text-xs text-slate-400 mt-0.5">Módulos</div></div>
-                <div className="glass-dark rounded-2xl p-3"><div className="mono text-lg font-black accent">{totalBestScore}</div><div className="text-xs text-slate-400 mt-0.5">Puntos</div></div>
+          {/* SIDEBAR */}
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            {/* Progress card */}
+            <div style={{...glass,borderRadius:24,padding:24}}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",color:TEXT_DIM,marginBottom:16,fontFamily:MONO}}>MI PROGRESO</div>
+              <div style={{fontSize:52,fontWeight:800,color:TEAL,fontFamily:MONO,lineHeight:1}}>{overallPercent}%</div>
+              <div style={{color:TEXT_MID,fontSize:13,marginTop:4,fontFamily:FONT}}>completado</div>
+              <div style={{marginTop:16,height:6,borderRadius:99,background:"rgba(255,255,255,0.07)",overflow:"hidden"}}>
+                <div style={{height:"100%",borderRadius:99,width:`${overallPercent}%`,background:`linear-gradient(90deg,${TEAL},#67e8f9)`,boxShadow:"0 0 12px rgba(45,212,191,0.35)",transition:"width 0.7s ease"}}/>
+              </div>
+              <div style={{marginTop:16,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                {[{n:completedModules,l:"Módulos"},{n:totalBestScore,l:"Puntos",c:TEAL}].map(x=>(
+                  <div key={x.l} style={{...glassDark,borderRadius:14,padding:14}}>
+                    <div style={{fontSize:20,fontWeight:800,fontFamily:MONO,color:x.c||TEXT}}>{x.n}</div>
+                    <div style={{fontSize:12,color:TEXT_DIM,marginTop:2,fontFamily:FONT}}>{x.l}</div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="glass rounded-3xl p-6">
-              <div className="mono text-xs text-slate-400 tracking-widest mb-4">MÓDULOS</div>
-              <div className="space-y-1 max-h-[500px] overflow-y-auto pr-1">
+
+            {/* Module list */}
+            <div style={{...glass,borderRadius:24,padding:24}}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",color:TEXT_DIM,marginBottom:16,fontFamily:MONO}}>MÓDULOS</div>
+              <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:480,overflowY:"auto" as const,paddingRight:4}}>
                 {MODULES.map(m=>{const p=studentProgress[m.id]; const isA=m.id===selectedModuleId; return(
-                  <button key={m.id} onClick={()=>setSelectedModuleId(m.id)} className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${isA?"bg-white/10":"hover:bg-white/5"}`}>
-                    <span className="text-lg">{m.emoji}</span>
-                    <div className="flex-1 min-w-0"><div className={`text-sm font-medium truncate ${isA?"text-white":"text-slate-300"}`}>{m.title}</div><div className="text-xs text-slate-500">{m.category}</div></div>
-                    {p?<span className="mono text-xs font-bold accent whitespace-nowrap">{p.score}/{p.total}</span>:<span className="text-slate-600 text-xs">—</span>}
+                  <button key={m.id} onClick={()=>setSelectedModuleId(m.id)} style={{display:"flex",alignItems:"center",gap:12,borderRadius:12,padding:"10px 12px",background:isA?"rgba(45,212,191,0.08)":"transparent",border:`1px solid ${isA?BORDER_A:"transparent"}`,cursor:"pointer",textAlign:"left" as const,transition:"all 0.15s",width:"100%"}}>
+                    <span style={{fontSize:16}}>{m.emoji}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:13,fontWeight:isA?700:500,color:isA?TEXT:"#94a3b8",fontFamily:FONT,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" as const}}>{m.title}</div>
+                      <div style={{fontSize:11,color:catColor(m.category),marginTop:1,fontFamily:MONO}}>{m.category}</div>
+                    </div>
+                    {p?<span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:TEAL,whiteSpace:"nowrap" as const}}>{p.score}/{p.total}</span>:<span style={{color:TEXT_DIM,fontSize:12}}>—</span>}
                   </button>
                 );})}
               </div>
             </div>
-            <div className="glass rounded-3xl p-6">
-              <div className="mono text-xs text-slate-400 tracking-widest mb-3">CONSEJO DEL DÍA</div>
-              <p className="text-sm text-slate-300 leading-6">💡 Cuando uses términos técnicos con un cliente, la <span className="accent font-semibold">claridad</span> siempre es más importante que la complejidad del vocabulario.</p>
+
+            {/* Tip */}
+            <div style={{...glass,borderRadius:24,padding:24}}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",color:TEXT_DIM,marginBottom:12,fontFamily:MONO}}>CONSEJO DEL DÍA</div>
+              <p style={{fontSize:14,color:"#cbd5e1",lineHeight:1.7,margin:0,fontFamily:FONT}}>💡 Cuando uses términos técnicos con un cliente, la <span style={{color:TEAL,fontWeight:600}}>claridad</span> siempre es más importante que la complejidad del vocabulario.</p>
             </div>
-            <div className="rounded-3xl overflow-hidden" style={{border:"1px solid rgba(30,215,96,0.2)", background:"linear-gradient(135deg,rgba(30,215,96,0.07),rgba(6,11,20,0.9))"}}>
-              <div className="px-5 pt-4 pb-2 flex items-center gap-2">
+
+            {/* Spotify */}
+            <div style={{borderRadius:24,overflow:"hidden",border:"1px solid rgba(30,215,96,0.2)",background:"linear-gradient(135deg,rgba(30,215,96,0.07),rgba(6,11,20,0.95))"}}>
+              <div style={{padding:"16px 20px 8px",display:"flex",alignItems:"center",gap:8}}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-                <span className="text-xs font-semibold text-white">Escuchá mientras estudiás</span>
+                <span style={{fontSize:13,fontWeight:600,color:TEXT,fontFamily:FONT}}>Escuchá mientras estudiás</span>
               </div>
-              <iframe
-                style={{borderRadius:"0 0 24px 24px", display:"block"}}
-                src="https://open.spotify.com/embed/playlist/37i9dQZF1DX3LyU02BhDVu?utm_source=generator&theme=0"
-                width="100%" height="152" frameBorder="0"
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"
-              />
+              <iframe style={{borderRadius:"0 0 24px 24px",display:"block"}} src="https://open.spotify.com/embed/playlist/37i9dQZF1DX3LyU02BhDVu?utm_source=generator&theme=0" width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"/>
             </div>
-          </aside>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
