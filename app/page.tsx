@@ -427,6 +427,7 @@ export default function Home() {
   const [selectedOption, setSelectedOption] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [showProfessorPanel, setShowProfessorPanel] = useState(false);
+  const PROFESSOR_PASSWORD = "controllab2025";
   const [newStudentName, setNewStudentName] = useState("");
   const [newStudentCode, setNewStudentCode] = useState("");
   const [dictationText, setDictationText] = useState("");
@@ -645,7 +646,18 @@ export default function Home() {
               </div>
               <div className="mt-8 glass rounded-2xl p-5">
                 <div className="mono text-xs text-slate-400 tracking-widest mb-3">PANEL DEL PROFE</div>
-                <button onClick={() => setShowProfessorPanel(v => !v)} className="w-full text-left text-sm text-slate-300 hover:text-white transition flex justify-between items-center">
+                <button onClick={() => {
+                  if (showProfessorPanel) {
+                    setShowProfessorPanel(false);
+                  } else {
+                    const pwd = prompt("Contraseña del profesor:");
+                    if (pwd === PROFESSOR_PASSWORD) {
+                      setShowProfessorPanel(true);
+                    } else if (pwd !== null) {
+                      alert("Contraseña incorrecta.");
+                    }
+                  }
+                }} className="w-full text-left text-sm text-slate-300 hover:text-white transition flex justify-between items-center">
                   <span>Agregar / gestionar alumnos</span>
                   <span className="text-slate-500">{showProfessorPanel ? "▲" : "▼"}</span>
                 </button>
@@ -726,7 +738,18 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowProfessorPanel(v => !v)} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition">
+            <button onClick={() => {
+              if (showProfessorPanel) {
+                setShowProfessorPanel(false);
+              } else {
+                const pwd = prompt("Contraseña del profesor:");
+                if (pwd === PROFESSOR_PASSWORD) {
+                  setShowProfessorPanel(true);
+                } else if (pwd !== null) {
+                  alert("Contraseña incorrecta.");
+                }
+              }
+            }} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition">
               {showProfessorPanel ? "✕ Panel" : "📊 Panel profe"}
             </button>
             <button onClick={logout} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition">
