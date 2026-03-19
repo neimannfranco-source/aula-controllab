@@ -1759,7 +1759,7 @@ export default function Home() {
             </div>
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap" as const}}>
-            {[{l:"🔄 Reset módulo",fn:resetCurrentModule,c:"#fbbf24"},{l:showProfessorPanel?"✕ Panel":"📊 Panel profe",fn:handleProfessorClick,c:TEXT_MID},{l:"Salir →",fn:logout,c:TEXT_MID}].map(b=>(
+            {[{l:showProfessorPanel?"✕ Panel":"📊 Panel profe",fn:handleProfessorClick,c:TEXT_MID},{l:"Salir →",fn:logout,c:TEXT_MID}].map(b=>(
               <button key={b.l} onClick={b.fn} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:b.c,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,fontWeight:600}}>{b.l}</button>
             ))}
           </div>
