@@ -1727,7 +1727,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="glass rounded-xl px-3 py-1.5 text-xs"><span className="text-slate-400">Mejor: </span><span className="font-bold accent mono">{mp.score}/{mp.total}</span></div>
-                  {(mp.score > 0 || mp.completed || mp.attempts > 0) && (
+                  {!!sp[selectedModuleId] && (
                     <button onClick={() => {
                       if (window.confirm(`¿Reiniciar "${mod.title}"?\nPuntaje actual: ${mp.score}/${mp.total}\nEsto no se puede deshacer.`)) {
                         resetModuleProgress(student!.id, selectedModuleId);
