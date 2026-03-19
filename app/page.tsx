@@ -1061,7 +1061,6 @@ const MODULES: ModuleType[] = [
 ];
 
 
-
 const defaultStudents: Student[] = [
   { id: "marilia", name: "Marília", code: "MARILIA" },
   { id: "claudio", name: "Claudio", code: "CLAUDIO" },
@@ -1101,9 +1100,9 @@ function shuffleOpts(opts: string[], seed: number): string[] {
 
 
 const LEVEL_COLOR: Record<string, string> = {
-  Básico: "bg-emerald-100 text-emerald-800",
-  Intermedio: "bg-amber-100 text-amber-800",
-  Avanzado: "bg-rose-100 text-rose-800",
+  Básico: "lvl-basico",
+  Intermedio: "lvl-intermedio",
+  Avanzado: "lvl-avanzado",
 };
 
 function createInitialState(): AppState {
@@ -1327,67 +1326,85 @@ export default function Home() {
   };
 
   const CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap');
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    * { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .mono { font-family: 'DM Mono', monospace; }
-    :root {
-      --teal: #2DD4BF; --teal-dim: rgba(45,212,191,0.1); --teal-glow: 0 0 32px rgba(45,212,191,0.2);
-      --rose: #FB7185; --amber: #FBBF24; --violet: #A78BFA; --blue: #60A5FA;
-      --bg: #060A12; --surface: rgba(255,255,255,0.04); --surface-h: rgba(255,255,255,0.07);
-      --border: rgba(255,255,255,0.07); --border-a: rgba(45,212,191,0.3);
-      --text: #E2E8F0; --text-dim: #475569; --text-mid: #94A3B8;
-    }
-    body,html { background: var(--bg); }
-    .glass { background: rgba(12,18,32,0.65); border: 1px solid var(--border); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); }
-    .glass-dark { background: rgba(4,8,18,0.75); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); }
-    .accent { color: var(--teal); }
-    .btn-accent { background: linear-gradient(135deg,var(--teal),#0ea5a0); color: #030d10; font-weight: 700; border-radius: 14px; transition: all 0.2s cubic-bezier(.4,0,.2,1); box-shadow: 0 4px 20px rgba(45,212,191,0.18); letter-spacing: 0.01em; }
-    .btn-accent:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(45,212,191,0.32); }
-    input,textarea { outline: none; transition: all 0.2s; color: var(--text); }
-    input:focus,textarea:focus { border-color: var(--teal)!important; box-shadow: 0 0 0 3px rgba(45,212,191,0.1); }
-    .module-card { transition: all 0.22s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
-    .module-card:hover { border-color: var(--border-a)!important; transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
-    .module-card.active { background: linear-gradient(135deg,rgba(45,212,191,0.12),rgba(14,165,160,0.05)); border-color: var(--teal)!important; box-shadow: 0 0 0 1px rgba(45,212,191,0.15), var(--teal-glow); }
-    .progress-bar { height: 3px; background: rgba(255,255,255,0.05); overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg,var(--teal),#67e8f9); transition: width 0.7s cubic-bezier(.4,0,.2,1); }
-    .progress-bar-thick { height: 8px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; }
-    .progress-fill-thick { height: 100%; border-radius: 99px; background: linear-gradient(90deg,var(--teal),#67e8f9); transition: width 0.7s cubic-bezier(.4,0,.2,1); box-shadow: 0 0 12px rgba(45,212,191,0.35); }
-    .section-tab { transition: all 0.18s; cursor: pointer; border-radius: 10px; padding: 7px 14px; font-size: 13px; font-weight: 600; letter-spacing: 0.01em; white-space: nowrap; }
-    .section-tab.active { background: var(--teal); color: #030d10; box-shadow: 0 4px 14px rgba(45,212,191,0.28); }
-    .section-tab:not(.active) { color: var(--text-mid); }
-    .section-tab:not(.active):hover { color: var(--text); background: var(--surface-h); }
-    .option-btn { transition: all 0.15s; border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 18px; text-align: left; width: 100%; background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; line-height: 1.55; }
-    .option-btn:hover:not(:disabled) { border-color: var(--border-a); background: var(--teal-dim); }
-    .option-btn.selected { border-color: var(--teal); background: var(--teal-dim); }
-    .option-btn.correct { border-color: var(--teal); background: rgba(45,212,191,0.14); color: var(--teal); font-weight: 600; }
-    .option-btn.wrong { border-color: var(--rose); background: rgba(251,113,133,0.1); color: var(--rose); }
-    .cat-lab { background: rgba(45,212,191,0.1); color: #2DD4BF; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
-    .cat-ges { background: rgba(251,191,36,0.1); color: #FBBF24; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
-    .cat-com { background: rgba(167,139,250,0.1); color: #A78BFA; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
-    .cat-tec { background: rgba(96,165,250,0.1); color: #60A5FA; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
-    .cat-gra { background: rgba(251,113,133,0.1); color: #FB7185; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+    html, body { background: #060b14 !important; }
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    .mono { font-family: 'DM Mono', monospace !important; }
+
+    /* GLASS */
+    .glass { background: rgba(14,22,40,0.7) !important; border: 1px solid rgba(255,255,255,0.08) !important; backdrop-filter: blur(24px) !important; -webkit-backdrop-filter: blur(24px) !important; }
+    .glass-dark { background: rgba(5,10,20,0.8) !important; border: 1px solid rgba(255,255,255,0.05) !important; backdrop-filter: blur(20px) !important; }
+
+    /* ACCENT */
+    .accent { color: #2DD4BF !important; }
+
+    /* BUTTON */
+    .btn-accent { background: linear-gradient(135deg, #2DD4BF, #0ea5a0) !important; color: #021010 !important; font-weight: 700 !important; border-radius: 14px !important; transition: all 0.2s cubic-bezier(.4,0,.2,1) !important; box-shadow: 0 4px 20px rgba(45,212,191,0.2) !important; letter-spacing: 0.01em !important; border: none !important; }
+    .btn-accent:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 30px rgba(45,212,191,0.35) !important; opacity: 1 !important; }
+
+    /* INPUTS */
+    input, textarea { outline: none !important; transition: all 0.2s !important; }
+    input:focus, textarea:focus { border-color: #2DD4BF !important; box-shadow: 0 0 0 3px rgba(45,212,191,0.12) !important; }
+
+    /* MODULE CARDS */
+    .module-card { transition: all 0.22s cubic-bezier(.4,0,.2,1) !important; }
+    .module-card:hover { border-color: rgba(45,212,191,0.45) !important; transform: translateY(-3px) !important; box-shadow: 0 16px 40px rgba(0,0,0,0.5) !important; }
+    .module-card.active { background: linear-gradient(135deg, rgba(45,212,191,0.13), rgba(14,165,160,0.05)) !important; border-color: #2DD4BF !important; box-shadow: 0 0 0 1px rgba(45,212,191,0.15), 0 0 32px rgba(45,212,191,0.18) !important; }
+
+    /* PROGRESS */
+    .progress-bar { height: 3px !important; border-radius: 0 !important; background: rgba(255,255,255,0.06) !important; overflow: hidden !important; }
+    .progress-fill { height: 100% !important; border-radius: 99px !important; background: linear-gradient(90deg, #2DD4BF, #67e8f9) !important; transition: width 0.7s cubic-bezier(.4,0,.2,1) !important; box-shadow: 0 0 10px rgba(45,212,191,0.4) !important; }
+    .progress-bar-card { height: 4px !important; border-radius: 99px !important; background: rgba(255,255,255,0.07) !important; overflow: hidden !important; margin-top: 10px !important; }
+    .progress-fill-card { height: 100% !important; border-radius: 99px !important; background: linear-gradient(90deg, #2DD4BF, #67e8f9) !important; transition: width 0.7s ease !important; }
+
+    /* TABS */
+    .section-tab { transition: all 0.18s !important; cursor: pointer !important; border-radius: 10px !important; padding: 7px 15px !important; font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0.01em !important; white-space: nowrap !important; }
+    .section-tab.active { background: #2DD4BF !important; color: #021010 !important; box-shadow: 0 4px 14px rgba(45,212,191,0.3) !important; }
+    .section-tab:not(.active) { color: #94a3b8 !important; }
+    .section-tab:not(.active):hover { color: #fff !important; background: rgba(255,255,255,0.08) !important; }
+
+    /* QUIZ OPTIONS */
+    .option-btn { transition: all 0.15s !important; border: 1.5px solid rgba(255,255,255,0.09) !important; border-radius: 14px !important; padding: 14px 18px !important; text-align: left !important; width: 100% !important; background: rgba(255,255,255,0.03) !important; color: #e2e8f0 !important; cursor: pointer !important; font-size: 14px !important; line-height: 1.55 !important; }
+    .option-btn:hover:not(:disabled) { border-color: rgba(45,212,191,0.45) !important; background: rgba(45,212,191,0.08) !important; }
+    .option-btn.selected { border-color: #2DD4BF !important; background: rgba(45,212,191,0.1) !important; }
+    .option-btn.correct { border-color: #2DD4BF !important; background: rgba(45,212,191,0.15) !important; color: #2DD4BF !important; font-weight: 600 !important; }
+    .option-btn.wrong { border-color: #fb7185 !important; background: rgba(251,113,133,0.1) !important; color: #fb7185 !important; }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px !important; }
+    ::-webkit-scrollbar-track { background: transparent !important; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08) !important; border-radius: 99px !important; }
+
+    /* READING */
+    .reading-p { line-height: 1.9 !important; color: #cbd5e1 !important; font-size: 15px !important; }
+
+    /* LEVEL BADGES */
+    .lvl-basico { background: rgba(52,211,153,0.12) !important; color: #34d399 !important; border-radius: 99px !important; padding: 3px 10px !important; font-size: 11px !important; font-weight: 700 !important; }
+    .lvl-intermedio { background: rgba(251,191,36,0.12) !important; color: #fbbf24 !important; border-radius: 99px !important; padding: 3px 10px !important; font-size: 11px !important; font-weight: 700 !important; }
+    .lvl-avanzado { background: rgba(251,113,133,0.12) !important; color: #fb7185 !important; border-radius: 99px !important; padding: 3px 10px !important; font-size: 11px !important; font-weight: 700 !important; }
+
+    /* CATEGORY COLORS */
+    .cat-lab { color: #2DD4BF !important; } .cat-ges { color: #fbbf24 !important; } .cat-com { color: #a78bfa !important; } .cat-tec { color: #60a5fa !important; } .cat-gra { color: #fb7185 !important; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .ani { animation: fadeUp 0.28s ease both; }
-    ::-webkit-scrollbar{width:4px;height:4px}
-    ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);border-radius:99px}
   `;
 
   if (loadStatus === "loading") return (
-    <div className="min-h-screen text-white flex items-center justify-center" style={{background:"#060A12"}}>
+    <div className="min-h-screen text-white flex items-center justify-center" style={{background:"#060b14"}}>
       <div className="text-center"><div className="text-2xl font-bold">Cargando Aula Controllab...</div><div className="text-slate-400 mt-2 text-sm">Sincronizando progreso en la nube ☁️</div></div>
     </div>
   );
 
   if (loadStatus === "error") return (
-    <div className="min-h-screen text-white flex items-center justify-center px-6" style={{background:"#060A12"}}>
+    <div className="min-h-screen text-white flex items-center justify-center px-6" style={{background:"#060b14"}}>
       <div className="max-w-xl text-center"><div className="text-2xl font-bold text-rose-400">Error al cargar los datos</div><p className="text-slate-300 mt-3">Revisá las variables de Supabase y la tabla <code>aula_controllab_state</code>.</p></div>
     </div>
   );
 
   if (!currentStudent) return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{background:"radial-gradient(ellipse 80% 60% at 50% -10%, rgba(45,212,191,0.07) 0%, transparent 60%), #060A12"}}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{background:"radial-gradient(ellipse 80% 50% at 50% -5%, rgba(45,212,191,0.08) 0%, transparent 60%), #060b14"}}>
       <style>{CSS + `
         .btn-primary { background:linear-gradient(135deg,#63CAB7,#4aab97); color:#0f1923; font-weight:600; }
         .btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
@@ -1443,7 +1460,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen text-white" style={{background:"radial-gradient(ellipse 80% 60% at 50% -10%, rgba(45,212,191,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(96,165,250,0.05) 0%, transparent 50%), #060A12"}}>
+    <div className="min-h-screen text-white" style={{background:"radial-gradient(ellipse 80% 50% at 50% -5%, rgba(45,212,191,0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 85% 85%, rgba(96,165,250,0.04) 0%, transparent 50%), #060b14"}}>
       <style>{CSS}</style>
       <header className="sticky top-0 z-50 glass-dark border-b border-white/5">
         <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
@@ -1564,16 +1581,17 @@ export default function Home() {
         <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 mb-8">
           {filteredModules.map(module=>{
             const prog=studentProgress[module.id]; const active=module.id===selectedModuleId;
+            const catClass = module.category==="Laboratorio"?"cat-lab":module.category==="Gestión"?"cat-ges":module.category==="Comunicación"?"cat-com":module.category==="Tecnología"?"cat-tec":"cat-gra";
             return(
               <button key={module.id} onClick={()=>setSelectedModuleId(module.id)} className={`module-card glass rounded-2xl p-4 text-left border ${active?"active":"border-white/5"}`}>
-                <div className="text-2xl mb-2">{module.emoji}</div>
-                <div className="text-xs text-slate-400 mb-1 font-medium">{module.category}</div>
-                <div className="font-bold text-sm leading-tight">{module.title}</div>
+                <div className="text-xl mb-2">{module.emoji}</div>
+                <div className={`text-xs mb-1 font-bold ${catClass}`}>{module.category}</div>
+                <div className="font-bold text-sm leading-tight text-white">{module.title}</div>
                 <div className="mt-3 flex items-center justify-between">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${active?"bg-white/20 text-white":"bg-white/5 text-slate-400"}`}>{module.level}</span>
+                  <span className={LEVEL_COLOR[module.level]}>{module.level}</span>
                   <span className={`mono text-xs font-bold ${prog?"accent":"text-slate-600"}`}>{prog?`${prog.score}/${prog.total}`:"—"}</span>
                 </div>
-                {prog&&<div className="mt-2 progress-bar"><div className="progress-fill" style={{width:`${Math.round((prog.score/prog.total)*100)}%`}}/></div>}
+                {prog&&<div className="progress-bar-card"><div className="progress-fill-card" style={{width:`${Math.round((prog.score/prog.total)*100)}%`}}/></div>}
               </button>
             );
           })}
@@ -1613,7 +1631,7 @@ export default function Home() {
                   <button onClick={()=>speak(selectedModule.reading.join(" "),0.9)} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-2">🔊 <span>Escuchar</span></button>
                 </div>
                 <div className="space-y-5">
-                  {selectedModule.reading.map((para,i)=><p key={i} className="text-slate-200 leading-8 text-[15px]">{para}</p>)}
+                  {selectedModule.reading.map((para,i)=><p key={i} className="reading-p">{para}</p>)}
                 </div>
                 <button onClick={()=>setActiveSection("quiz")} className="btn-accent mt-8 px-6 py-3 text-sm">Ir al quiz →</button>
               </div>
@@ -1705,17 +1723,16 @@ export default function Home() {
               </div>
             </div>
             <div className="glass rounded-3xl p-6">
-              <div className="mono text-xs text-slate-400 tracking-widest mb-4">CONSEJO DEL DÍA</div>
+              <div className="mono text-xs text-slate-400 tracking-widest mb-3">CONSEJO DEL DÍA</div>
               <p className="text-sm text-slate-300 leading-6">💡 Cuando uses términos técnicos con un cliente, la <span className="accent font-semibold">claridad</span> siempre es más importante que la complejidad del vocabulario.</p>
             </div>
-            {/* ── SPOTIFY ── */}
-            <div className="rounded-3xl overflow-hidden" style={{background:"linear-gradient(135deg,rgba(30,215,96,0.07),rgba(0,0,0,0.5))",border:"1px solid rgba(30,215,96,0.18)"}}>
+            <div className="rounded-3xl overflow-hidden" style={{border:"1px solid rgba(30,215,96,0.2)", background:"linear-gradient(135deg,rgba(30,215,96,0.07),rgba(6,11,20,0.9))"}}>
               <div className="px-5 pt-4 pb-2 flex items-center gap-2">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-                <span className="text-xs font-700 text-white tracking-wide">Escuchá mientras estudiás</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                <span className="text-xs font-semibold text-white">Escuchá mientras estudiás</span>
               </div>
               <iframe
-                style={{borderRadius:"0 0 24px 24px"}}
+                style={{borderRadius:"0 0 24px 24px", display:"block"}}
                 src="https://open.spotify.com/embed/playlist/37i9dQZF1DX3LyU02BhDVu?utm_source=generator&theme=0"
                 width="100%" height="152" frameBorder="0"
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
