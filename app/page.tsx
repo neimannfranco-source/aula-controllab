@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 type VocabItem = { es: string; pt: string };
-type QuizQuestion = { question: string; options: string[]; answer: string };
+type QuizQuestion = { question: string; options: string[]; answer: string; explanation?: string; };
 type ModuleType = {
   id: string; title: string; level: string; category: string; emoji: string;
   description: string; readingTitle: string; reading: string[];
@@ -11,10 +11,14 @@ type ModuleType = {
 type Student = { id: string; name: string; code: string; password?: string; passwordChanged?: boolean };
 type ModuleProgress = { completed: boolean; score: number; total: number; attempts: number };
 type DictationResult = { exact: boolean; score: number; written: string; expected: string; updatedAt: string };
+type Achievement = { id: string; title: string; emoji: string; unlockedAt: string };
 type AppState = {
   students: Student[]; currentStudentId: string | null;
   progress: Record<string, Record<string, ModuleProgress>>;
   dictations: Record<string, Record<string, DictationResult>>;
+  achievements: Record<string, Achievement[]>;
+  streaks: Record<string, { count: number; lastDate: string }>;
+  weeklyActivity: Record<string, Record<string, number>>;
 };
 
 const MODULES: ModuleType[] = [
@@ -1061,7 +1065,170 @@ const MODULES: ModuleType[] = [
     dictation: "Buenos días, habla el analista del laboratorio. Le llamo para comunicar un resultado crítico del potasio del paciente García, número de solicitud cinco cuatro tres dos.",
   },
 ];
+  // ══ LABORATORIO EXTRA ══
+  {
+    id: "uremia-electrolitos", title: "Electrolitos y función renal", level: "Intermedio", category: "Laboratorio", emoji: "💧",
+    description: "Sodio, potasio, cloro y su interpretación clínica en laboratorio.",
+    readingTitle: "El equilibrio que el riñón mantiene",
+    reading: [
+      "Los electrolitos son iones cargados eléctricamente que cumplen funciones vitales en el organismo: regulan el equilibrio hídrico, participan en la conducción nerviosa y muscular, y mantienen el equilibrio ácido-base. Los principales electrolitos medidos en el laboratorio clínico son el sodio (Na+), el potasio (K+), el cloro (Cl-) y el bicarbonato (HCO3-).",
+      "El sodio es el electrolito más abundante en el líquido extracelular y es el principal regulador de la osmolaridad plasmática. Una hiponatremia (sodio bajo) puede causar síntomas neurológicos graves como convulsiones. Una hipernatremia (sodio elevado) indica deshidratación o pérdida de agua libre. El potasio, en cambio, es el principal catión intracelular y su concentración en plasma es muy pequeña pero clínicamente crítica: variaciones mínimas pueden causar arritmias cardíacas potencialmente fatales.",
+      "Los valores de pánico para electrolitos son especialmente importantes en la práctica de laboratorio. Un potasio mayor de 6.5 mEq/L o menor de 2.5 mEq/L, o un sodio mayor de 160 mEq/L o menor de 120 mEq/L, son situaciones que requieren comunicación inmediata al médico. Estos valores pueden reflejar emergencias médicas reales que requieren intervención urgente.",
+      "Una fuente frecuente de error en la determinación de potasio es la hemólisis de la muestra. Los glóbulos rojos contienen una concentración de potasio intracelular muy superior a la del plasma. Si la muestra se hemoliza durante la extracción o el transporte, el potasio intracelular se libera al plasma, generando una hiperpotasemia artificiosa que puede llevar a decisiones clínicas incorrectas. El analista debe siempre verificar el índice de hemólisis antes de liberar un resultado de potasio elevado.",
+      "El anión gap es un cálculo derivado de los electrolitos que el laboratorio puede reportar junto con los resultados de ionograma. Se calcula como sodio menos la suma de cloro y bicarbonato, y su valor normal es de 8 a 12 mEq/L. Un anión gap elevado indica la presencia de ácidos no medidos en el plasma y es útil en el diagnóstico diferencial de la acidosis metabólica. Saber explicar este cálculo al médico solicitante es un ejemplo de cómo el laboratorio puede agregar valor interpretativo a los resultados.",
+    ],
+    vocab: [
+      { es: "electrolito", pt: "eletrólito" }, { es: "sodio / potasio", pt: "sódio / potássio" },
+      { es: "hiponatremia", pt: "hiponatremia" }, { es: "hiperpotasemia", pt: "hiperpotassemia" },
+      { es: "anión gap", pt: "ânion gap" }, { es: "osmolaridad", pt: "osmolaridade" },
+    ],
+    quiz: [
+      { question: "¿Cuál es el principal electrolito del líquido extracelular?", options: ["Potasio", "Sodio", "Cloro", "Bicarbonato"], answer: "Sodio", explanation: "El sodio es el catión más abundante en el espacio extracelular y regula la osmolaridad plasmática." },
+      { question: "¿Por qué es clínicamente crítico el potasio?", options: ["Porque regula la sed", "Porque variaciones mínimas pueden causar arritmias cardíacas fatales", "Porque determina el color de la orina", "Porque regula la temperatura"], answer: "Porque variaciones mínimas pueden causar arritmias cardíacas fatales", explanation: "El potasio tiene un rango normal muy estrecho (3.5-5.0 mEq/L) y pequeñas desviaciones afectan directamente la conducción cardíaca." },
+      { question: "¿Qué causa un potasio falsamente elevado en la muestra?", options: ["Alta temperatura ambiente", "Hemólisis: el potasio intracelular se libera al plasma", "Muestra muy fresca", "Anticoagulante incorrecto"], answer: "Hemólisis: el potasio intracelular se libera al plasma", explanation: "Los eritrocitos contienen concentraciones de potasio muy superiores al plasma. La hemólisis contamina el plasma con ese potasio intracelular." },
+      { question: "¿Qué indica un anión gap elevado?", options: ["Exceso de bicarbonato", "Presencia de ácidos no medidos en el plasma", "Deshidratación severa", "Función renal normal"], answer: "Presencia de ácidos no medidos en el plasma", explanation: "El anión gap aumentado sugiere acidosis metabólica por acumulación de ácidos como lactato, cetoácidos o tóxicos." },
+      { question: "¿Cómo se calcula el anión gap?", options: ["Na + K - Cl", "Na - (Cl + HCO3)", "Cl + HCO3 - Na", "Na + Cl - HCO3"], answer: "Na - (Cl + HCO3)", explanation: "El anión gap = Sodio - (Cloro + Bicarbonato). El rango normal es 8-12 mEq/L." },
+      { question: "¿Cuál es el valor de pánico para el potasio?", options: ["Mayor de 5.5 mEq/L", "Mayor de 6.5 o menor de 2.5 mEq/L", "Mayor de 4.0 mEq/L", "Cualquier valor fuera de rango"], answer: "Mayor de 6.5 o menor de 2.5 mEq/L", explanation: "Estos valores extremos representan riesgo vital inminente y requieren comunicación inmediata al médico." },
+      { question: "¿Qué indica una hiponatremia severa?", options: ["Deshidratación leve", "Puede causar síntomas neurológicos graves como convulsiones", "Solo deshidratación", "Es siempre un error analítico"], answer: "Puede causar síntomas neurológicos graves como convulsiones", explanation: "Un sodio menor de 120 mEq/L puede causar edema cerebral, convulsiones y coma." },
+      { question: "¿Qué debe verificar el analista antes de liberar un potasio elevado?", options: ["Solo el nombre del paciente", "El índice de hemólisis de la muestra", "El color del tubo", "La temperatura de almacenamiento"], answer: "El índice de hemólisis de la muestra", explanation: "La hemólisis es la causa más frecuente de hiperpotasemia artefactual. Verificarla evita alarmar innecesariamente al médico." },
+    ],
+    dictation: "Un potasio mayor de seis punto cinco o menor de dos punto cinco mEq por litro es un valor de pánico que requiere comunicación inmediata al médico.",
+  },
+  {
+    id: "marcadores-cardiacos", title: "Marcadores cardíacos", level: "Avanzado", category: "Laboratorio", emoji: "❤️",
+    description: "Troponina, CK-MB y BNP en el diagnóstico de eventos cardiovasculares.",
+    readingTitle: "Cuando el corazón habla a través de la sangre",
+    reading: [
+      "Los marcadores cardíacos son proteínas o enzimas que se liberan al torrente sanguíneo cuando las células del músculo cardíaco sufren daño. Su determinación en el laboratorio es fundamental en el diagnóstico del infarto agudo de miocardio y otras condiciones cardíacas. El tiempo es crítico en estos casos: un resultado rápido y confiable puede ser determinante para que el médico tome la decisión de activar el protocolo de revascularización urgente.",
+      "La troponina cardíaca (troponina I o troponina T de alta sensibilidad) es actualmente el marcador de elección para el diagnóstico de infarto de miocardio. Se eleva en las primeras horas después del daño miocárdico, alcanza su pico entre 12 y 24 horas y puede permanecer elevada durante varios días. Los ensayos de alta sensibilidad permiten detectar elevaciones muy pequeñas, lo que mejora el diagnóstico temprano pero también requiere interpretación cuidadosa para distinguir entre daño miocárdico de origen isquémico y otras causas de elevación como miocarditis, insuficiencia renal o sepsis.",
+      "La CK-MB (creatinquinasa fracción MB) fue durante muchos años el marcador de referencia para el infarto. Aunque ha sido desplazada por la troponina en muchos protocolos, sigue siendo útil para detectar reinfartos y para el monitoreo postoperatorio cardíaco, porque su elevación y normalización son más rápidas que las de la troponina.",
+      "El péptido natriurético cerebral (BNP) y su precursor NT-proBNP son marcadores del estrés de la pared ventricular. Se elevan en la insuficiencia cardíaca y son útiles tanto para el diagnóstico como para el seguimiento y la evaluación de la respuesta al tratamiento. Su interpretación debe considerar factores como la edad, el sexo y la función renal del paciente, que afectan los valores de referencia.",
+      "La comunicación de resultados críticos de marcadores cardíacos es una responsabilidad especialmente importante. Una troponina significativamente elevada en un paciente con dolor torácico puede implicar la activación inmediata del equipo de hemodinamia. El laboratorio debe tener establecido un tiempo de respuesta máximo para estos marcadores, generalmente de sesenta minutos desde la recepción de la muestra, y comunicar el resultado de forma verbal además del informe digital.",
+    ],
+    vocab: [
+      { es: "troponina", pt: "troponina" }, { es: "infarto de miocardio", pt: "infarto do miocárdio" },
+      { es: "CK-MB", pt: "CK-MB" }, { es: "BNP / NT-proBNP", pt: "BNP / NT-proBNP" },
+      { es: "insuficiencia cardíaca", pt: "insuficiência cardíaca" }, { es: "revascularización", pt: "revascularização" },
+    ],
+    quiz: [
+      { question: "¿Qué marcador es actualmente de elección para el diagnóstico de infarto?", options: ["CK-MB", "Troponina cardíaca de alta sensibilidad", "BNP", "LDH"], answer: "Troponina cardíaca de alta sensibilidad", explanation: "La troponina de alta sensibilidad permite detectar daño miocárdico muy temprano, incluso antes de las 3 horas del inicio del dolor." },
+      { question: "¿Cuándo alcanza su pico la troponina después del infarto?", options: ["A los 30 minutos", "Entre 12 y 24 horas", "A los 5 días", "Inmediatamente al inicio del dolor"], answer: "Entre 12 y 24 horas", explanation: "La troponina comienza a elevarse en las primeras 2-4 horas, alcanza su pico a las 12-24 horas y puede permanecer elevada 7-14 días." },
+      { question: "¿Para qué sigue siendo útil la CK-MB?", options: ["Es el marcador principal actualmente", "Para detectar reinfartos y monitoreo postoperatorio por su cinética más rápida", "Solo para diagnóstico de insuficiencia cardíaca", "No tiene utilidad actual"], answer: "Para detectar reinfartos y monitoreo postoperatorio por su cinética más rápida", explanation: "La CK-MB se normaliza más rápido que la troponina, lo que permite detectar una nueva elevación indicativa de reinfarto." },
+      { question: "¿Qué indica un BNP elevado?", options: ["Infarto agudo de miocardio", "Estrés de la pared ventricular e insuficiencia cardíaca", "Infección viral cardíaca", "Arritmia"], answer: "Estrés de la pared ventricular e insuficiencia cardíaca", explanation: "El BNP se libera cuando el ventrículo está sometido a mayor presión o volumen, como en la insuficiencia cardíaca." },
+      { question: "¿Qué tiempo máximo de respuesta suele establecerse para marcadores cardíacos urgentes?", options: ["24 horas", "6 horas", "60 minutos desde la recepción de la muestra", "Solo durante el día"], answer: "60 minutos desde la recepción de la muestra", explanation: "En síndromes coronarios agudos, cada minuto de demora en el diagnóstico puede significar mayor daño miocárdico irreversible." },
+      { question: "¿Puede elevarse la troponina sin infarto de miocardio?", options: ["No, es exclusiva del infarto", "Sí, también en miocarditis, insuficiencia renal o sepsis", "Solo en personas mayores", "Solo con CK-MB también elevada"], answer: "Sí, también en miocarditis, insuficiencia renal o sepsis", explanation: "La troponina de alta sensibilidad es muy sensible pero no específica: cualquier daño miocárdico o reducción de su excreción puede elevarla." },
+      { question: "¿Cómo afecta la función renal al BNP?", options: ["No tiene ningún efecto", "La insuficiencia renal puede elevar los niveles de NT-proBNP independientemente de la función cardíaca", "La mejora renal elimina el BNP", "Solo afecta a la CK-MB"], answer: "La insuficiencia renal puede elevar los niveles de NT-proBNP independientemente de la función cardíaca", explanation: "El NT-proBNP se excreta por el riñón, por lo que su reducción causa acumulación plasmática incluso sin insuficiencia cardíaca." },
+      { question: "¿Por qué es especialmente importante comunicar una troponina elevada?", options: ["Solo por protocolo", "Porque puede implicar activación inmediata del equipo de hemodinamia para salvar al paciente", "Para registrar en el sistema", "Solo si el médico lo solicita"], answer: "Porque puede implicar activación inmediata del equipo de hemodinamia para salvar al paciente", explanation: "En infarto con elevación del ST, la revascularización percutánea en menos de 90 minutos mejora dramáticamente el pronóstico." },
+    ],
+    dictation: "La troponina cardíaca de alta sensibilidad es el marcador de elección para el infarto de miocardio y debe reportarse dentro de los sesenta minutos de recibida la muestra.",
+  },
+
+  // ══ GESTIÓN EXTRA ══
+  {
+    id: "iso-15189", title: "Norma ISO 15189", level: "Avanzado", category: "Gestión", emoji: "📜",
+    description: "Requisitos de la norma ISO 15189 para laboratorios clínicos.",
+    readingTitle: "La norma que define la excelencia",
+    reading: [
+      "La ISO 15189 es la norma internacional específica para laboratorios de análisis clínicos. Establece los requisitos de competencia técnica y de gestión que un laboratorio debe cumplir para garantizar la calidad y confiabilidad de sus resultados. A diferencia de otras normas ISO, la 15189 fue diseñada específicamente para el entorno clínico, considerando el impacto directo que los resultados del laboratorio tienen sobre la salud de los pacientes.",
+      "La norma organiza sus requisitos en dos grandes bloques: los requisitos de gestión, que abordan aspectos como la organización, la gestión de documentos, la gestión de no conformidades, las auditorías internas y la revisión por la dirección; y los requisitos técnicos, que cubren la competencia del personal, las instalaciones y condiciones ambientales, el equipamiento, los procedimientos pre y postanalíticos, el aseguramiento de la calidad de los resultados y los informes.",
+      "Uno de los conceptos clave de la ISO 15189 es la trazabilidad metrológica: los valores de los resultados deben poder vincularse a referencias nacionales o internacionales reconocidas mediante una cadena ininterrumpida de calibraciones. Esto garantiza que un resultado de creatinina de 1.0 mg/dL en un laboratorio de Buenos Aires sea comparable con el mismo resultado en un laboratorio de Río de Janeiro o Madrid.",
+      "La norma también pone énfasis en la comunicación con los usuarios del laboratorio: los médicos y los pacientes. Requiere que el laboratorio tenga mecanismos para recibir y responder consultas técnicas, para comunicar resultados críticos, para gestionar las quejas de los usuarios y para evaluar periódicamente la satisfacción de sus clientes. Esta dimensión comunicativa reconoce que el laboratorio no termina su trabajo cuando libera el resultado: también es responsable de que ese resultado sea comprendido y utilizado correctamente.",
+      "La acreditación bajo ISO 15189 es el reconocimiento formal por parte de un organismo acreditador de que el laboratorio cumple con los requisitos de la norma. En la práctica, implica superar una auditoría inicial y auditorías de seguimiento periódicas. Para muchos laboratorios, el proceso de preparación para la acreditación es tan valioso como la acreditación en sí misma: obliga a revisar, documentar y mejorar todos los procesos, generando una cultura de calidad que beneficia a los pacientes.",
+    ],
+    vocab: [
+      { es: "acreditación", pt: "acreditação" }, { es: "trazabilidad metrológica", pt: "rastreabilidade metrológica" },
+      { es: "requisito técnico", pt: "requisito técnico" }, { es: "revisión por la dirección", pt: "revisão pela direção" },
+      { es: "competencia del personal", pt: "competência do pessoal" }, { es: "organismo acreditador", pt: "organismo acreditador" },
+    ],
+    quiz: [
+      { question: "¿Para qué tipo de laboratorios es específica la ISO 15189?", options: ["Laboratorios industriales", "Laboratorios de análisis clínicos", "Solo laboratorios hospitalarios", "Laboratorios ambientales"], answer: "Laboratorios de análisis clínicos", explanation: "La ISO 15189 fue diseñada específicamente para el laboratorio clínico, considerando su impacto directo en la salud de los pacientes." },
+      { question: "¿Cuáles son los dos grandes bloques de requisitos de la ISO 15189?", options: ["Técnicos y financieros", "Requisitos de gestión y requisitos técnicos", "Administrativos y científicos", "Nacionales e internacionales"], answer: "Requisitos de gestión y requisitos técnicos", explanation: "La norma separa los requisitos organizacionales y de gestión de calidad de los requisitos específicamente técnicos del proceso analítico." },
+      { question: "¿Qué garantiza la trazabilidad metrológica?", options: ["Que los resultados sean siempre normales", "Que los resultados sean comparables entre laboratorios de diferentes países", "Que el equipo no falle nunca", "Que los reactivos sean siempre del mismo lote"], answer: "Que los resultados sean comparables entre laboratorios de diferentes países", explanation: "La trazabilidad metrológica permite que un mismo resultado tenga el mismo significado clínico en cualquier laboratorio acreditado del mundo." },
+      { question: "¿Qué reconoce la acreditación ISO 15189?", options: ["Que el laboratorio tiene los equipos más modernos", "Que el laboratorio cumple formalmente los requisitos de competencia y calidad de la norma", "Que el laboratorio es el más grande del país", "Que el laboratorio no ha tenido errores en el último año"], answer: "Que el laboratorio cumple formalmente los requisitos de competencia y calidad de la norma", explanation: "La acreditación es una evaluación independiente y periódica realizada por un organismo externo reconocido." },
+      { question: "¿Qué aspecto comunicativo enfatiza la ISO 15189?", options: ["Solo la comunicación interna entre analistas", "Comunicación con médicos y pacientes: consultas, resultados críticos y gestión de quejas", "Solo la comunicación con proveedores", "Solo los informes escritos"], answer: "Comunicación con médicos y pacientes: consultas, resultados críticos y gestión de quejas", explanation: "La norma reconoce que el ciclo del laboratorio incluye la comunicación efectiva del resultado y su comprensión por parte del usuario." },
+      { question: "¿Cuándo termina el trabajo del laboratorio según la ISO 15189?", options: ["Cuando libera el resultado digital", "No termina al liberar el resultado: también es responsable de que sea comprendido y utilizado", "Cuando el médico firma el informe", "Cuando el paciente retira su resultado"], answer: "No termina al liberar el resultado: también es responsable de que sea comprendido y utilizado", explanation: "La norma incluye requisitos de comunicación post-analítica y gestión de consultas que extienden la responsabilidad del laboratorio más allá del informe." },
+      { question: "¿Cuál es el valor del proceso de preparación para la acreditación?", options: ["Solo obtener el certificado", "Obliga a revisar y mejorar todos los procesos generando una cultura de calidad", "Solo es burocrático sin beneficio real", "Solo beneficia al área de calidad"], answer: "Obliga a revisar y mejorar todos los procesos generando una cultura de calidad", explanation: "Muchos laboratorios reportan que la mayor transformación ocurre durante el proceso de preparación, antes de la auditoría de acreditación." },
+      { question: "¿Qué implica la acreditación una vez obtenida?", options: ["Es permanente para siempre", "Requiere auditorías de seguimiento periódicas para mantener la acreditación", "Solo se renueva cada 10 años", "Solo aplica al director técnico"], answer: "Requiere auditorías de seguimiento periódicas para mantener la acreditación", explanation: "La acreditación no es un logro estático: requiere demostrar continuamente el mantenimiento y mejora del sistema de gestión de calidad." },
+    ],
+    dictation: "La ISO quince mil ciento ochenta y nueve establece los requisitos técnicos y de gestión que un laboratorio clínico debe cumplir para garantizar la calidad de sus resultados.",
+  },
+
+  // ══ COMUNICACIÓN EXTRA ══
+  {
+    id: "informe-escrito", title: "Redacción de informes técnicos", level: "Intermedio", category: "Comunicación", emoji: "📄",
+    description: "Cómo estructurar y redactar informes técnicos claros en español.",
+    readingTitle: "El informe que se entiende solo",
+    reading: [
+      "Un informe técnico bien redactado es uno de los documentos más valiosos que puede producir un profesional del laboratorio. Es la evidencia escrita de un proceso, una decisión o un hallazgo, y puede ser consultado semanas, meses o años después de haber sido elaborado. Por eso, debe ser claro, preciso, completo y comprensible para cualquier persona calificada que lo lea, no solo para quien lo escribió.",
+      "La estructura básica de un informe técnico incluye: un encabezado con la identificación del laboratorio, la fecha y el autor; un resumen ejecutivo o conclusión principal al inicio; el desarrollo con los datos, el análisis y la evidencia que sostiene las conclusiones; y un cierre con las recomendaciones o acciones propuestas. Esta estructura responde a la lógica de la pirámide invertida: lo más importante primero, los detalles después.",
+      "El lenguaje del informe técnico en español tiene características específicas. Predomina la voz pasiva o el se impersonal para dar objetividad: 'se detectó una desviación', 'fue comunicado al médico', 'se implementaron las acciones correctivas'. Los tiempos verbales más frecuentes son el pretérito indefinido para hechos pasados y el condicional o el subjuntivo para recomendaciones. Las oraciones deben ser cortas y directas, evitando la ambigüedad.",
+      "Los errores más frecuentes en la redacción de informes técnicos son: usar lenguaje excesivamente técnico sin definir los términos para el lector previsto, mezclar hechos con opiniones sin distinguirlos claramente, omitir información relevante asumiendo que el lector ya la conoce, y escribir conclusiones que no se sostienen con los datos presentados. Un buen informe es aquel en el que cada afirmación puede rastrearse hasta la evidencia concreta que la fundamenta.",
+      "En el contexto bilingüe español-portugués del equipo Controllab, la redacción de informes en español requiere prestar atención especial a las diferencias de registro y formalidad entre ambos idiomas. Algunas estructuras que suenan naturales en portugués resultan demasiado coloquiales en español formal, y viceversa. La práctica constante de leer informes en español, recibir retroalimentación sobre la propia escritura y revisar modelos de referencia es la mejor estrategia para desarrollar esta competencia.",
+    ],
+    vocab: [
+      { es: "informe técnico", pt: "relatório técnico" }, { es: "resumen ejecutivo", pt: "resumo executivo" },
+      { es: "evidencia", pt: "evidência" }, { es: "recomendación", pt: "recomendação" },
+      { es: "conclusión", pt: "conclusão" }, { es: "retroalimentación", pt: "feedback / retorno" },
+    ],
+    quiz: [
+      { question: "¿Qué estructura responde al principio de pirámide invertida en un informe?", options: ["Detalles primero, conclusión al final", "Conclusión principal al inicio, detalles después", "Solo datos sin conclusión", "Solo recomendaciones sin datos"], answer: "Conclusión principal al inicio, detalles después", explanation: "La pirámide invertida pone la información más importante al principio para que el lector comprenda el mensaje principal desde el inicio." },
+      { question: "¿Qué voz predomina en el lenguaje de informes técnicos en español?", options: ["Primera persona singular activa", "Voz pasiva o se impersonal para dar objetividad", "Segunda persona informal", "Solo el imperativo"], answer: "Voz pasiva o se impersonal para dar objetividad", explanation: "La voz pasiva permite enfocarse en el proceso y los hechos sin personalizar la acción, dando mayor objetividad al informe." },
+      { question: "¿Cuál es un error frecuente en la redacción de informes técnicos?", options: ["Usar demasiados datos", "Mezclar hechos con opiniones sin distinguirlos claramente", "Ser demasiado preciso", "Incluir demasiadas recomendaciones"], answer: "Mezclar hechos con opiniones sin distinguirlos claramente", explanation: "Un informe confiable diferencia claramente lo que ocurrió (hechos) de lo que el autor interpreta o recomienda (opiniones/juicios)." },
+      { question: "¿Cuál es la característica más importante de una conclusión bien escrita?", options: ["Que sea larga y detallada", "Que cada afirmación pueda rastrearse a la evidencia concreta que la fundamenta", "Que use vocabulario técnico avanzado", "Que cite muchas fuentes externas"], answer: "Que cada afirmación pueda rastrearse a la evidencia concreta que la fundamenta", explanation: "Una conclusión sin respaldo en los datos presentados no es una conclusión técnica válida, sino una opinión no sustentada." },
+      { question: "¿Qué tiempos verbales predominan en informes técnicos en español?", options: ["Presente e imperativo", "Pretérito indefinido para hechos y condicional o subjuntivo para recomendaciones", "Solo el futuro simple", "Solo el presente de indicativo"], answer: "Pretérito indefinido para hechos y condicional o subjuntivo para recomendaciones", explanation: "El indefinido describe lo que ocurrió; el condicional o subjuntivo expresa lo que debería hacerse con mayor cortesía y precisión." },
+      { question: "¿Qué debe incluir el encabezado de un informe técnico?", options: ["Solo el título del informe", "Identificación del laboratorio, fecha y autor como mínimo", "Solo la firma del director técnico", "Solo el número de solicitud"], answer: "Identificación del laboratorio, fecha y autor como mínimo", explanation: "El encabezado permite identificar de forma inequívoca quién emitió el informe, cuándo y en qué contexto institucional." },
+      { question: "¿Cuál es la mejor estrategia para mejorar la redacción técnica en español?", options: ["Solo estudiar gramática abstracta", "Leer informes en español, recibir retroalimentación y revisar modelos de referencia constantemente", "Solo traducir del portugués al español", "Solo escribir mucho sin revisar"], answer: "Leer informes en español, recibir retroalimentación y revisar modelos de referencia constantemente", explanation: "La competencia en escritura técnica se desarrolla con práctica activa y retroalimentación, no solo con conocimiento teórico de la gramática." },
+      { question: "¿Por qué un informe debe ser comprensible para cualquier persona calificada?", options: ["Por razones estéticas", "Porque puede ser consultado mucho tiempo después por personas que no estuvieron involucradas", "Solo porque lo exige la norma", "Solo para los auditores externos"], answer: "Porque puede ser consultado mucho tiempo después por personas que no estuvieron involucradas", explanation: "Un informe técnico es un documento de largo plazo. Su claridad debe ser independiente del contexto inmediato en que fue escrito." },
+    ],
+    dictation: "Un informe técnico bien redactado presenta la conclusión principal al inicio, sostiene cada afirmación con evidencia concreta y usa la voz pasiva para dar objetividad.",
+  },
+
+  // ══ GRAMÁTICA EXTRA ══
+  {
+    id: "pronunciacion", title: "Pronunciación y fonología", level: "Básico", category: "Gramática", emoji: "🗣️",
+    description: "Sonidos del español que difieren del portugués y estrategias para mejorar.",
+    readingTitle: "Los sonidos que cambian el significado",
+    reading: [
+      "La pronunciación es una de las dimensiones del aprendizaje de idiomas que más influye en la comprensión oral y en la credibilidad del hablante, y al mismo tiempo es una de las que más frecuentemente se descuida en la enseñanza formal. Para los hablantes de portugués brasileño que aprenden español, la mayoría de los sonidos son similares o idénticos, lo que facilita enormemente la comunicación. Sin embargo, existen diferencias fonológicas específicas que conviene conocer y trabajar sistemáticamente.",
+      "Una de las diferencias más notables es la pronunciación de la letra 'll' y la 'y'. En el español estándar, ambas se pronuncian como un sonido similar al de la 'y' francesa o inglesa (como en 'yellow'). En el Río de la Plata, tanto la 'll' como la 'y' se pronuncian como 'sh' (como en 'she') o 'zh' (sonido sonoro), dando el característico acento porteño. En el contexto del laboratorio, palabras como 'llevar', 'llave', 'inyección' o 'rayos' tendrán pronunciaciones diferentes según el país hispanohablante del interlocutor.",
+      "Las vocales del español son más breves y uniformes que las del portugués. El portugués tiene vocales largas, nasalizadas (ã, õ) y reducidas que no existen en español. En español, todas las vocales tienen una duración y apertura más pareja. Para el hablante de portugués brasileño, esto significa que debe evitar nasalizar las vocales en palabras como 'análisis', 'función' o 'condición', que en portugués tendrían una pronunciación diferente.",
+      "La 'r' es otro sonido que genera diferencias importantes. El español tiene dos sonidos de 'r': la 'r' simple (como en 'pero') y la 'r' vibrante múltiple o 'rr' (como en 'perro'). Esta distinción es fonémica en español: 'pero' y 'perro' son palabras completamente diferentes. En portugués, la 'r' en posición inicial o doble se pronuncia de forma más aspirada o gutural, similar a la 'j' española, lo que puede generar confusión en palabras técnicas como 'resultado', 'reactivo' o 'referencia'.",
+      "La mejor estrategia para mejorar la pronunciación no es estudiar reglas fonéticas en abstracto, sino escuchar activamente el español técnico en contextos reales: podcasts de divulgación médica en español, videos de formación de laboratorio, o simplemente las lecturas de audio de esta plataforma. La imitación consciente de los patrones de entonación y pronunciación de hablantes nativos, seguida de práctica en voz alta, es lo que transforma el conocimiento fonético en una habilidad comunicativa real.",
+    ],
+    vocab: [
+      { es: "pronunciación", pt: "pronúncia" }, { es: "vocal / consonante", pt: "vogal / consoante" },
+      { es: "sílaba tónica", pt: "sílaba tônica" }, { es: "entonación", pt: "entonação" },
+      { es: "r vibrante múltiple", pt: "r vibrante múltiplo (rr)" }, { es: "acento", pt: "acento" },
+    ],
+    quiz: [
+      { question: "¿Cómo se pronuncian 'll' e 'y' en el español rioplatense (Argentina)?", options: ["Como la 'y' inglesa en 'yes'", "Como 'sh' o 'zh', el acento porteño característico", "Como la 'l' normal", "Como la 'j' española"], answer: "Como 'sh' o 'zh', el acento porteño característico", explanation: "El yeísmo rehilado es la pronunciación característica del Río de la Plata, diferente al español estándar de España o México." },
+      { question: "¿Qué diferencia existe entre 'pero' y 'perro' en español?", options: ["Son sinónimos con diferente ortografía", "Son palabras completamente diferentes: 'r' simple vs 'rr' vibrante múltiple", "Solo se diferencian en el acento gráfico", "No hay diferencia en pronunciación"], answer: "Son palabras completamente diferentes: 'r' simple vs 'rr' vibrante múltiple", explanation: "La distinción entre r simple y rr vibrante es fonémica en español: cambia el significado de la palabra." },
+      { question: "¿Qué característica tienen las vocales del español comparadas con el portugués?", options: ["Son más largas y nasalizadas", "Son más breves, uniformes y sin nasalización", "Son idénticas al portugués", "Tienen más variedad de sonidos"], answer: "Son más breves, uniformes y sin nasalización", explanation: "El español tiene 5 vocales puras sin nasalización ni reducción, a diferencia del portugués que tiene vocales nasales y reducidas." },
+      { question: "¿Cómo puede pronunciarse incorrectamente 'resultado' por influencia del portugués?", options: ["Con acento en la primera sílaba", "Con la 'r' inicial pronunciada de forma gutural o aspirada como en portugués", "Sin pronunciar la 'd' final", "Con la 'u' muy prolongada"], answer: "Con la 'r' inicial pronunciada de forma gutural o aspirada como en portugués", explanation: "En portugués brasileño, la 'r' inicial se pronuncia como 'j' española. En español, la 'r' inicial es vibrante múltiple, no gutural." },
+      { question: "¿Cuál es la mejor estrategia para mejorar la pronunciación?", options: ["Solo estudiar reglas fonéticas en libros", "Escuchar español técnico real e imitar conscientemente la pronunciación de hablantes nativos", "Practicar solo palabras sueltas", "Evitar hablar hasta dominar todas las reglas"], answer: "Escuchar español técnico real e imitar conscientemente la pronunciación de hablantes nativos", explanation: "La pronunciación es una habilidad motriz que se desarrolla con práctica activa y exposición al input real, no solo con conocimiento teórico." },
+      { question: "¿Qué error de pronunciación es común en hablantes de portugués brasileño?", options: ["Pronunciar las consonantes finales", "Nasalizar vocales en palabras como 'función' o 'condición'", "Alargar las consonantes", "Pronunciar la 'h' con sonido"], answer: "Nasalizar vocales en palabras como 'función' o 'condición'", explanation: "En portugués, la terminación -ção es nasal. En español, la terminación -ción se pronuncia sin nasalización de la vocal." },
+      { question: "¿Qué son los pares mínimos en fonología?", options: ["Palabras que se escriben igual pero significan distinto", "Palabras que solo se diferencian en un sonido como 'pero/perro' o 'casa/caza'", "Palabras con la misma pronunciación", "Sinónimos exactos"], answer: "Palabras que solo se diferencian en un sonido como 'pero/perro' o 'casa/caza'", explanation: "Los pares mínimos demuestran que un sonido es fonémico, es decir, que distingue significados en esa lengua." },
+      { question: "¿Por qué la pronunciación influye en la credibilidad del hablante?", options: ["Solo por razones estéticas superficiales", "Porque facilita la comprensión y reduce malentendidos en contextos técnicos de alta responsabilidad", "Solo importa en conversaciones sociales", "Solo en presentaciones formales"], answer: "Porque facilita la comprensión y reduce malentendidos en contextos técnicos de alta responsabilidad", explanation: "En contextos médicos y técnicos, una pronunciación clara puede ser crítica para evitar errores de comunicación con consecuencias clínicas." },
+    ],
+    dictation: "En español rioplatense, las letras ll e y se pronuncian como sh, mientras que la r inicial como en resultado es vibrante y diferente de la r del portugués brasileño.",
+  },
 ];
+
+];
+
+const ALL_ACHIEVEMENTS = [
+  { id: "first-module", title: "Primer paso", emoji: "🌱", condition: (cm: number, _score: number, _dicts: number, streak: number) => cm >= 1 },
+  { id: "five-modules", title: "En racha", emoji: "🔥", condition: (cm: number) => cm >= 5 },
+  { id: "ten-modules", title: "A mitad de camino", emoji: "⭐", condition: (cm: number) => cm >= 10 },
+  { id: "twenty-modules", title: "Muy dedicado", emoji: "💪", condition: (cm: number) => cm >= 20 },
+  { id: "all-modules", title: "¡Completado!", emoji: "🏆", condition: (cm: number) => cm >= MODULES.length },
+  { id: "perfect-quiz", title: "Quiz perfecto", emoji: "🎯", condition: (_cm: number, score: number) => score >= 8 },
+  { id: "dictation-80", title: "Buen oído", emoji: "🎙️", condition: (_cm: number, _score: number, dicts: number) => dicts >= 80 },
+  { id: "streak-3", title: "3 días seguidos", emoji: "📅", condition: (_cm: number, _s: number, _d: number, streak: number) => streak >= 3 },
+  { id: "streak-7", title: "¡Una semana!", emoji: "🗓️", condition: (_cm: number, _s: number, _d: number, streak: number) => streak >= 7 },
+  { id: "lab-master", title: "Maestro del Lab", emoji: "🔬", condition: (_cm: number, _s: number, _d: number, _str: number, labDone: number) => labDone >= 8 },
+];
+
 
 const defaultStudents: Student[] = [
   { id: "marilia", name: "Marília", code: "MARILIA" },
@@ -1080,7 +1247,7 @@ const defaultStudents: Student[] = [
   { id: "thiago", name: "Thiago", code: "THIAGO" },
 ];
 
-const STORAGE_KEY = "aula-controllab-v5";
+const STORAGE_KEY = "aula-controllab-v6";
 const PROFESSOR_PASSWORD = "controllab2025";
 const CATEGORIES = ["Todos", "Laboratorio", "Gestión", "Comunicación", "Tecnología", "Gramática"];
 const LEVEL_COLOR: Record<string, string> = {
@@ -1091,7 +1258,7 @@ const LEVEL_COLOR: Record<string, string> = {
 const QUIZ_TIME = 30;
 
 function createInitialState(): AppState {
-  return { students: defaultStudents, currentStudentId: null, progress: {}, dictations: {} };
+  return { students: defaultStudents, currentStudentId: null, progress: {}, dictations: {}, achievements: {}, streaks: {}, weeklyActivity: {} };
 }
 function normalize(v: string): string {
   return v.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
@@ -1188,6 +1355,10 @@ export default function Home() {
   const [transResult, setTransResult] = useState("");
   const [transDir, setTransDir] = useState<"es-pt" | "pt-es">("es-pt");
   const [transLoading, setTransLoading] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [weekTab, setWeekTab] = useState<"weekly" | "achievements">("weekly");
   const [showChangePass, setShowChangePass] = useState(false);
   const [newPass, setNewPass] = useState("");
   const [newPassConfirm, setNewPassConfirm] = useState("");
@@ -1300,7 +1471,7 @@ export default function Home() {
     });
     if (!found) { setLoginError("Nombre o código incorrecto. Si cambiaste tu contraseña, usá la nueva."); return; }
     setAppState(p => ({ ...p, currentStudentId: found.id }));
-    setLoginError(""); setLoginName(""); setLoginCode("");
+    setLoginError(""); setLoginName(""); setLoginCode(""); setShowWelcome(true);
   };
   const logout = () => { setAppState(p => ({ ...p, currentStudentId: null })); setShowPanel(false); setShowChangePass(false); };
 
@@ -1331,6 +1502,49 @@ export default function Home() {
       return { ...p, progress: { ...p.progress, [student.id]: { ...ps, [selectedModuleId]: { completed: true, score: Math.max(pm.score, score), total, attempts: pm.attempts + 1 } } } };
     });
   };
+  const checkAchievements = (studentId: string) => {
+    const p = appState.progress[studentId] || {};
+    const d = appState.dictations[studentId] || {};
+    const cm = Object.keys(p).length;
+    const bestScore = Math.max(...Object.values(p).map(mp => mp.score), 0);
+    const dictScores = Object.values(d).map(dr => dr.score);
+    const bestDict = dictScores.length ? Math.max(...dictScores) : 0;
+    const streak = appState.streaks[studentId]?.count || 0;
+    const labDone = MODULES.filter(m => m.category === "Laboratorio" && p[m.id]).length;
+    const existing = (appState.achievements[studentId] || []).map(a => a.id);
+    const unlocked = ALL_ACHIEVEMENTS.filter(a =>
+      !existing.includes(a.id) && a.condition(cm, bestScore, bestDict, streak, labDone)
+    );
+    if (unlocked.length > 0) {
+      const now = new Date().toLocaleString();
+      const newOnes = unlocked.map(a => ({ id: a.id, title: a.title, emoji: a.emoji, unlockedAt: now }));
+      setNewAchievements(newOnes);
+      setAppState(prev => ({
+        ...prev,
+        achievements: { ...prev.achievements, [studentId]: [...(prev.achievements[studentId] || []), ...newOnes] }
+      }));
+      setTimeout(() => setNewAchievements([]), 4000);
+    }
+  };
+
+  const updateStreak = (studentId: string) => {
+    const today = new Date().toISOString().split("T")[0];
+    const streak = appState.streaks[studentId];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+    let newCount = 1;
+    if (streak?.lastDate === today) return;
+    if (streak?.lastDate === yesterday) newCount = (streak.count || 0) + 1;
+    const week = today.slice(0, 7);
+    setAppState(prev => ({
+      ...prev,
+      streaks: { ...prev.streaks, [studentId]: { count: newCount, lastDate: today } },
+      weeklyActivity: {
+        ...prev.weeklyActivity,
+        [studentId]: { ...(prev.weeklyActivity[studentId] || {}), [today]: (prev.weeklyActivity[studentId]?.[today] || 0) + 1 }
+      }
+    }));
+  };
+
   const handleSubmit = () => { if (!selectedOption) return; setSubmitted(true); setTimerOn(false); };
   const handleNext = () => {
     if (qIdx < mod.quiz.length - 1) {
@@ -1338,6 +1552,7 @@ export default function Home() {
     }
     const correct = mod.quiz.reduce((s, q, i) => s + (answers[i] === q.answer ? 1 : 0), 0);
     saveProg(correct, mod.quiz.length);
+    if (student) { updateStreak(student.id); setTimeout(() => checkAchievements(student.id), 300); }
     setQIdx(0); setSelectedOption(""); setSubmitted(false); setAnswers({}); setTimerOn(false); setSection("reading");
   };
   const setAns = (v: string) => { setSelectedOption(v); setAnswers(p => ({ ...p, [qIdx]: v })); };
@@ -1636,6 +1851,72 @@ export default function Home() {
     );
   }
 
+  // WELCOME SCREEN
+  if (showWelcome && student) {
+    const streak = appState.streaks[student.id];
+    const today = new Date().toISOString().split("T")[0];
+    const isStreakActive = streak?.lastDate === today;
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? "¡Buenos días" : hour < 18 ? "¡Buenas tardes" : "¡Buenas noches";
+    const completedToday = Object.values(appState.weeklyActivity[student.id] || {}).reduce((s, v) => s + v, 0);
+    const suggestedMod = MODULES.find(m => !sp[m.id]) || MODULES.find(m => sp[m.id] && sp[m.id].score < sp[m.id].total) || MODULES[0];
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center px-4 py-10">
+        <style>{STYLES}</style>
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: "-10%", left: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,202,183,0.1) 0%, transparent 70%)" }} />
+          <div style={{ position: "absolute", bottom: "-10%", right: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%)" }} />
+        </div>
+        <div className="relative z-10 max-w-2xl w-full ani">
+          <div className="glass rounded-3xl p-8 glow-teal text-center" style={{ borderColor: "rgba(99,202,183,0.2)" }}>
+            <div className="text-6xl mb-4">{hour < 12 ? "🌅" : hour < 18 ? "☀️" : "🌙"}</div>
+            <div className="mono text-xs tracking-widest text-slate-400 mb-3">AULA CONTROLLAB</div>
+            <h1 className="text-3xl md:text-4xl font-black text-white">{greeting}, <span className="accent">{student.name}</span>!</h1>
+            <p className="text-slate-300 mt-3 text-lg">Bienvenido/a a tu espacio de español técnico.</p>
+
+            <div className="grid grid-cols-3 gap-3 mt-8">
+              <div className="glass-dark rounded-2xl p-4 text-center">
+                <div className="text-2xl mb-1">🔥</div>
+                <div className="text-2xl font-black mono accent">{streak?.count || 0}</div>
+                <div className="text-xs text-slate-400 mt-0.5">días de racha</div>
+              </div>
+              <div className="glass-dark rounded-2xl p-4 text-center">
+                <div className="text-2xl mb-1">✅</div>
+                <div className="text-2xl font-black mono">{completedMods}</div>
+                <div className="text-xs text-slate-400 mt-0.5">módulos hechos</div>
+              </div>
+              <div className="glass-dark rounded-2xl p-4 text-center">
+                <div className="text-2xl mb-1">🏅</div>
+                <div className="text-2xl font-black mono accent">{(appState.achievements[student.id] || []).length}</div>
+                <div className="text-xs text-slate-400 mt-0.5">logros</div>
+              </div>
+            </div>
+
+            {suggestedMod && (
+              <div className="glass rounded-2xl p-4 mt-6 text-left">
+                <div className="mono text-xs text-slate-400 tracking-widest mb-2">💡 SUGERENCIA DE HOY</div>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{suggestedMod.emoji}</span>
+                  <div className="flex-1">
+                    <div className="font-bold text-white">{suggestedMod.title}</div>
+                    <div className="text-xs text-slate-400">{suggestedMod.category} · {suggestedMod.level}</div>
+                  </div>
+                  <button onClick={() => { setShowWelcome(false); setSelectedModuleId(suggestedMod.id); }} className="btn-accent px-4 py-2 text-xs">Ir →</button>
+                </div>
+              </div>
+            )}
+
+            <button onClick={() => setShowWelcome(false)} className="btn-accent w-full mt-6 py-4 text-sm font-bold">
+              Entrar a la plataforma →
+            </button>
+            <button onClick={logout} className="mt-3 text-xs text-slate-500 hover:text-slate-300 transition">No soy {student.name} — Salir</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // CERTIFICATE
   if (showCert) return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-10">
@@ -1661,6 +1942,22 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <style>{STYLES}</style>
+
+      {/* ACHIEVEMENT TOAST */}
+      {newAchievements.length > 0 && (
+        <div className="fixed top-4 right-4 z-[100] space-y-2 ani">
+          {newAchievements.map(a => (
+            <div key={a.id} className="glass-accent rounded-2xl px-5 py-4 flex items-center gap-3 pop" style={{ borderColor: "rgba(99,202,183,.4)", boxShadow: "0 0 30px rgba(99,202,183,.3)" }}>
+              <span className="text-3xl">{a.emoji}</span>
+              <div>
+                <div className="text-xs mono tracking-widest text-slate-400 mb-0.5">🏅 LOGRO DESBLOQUEADO</div>
+                <div className="font-bold text-white">{a.title}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <header className="sticky top-0 z-50 glass-dark border-b border-white/5">
         <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
@@ -1676,6 +1973,9 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {allDone && <button onClick={() => setShowCert(true)} className="btn-accent px-3 py-2 text-xs">🎓 Certificado</button>}
+            <button onClick={() => setShowAchievements(a => !a)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showAchievements ? "accent" : "text-slate-300 hover:text-white"}`}>
+              🏅 {(appState.achievements[student?.id || ""] || []).length}/{ALL_ACHIEVEMENTS.length}
+            </button>
             <button onClick={startExam} className="btn-purple px-3 py-2 text-xs">⚡ Examen</button>
             {reviewModules.length > 0 && <button onClick={() => { setReviewMode(r => !r); setActiveCategory("Todos"); }} className={`glass rounded-xl px-3 py-2 text-xs transition font-semibold ${reviewMode ? "text-yellow-300 border-yellow-500/50" : "text-slate-300 hover:text-white"}`}>🔁 Repaso {reviewMode ? "ON" : `(${reviewModules.length})`}</button>}
             <button onClick={() => setShowTranslator(t => !t)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showTranslator ? "accent" : "text-slate-300 hover:text-white"}`}>🌐 Traductor</button>
@@ -1710,6 +2010,111 @@ export default function Home() {
                 {transResult && <button onClick={() => speak(transResult, 0.85)} className="mt-2 text-xs text-slate-400 hover:text-white transition">🔊 Escuchar</button>}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ACHIEVEMENTS & STATS PANEL */}
+        {showAchievements && student && (
+          <div className="glass rounded-3xl p-5 mb-6 ani">
+            <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+              <div>
+                <div className="mono text-xs text-slate-400 tracking-widest mb-1">MIS ESTADÍSTICAS</div>
+                <h2 className="text-xl font-bold">Progreso de <span className="accent">{student.name}</span></h2>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setWeekTab("weekly")} className={`tab ${weekTab === "weekly" ? "active" : ""}`}>📊 Actividad</button>
+                <button onClick={() => setWeekTab("achievements")} className={`tab ${weekTab === "achievements" ? "active" : ""}`}>🏅 Logros</button>
+              </div>
+            </div>
+
+            {weekTab === "weekly" && (() => {
+              const today = new Date();
+              const days = Array.from({length: 7}, (_, i) => {
+                const d = new Date(today); d.setDate(d.getDate() - (6 - i));
+                return d.toISOString().split("T")[0];
+              });
+              const activity = appState.weeklyActivity[student.id] || {};
+              const streak = appState.streaks[student.id];
+              const maxVal = Math.max(1, ...days.map(d => activity[d] || 0));
+              const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+              return (
+                <div className="space-y-5">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { icon: "🔥", val: streak?.count || 0, label: "Días de racha", sub: streak?.lastDate === new Date().toISOString().split("T")[0] ? "Activa hoy" : "Sin actividad hoy" },
+                      { icon: "✅", val: completedMods, label: "Módulos", sub: `de ${MODULES.length} totales` },
+                      { icon: "⭐", val: totalScore, label: "Puntos", sub: `de ${totalQ} posibles` },
+                      { icon: "📝", val: `${pct}%`, label: "Completado", sub: allDone ? "¡Todo listo!" : "En progreso" },
+                    ].map(s => (
+                      <div key={s.label} className="glass-dark rounded-2xl p-4 text-center">
+                        <div className="text-2xl mb-1">{s.icon}</div>
+                        <div className="text-2xl font-black mono accent">{s.val}</div>
+                        <div className="text-xs font-semibold text-white mt-0.5">{s.label}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{s.sub}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="glass-dark rounded-2xl p-5">
+                    <div className="mono text-xs text-slate-400 tracking-widest mb-4">ACTIVIDAD ÚLTIMOS 7 DÍAS</div>
+                    <div className="flex items-end gap-2 h-24">
+                      {days.map((d, i) => {
+                        const val = activity[d] || 0;
+                        const h = Math.max(4, Math.round((val / maxVal) * 80));
+                        const isToday = d === new Date().toISOString().split("T")[0];
+                        const dayName = dayNames[new Date(d + "T12:00:00").getDay()];
+                        return (
+                          <div key={d} className="flex-1 flex flex-col items-center gap-1">
+                            <div className="text-xs mono accent font-bold">{val > 0 ? val : ""}</div>
+                            <div className="w-full rounded-lg transition-all" style={{ height: `${h}px`, background: isToday ? "#63CAB7" : val > 0 ? "rgba(99,202,183,0.4)" : "rgba(255,255,255,0.06)" }} />
+                            <div className={`text-xs ${isToday ? "accent font-bold" : "text-slate-500"}`}>{dayName}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="glass-dark rounded-2xl p-5">
+                    <div className="mono text-xs text-slate-400 tracking-widest mb-3">PROGRESO POR ÁREA</div>
+                    <div className="space-y-3">
+                      {["Laboratorio","Gestión","Comunicación","Tecnología","Gramática"].map(cat => {
+                        const catMods = MODULES.filter(m => m.category === cat);
+                        const done = catMods.filter(m => sp[m.id]).length;
+                        const pctCat = Math.round((done / catMods.length) * 100);
+                        return (
+                          <div key={cat}>
+                            <div className="flex justify-between text-xs mb-1"><span className="text-slate-300 font-medium">{cat}</span><span className="mono accent">{done}/{catMods.length}</span></div>
+                            <div className="progress-bar"><div className="progress-fill" style={{ width: `${pctCat}%` }} /></div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {weekTab === "achievements" && (() => {
+              const unlocked = appState.achievements[student.id] || [];
+              const unlockedIds = unlocked.map(a => a.id);
+              return (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {ALL_ACHIEVEMENTS.map(a => {
+                    const isUnlocked = unlockedIds.includes(a.id);
+                    const data = unlocked.find(u => u.id === a.id);
+                    return (
+                      <div key={a.id} className={`rounded-2xl px-5 py-4 flex items-center gap-4 transition ${isUnlocked ? "glass-accent" : "glass-dark opacity-50"}`}>
+                        <span className="text-3xl">{isUnlocked ? a.emoji : "🔒"}</span>
+                        <div className="flex-1">
+                          <div className={`font-bold text-sm ${isUnlocked ? "text-white" : "text-slate-500"}`}>{a.title}</div>
+                          {isUnlocked && data && <div className="text-xs text-slate-400 mt-0.5">Desbloqueado {data.unlockedAt}</div>}
+                          {!isUnlocked && <div className="text-xs text-slate-600 mt-0.5">Sigue practicando...</div>}
+                        </div>
+                        {isUnlocked && <span className="badge badge-green">✓</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -1950,8 +2355,21 @@ export default function Home() {
                     })}
                   </div>
                 </div>
-                <div className="mt-5 flex items-center justify-between flex-wrap gap-4">
-                  <div className="text-sm">{submitted ? (isOk ? <span className="text-emerald-400 font-semibold">✓ ¡Correcto!</span> : <span className="text-rose-400">✗ Correcto: <strong className="text-white">{q.answer}</strong></span>) : <span className="text-slate-400">Elegí antes de que el tiempo se acabe.</span>}</div>
+                {submitted && (
+                  <div className={`mt-4 rounded-2xl px-5 py-4 ani ${isOk ? "bg-emerald-900/30 border border-emerald-500/30" : "bg-rose-900/30 border border-rose-500/30"}`}>
+                    <div className="flex items-start gap-3">
+                      <span className="text-xl">{isOk ? "✅" : "❌"}</span>
+                      <div>
+                        <div className={`font-bold text-sm ${isOk ? "text-emerald-300" : "text-rose-300"}`}>
+                          {isOk ? "¡Correcto!" : `Respuesta correcta: ${q.answer}`}
+                        </div>
+                        {q.explanation && <div className="text-slate-300 text-sm mt-1 leading-6">{q.explanation}</div>}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="mt-4 flex items-center justify-between flex-wrap gap-4">
+                  <div className="text-sm">{!submitted && <span className="text-slate-500">Elegí antes de que el tiempo se acabe.</span>}</div>
                   {!submitted ? <button onClick={handleSubmit} disabled={!selectedOption} className="btn-accent px-6 py-3 text-sm">Comprobar</button>
                     : <button onClick={handleNext} className="btn-accent px-6 py-3 text-sm">{qIdx < mod.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>}
                 </div>
