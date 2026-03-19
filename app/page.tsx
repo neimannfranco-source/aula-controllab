@@ -1058,7 +1058,240 @@ const MODULES: ModuleType[] = [
     ],
     dictation: "En los informes técnicos se usa frecuentemente la voz pasiva: los resultados fueron validados, las muestras fueron procesadas y la desviación fue documentada.",
   },
+  // ══ LABORATORIO (adicionales) ══
+  {
+    id: "electrolitos", title: "Electrolitos y función renal", level: "Intermedio", category: "Laboratorio", emoji: "⚡",
+    description: "Sodio, potasio, cloro y su relación con el equilibrio hidroelectrolítico.",
+    readingTitle: "El equilibrio que mantiene la vida",
+    reading: [
+      "Los electrolitos son iones con carga eléctrica que se encuentran disueltos en los líquidos del organismo y que cumplen funciones esenciales: mantienen el equilibrio osmótico entre los compartimentos corporales, participan en la conducción nerviosa y muscular, regulan el pH sanguíneo y son cofactores de numerosas enzimas. Los principales electrolitos medidos en el laboratorio clínico son el sodio, el potasio, el cloro y el bicarbonato.",
+      "El sodio es el catión predominante en el espacio extracelular y el principal determinante de la osmolaridad plasmática. Una hiponatremia, es decir, un sodio bajo, puede ser consecuencia de una retención de agua, de una pérdida de sodio o de una combinación de ambas. Los síntomas van desde náuseas y cefalea en casos leves hasta convulsiones y coma en casos graves. Su corrección debe ser gradual para evitar complicaciones neurológicas.",
+      "El potasio es el catión predominante en el espacio intracelular y tiene un rol crítico en la excitabilidad de las células musculares y cardíacas. Una hipopotasemia o hipocalemia puede causar debilidad muscular, calambres y arritmias cardíacas. Una hiperpotasemia es potencialmente más peligrosa aún, especialmente en pacientes con insuficiencia renal, porque puede producir arritmias graves e incluso paro cardíaco.",
+      "La creatinina y la urea son los principales marcadores de función renal determinados en conjunto con los electrolitos. La creatinina es un producto del metabolismo muscular que se elimina casi exclusivamente por filtración glomerular, lo que la convierte en un marcador muy específico de la función del riñón. La tasa de filtración glomerular estimada (TFGe) se calcula a partir de la creatinina, la edad, el sexo y la etnia del paciente.",
+      "En la práctica del laboratorio, la medición de electrolitos se realiza en equipos de bioquímica automatizados mediante electrodos selectivos de iones. La muestra puede ser suero, plasma o en algunos casos sangre entera. Los factores preanalíticos más importantes son la hemólisis, que libera potasio intracelular y eleva falsamente la potasemia, y el tiempo de contacto de la muestra con el coágulo antes de centrifugar, que también afecta al potasio.",
+    ],
+    vocab: [
+      { es: "sodio / hiponatremia", pt: "sódio / hiponatremia" }, { es: "potasio / hipopotasemia", pt: "potássio / hipopotassemia" },
+      { es: "electrolito", pt: "eletrólito" }, { es: "osmolaridad", pt: "osmolaridade" },
+      { es: "filtración glomerular", pt: "filtração glomerular" }, { es: "equilibrio ácido-base", pt: "equilíbrio ácido-base" },
+    ],
+    quiz: [
+      { question: "¿Cuál es el catión predominante en el espacio extracelular?", options: ["Potasio", "Sodio", "Cloro", "Bicarbonato"], answer: "Sodio" },
+      { question: "¿Qué riesgo presenta una hiperpotasemia grave?", options: ["Hipertensión arterial", "Arritmias cardíacas graves y paro cardíaco", "Insuficiencia hepática", "Anemia severa"], answer: "Arritmias cardíacas graves y paro cardíaco" },
+      { question: "¿Por qué la creatinina es un marcador específico de función renal?", options: ["Porque solo la produce el riñón", "Porque se elimina casi exclusivamente por filtración glomerular", "Porque su valor no varía con la dieta", "Porque es el único marcador no afectado por hemólisis"], answer: "Porque se elimina casi exclusivamente por filtración glomerular" },
+      { question: "¿Qué factor preanalítico eleva falsamente la potasemia?", options: ["La lipemia", "La hemólisis que libera potasio intracelular", "El ayuno prolongado", "La temperatura de transporte elevada"], answer: "La hemólisis que libera potasio intracelular" },
+      { question: "¿Qué método se usa para medir electrolitos en equipos automatizados?", options: ["Espectrofotometría", "Electrodos selectivos de iones", "Cromatografía líquida", "Inmunoensayo"], answer: "Electrodos selectivos de iones" },
+      { question: "¿Por qué la corrección de hiponatremia debe ser gradual?", options: ["Para ahorrar reactivos", "Para evitar complicaciones neurológicas graves", "Por exigencia del protocolo de calidad", "Para reducir el tiempo de hospitalización"], answer: "Para evitar complicaciones neurológicas graves" },
+      { question: "¿Qué variables se usan para calcular la TFGe?", options: ["Solo creatinina y edad", "Creatinina, edad, sexo y etnia del paciente", "Urea, creatinina y sodio", "Solo la creatinina y el peso corporal"], answer: "Creatinina, edad, sexo y etnia del paciente" },
+      { question: "¿En qué espacio corporal predomina el potasio?", options: ["Espacio extracelular", "Espacio intracelular", "Líquido cefalorraquídeo", "Líquido sinovial"], answer: "Espacio intracelular" },
+    ],
+    dictation: "Los electrolitos como el sodio y el potasio son esenciales para el equilibrio osmótico y la función cardíaca y deben interpretarse siempre en contexto clínico.",
+  },
+  {
+    id: "validacion-metodo", title: "Validación del método", level: "Avanzado", category: "Laboratorio", emoji: "✅",
+    description: "Validación, precisión, exactitud y robustez de métodos analíticos.",
+    readingTitle: "Antes de implementar el nuevo método",
+    reading: [
+      "Antes de implementar un nuevo método analítico en el laboratorio, el equipo necesitaba demostrar que su desempeño era adecuado para el uso previsto. No bastaba con que el procedimiento fuera rápido o práctico: también debía mostrar precisión, exactitud y estabilidad en diferentes condiciones. La validación es el proceso sistemático que permite obtener evidencia documentada de que el método cumple con esos requisitos.",
+      "La precisión es la capacidad del método de dar resultados reproducibles cuando se mide la misma muestra repetidamente. Se evalúa en dos niveles: la repetibilidad, que evalúa la variación dentro de una misma corrida analítica, y la precisión intermedia, que evalúa la variación entre diferentes corridas, analistas, días y lotes de reactivos. Ambos niveles son importantes porque representan diferentes fuentes de variabilidad del proceso.",
+      "La exactitud es la concordancia entre el resultado del método y el valor verdadero o de referencia. Se evalúa comparando los resultados del método bajo validación con un método de referencia o con materiales de referencia certificados de valor conocido. Un sesgo sistemático en la exactitud puede pasar desapercibido en la evaluación de precisión si siempre se mide el mismo error.",
+      "El límite de detección es la concentración mínima de analito que el método puede distinguir del ruido de fondo con un nivel de confianza estadístico determinado. El límite de cuantificación es la concentración mínima a partir de la cual el método puede medir con una precisión y exactitud aceptables. Ambos son parámetros críticos para métodos que deben detectar concentraciones muy bajas, como en toxicología o en marcadores de enfermedades.",
+      "La verificación es diferente de la validación completa: es el proceso simplificado que realizan los laboratorios cuando implementan un método ya validado por el fabricante o por otro laboratorio de referencia. Consiste en confirmar, con un número limitado de experimentos, que el método funciona correctamente en las condiciones específicas del laboratorio. La norma ISO 15189 establece que todo método debe ser verificado o validado antes de su uso clínico.",
+    ],
+    vocab: [
+      { es: "validación", pt: "validação" }, { es: "precisión / repetibilidad", pt: "precisão / repetibilidade" },
+      { es: "exactitud / sesgo", pt: "exatidão / viés" }, { es: "límite de detección", pt: "limite de detecção" },
+      { es: "verificación", pt: "verificação" }, { es: "material de referencia certificado", pt: "material de referência certificado" },
+    ],
+    quiz: [
+      { question: "¿Qué evalúa la precisión de un método analítico?", options: ["La concordancia con el valor verdadero", "La reproducibilidad de los resultados al medir la misma muestra repetidamente", "La velocidad de procesamiento", "La robustez frente a interferencias"], answer: "La reproducibilidad de los resultados al medir la misma muestra repetidamente" },
+      { question: "¿Qué diferencia hay entre repetibilidad y precisión intermedia?", options: ["Son sinónimos exactos", "La repetibilidad evalúa variación dentro de una corrida; la intermedia entre corridas, días y analistas", "La precisión intermedia solo evalúa diferentes analistas", "La repetibilidad es siempre mejor que la precisión intermedia"], answer: "La repetibilidad evalúa variación dentro de una corrida; la intermedia entre corridas, días y analistas" },
+      { question: "¿Cómo se evalúa la exactitud de un método?", options: ["Comparando resultados repetidos de la misma muestra", "Comparando con un método de referencia o material certificado de valor conocido", "Calculando el coeficiente de variación", "Evaluando la estabilidad a diferentes temperaturas"], answer: "Comparando con un método de referencia o material certificado de valor conocido" },
+      { question: "¿Qué es el límite de cuantificación?", options: ["La concentración máxima que el método puede medir", "La concentración mínima medible con precisión y exactitud aceptables", "El umbral de decisión clínica para el analito", "El valor más bajo del rango de referencia normal"], answer: "La concentración mínima medible con precisión y exactitud aceptables" },
+      { question: "¿Qué diferencia a la verificación de la validación completa?", options: ["Son exactamente lo mismo con distinto nombre", "La verificación es un proceso simplificado para confirmar que un método ya validado funciona en las condiciones del laboratorio", "La verificación solo la hace el fabricante", "La validación es más rápida que la verificación"], answer: "La verificación es un proceso simplificado para confirmar que un método ya validado funciona en las condiciones del laboratorio" },
+      { question: "¿Qué establece la ISO 15189 sobre la validación?", options: ["Solo los métodos nuevos requieren validación", "Todo método debe ser verificado o validado antes de su uso clínico", "Solo los métodos complejos requieren validación formal", "La validación es opcional si el fabricante ya la realizó"], answer: "Todo método debe ser verificado o validado antes de su uso clínico" },
+      { question: "¿Un método preciso es siempre exacto?", options: ["Sí, precisión y exactitud son inseparables", "No, un método puede ser preciso pero con sesgo sistemático", "Sí, si los resultados son reproducibles también son exactos", "Depende del tipo de analito medido"], answer: "No, un método puede ser preciso pero con sesgo sistemático" },
+      { question: "¿Para qué tipo de métodos son críticos los límites de detección?", options: ["Para todos los métodos por igual", "Para métodos que deben detectar concentraciones muy bajas como en toxicología", "Solo para métodos de bioquímica general", "Solo para métodos inmunológicos"], answer: "Para métodos que deben detectar concentraciones muy bajas como en toxicología" },
+    ],
+    dictation: "La validación de un método evalúa su precisión, exactitud y límites analíticos antes de implementarlo para uso clínico.",
+  },
+  // ══ GESTIÓN (adicional) ══
+  {
+    id: "satisfaccion-cliente", title: "Satisfacción del cliente", level: "Básico", category: "Gestión", emoji: "⭐",
+    description: "Medición, análisis y mejora de la satisfacción de clientes y médicos.",
+    readingTitle: "La queja que mejoró todo",
+    reading: [
+      "Un laboratorio puede tener excelentes resultados analíticos y, al mismo tiempo, clientes insatisfechos. La satisfacción del cliente va más allá de la calidad técnica del resultado: incluye la experiencia completa de interacción con el servicio, desde la solicitud del análisis hasta la recepción y comprensión del informe. Un cliente satisfecho regresa, recomienda el servicio y perdona errores ocasionales. Un cliente insatisfecho se va sin decir nada, y eso es lo más peligroso.",
+      "La medición de la satisfacción del cliente puede realizarse mediante encuestas periódicas, grupos focales, análisis de quejas y reclamos, y monitoreo de indicadores como el tiempo de respuesta y la tasa de errores en informes. Cada uno de estos instrumentos aporta información diferente y complementaria. Las encuestas miden percepciones generales. Las quejas revelan problemas específicos. Los indicadores muestran tendencias.",
+      "Una queja bien gestionada puede convertirse en una oportunidad de mejora y en un refuerzo de la relación con el cliente. El primer paso es escuchar sin interrumpir y sin justificarse. El segundo es agradecer que el cliente haya comunicado el problema en lugar de simplemente abandonar el servicio. El tercero es investigar la causa con seriedad y comunicar los hallazgos. El cuarto es implementar una acción correctiva y verificar su eficacia.",
+      "Los médicos que solicitan análisis son clientes especiales del laboratorio: son profesionales técnicos que valoran especialmente la precisión, la rapidez y la capacidad del laboratorio de comunicar información útil para sus decisiones clínicas. Gestionar bien la relación con los médicos requiere un enfoque proactivo: comunicar cambios de métodos, informar los valores críticos de forma oportuna, y estar disponible para consultas técnicas.",
+      "El Net Promoter Score (NPS) es una métrica ampliamente usada para medir la satisfacción y la lealtad del cliente en una sola pregunta: '¿Qué tan probable es que recomiende este servicio a un colega o conocido?' Las respuestas permiten clasificar a los clientes en promotores, pasivos y detractores. Un programa de mejora de la satisfacción del cliente que usa el NPS de forma regular puede identificar tendencias antes de que se conviertan en pérdida de clientes.",
+    ],
+    vocab: [
+      { es: "satisfacción del cliente", pt: "satisfação do cliente" }, { es: "queja / reclamo", pt: "reclamação / queixa" },
+      { es: "encuesta de satisfacción", pt: "pesquisa de satisfação" }, { es: "NPS", pt: "NPS" },
+      { es: "fidelización", pt: "fidelização" }, { es: "cliente interno / externo", pt: "cliente interno / externo" },
+    ],
+    quiz: [
+      { question: "¿Por qué un cliente insatisfecho que no se queja es peligroso?", options: ["Porque puede hacer una denuncia legal", "Porque se va sin dar oportunidad de mejorar y el laboratorio no sabe por qué perdió el cliente", "Porque puede afectar negativamente al personal", "Porque reduce los ingresos inmediatamente"], answer: "Porque se va sin dar oportunidad de mejorar y el laboratorio no sabe por qué perdió el cliente" },
+      { question: "¿Qué instrumentos sirven para medir la satisfacción del cliente?", options: ["Solo encuestas formales anuales", "Encuestas, grupos focales, análisis de quejas e indicadores operativos", "Solo el análisis de quejas y reclamos", "Solo los indicadores de tiempo de respuesta"], answer: "Encuestas, grupos focales, análisis de quejas e indicadores operativos" },
+      { question: "¿Cuál es el primer paso ante una queja del cliente?", options: ["Justificar y explicar por qué ocurrió", "Escuchar sin interrumpir y sin justificarse", "Ofrecer un descuento inmediatamente", "Derivar a otro responsable"], answer: "Escuchar sin interrumpir y sin justificarse" },
+      { question: "¿Por qué se agradece al cliente que realizó una queja?", options: ["Por protocolo formal únicamente", "Porque comunicar el problema en lugar de simplemente irse es una oportunidad de mejora valiosa", "Para reducir la tensión de la situación", "Por exigencia de la norma ISO"], answer: "Porque comunicar el problema en lugar de simplemente irse es una oportunidad de mejora valiosa" },
+      { question: "¿Qué valoran especialmente los médicos como clientes del laboratorio?", options: ["Los precios más bajos del mercado", "La precisión, rapidez y capacidad de comunicar información útil para decisiones clínicas", "Las instalaciones modernas", "La variedad de análisis disponibles"], answer: "La precisión, rapidez y capacidad de comunicar información útil para decisiones clínicas" },
+      { question: "¿Qué mide el Net Promoter Score (NPS)?", options: ["La cantidad de análisis realizados por mes", "La probabilidad de que un cliente recomiende el servicio a otros", "La velocidad de respuesta del laboratorio", "El porcentaje de resultados correctos"], answer: "La probabilidad de que un cliente recomiende el servicio a otros" },
+      { question: "¿Qué tres grupos clasifica el NPS?", options: ["Satisfechos, neutrales e insatisfechos", "Promotores, pasivos y detractores", "Leales, ocasionales y perdidos", "Internos, externos y potenciales"], answer: "Promotores, pasivos y detractores" },
+      { question: "¿Qué diferencia a los médicos de otros clientes del laboratorio?", options: ["Pagan más por los servicios", "Son profesionales técnicos que requieren un enfoque proactivo y comunicación especializada", "Solo les interesa la velocidad", "Son menos exigentes que los pacientes"], answer: "Son profesionales técnicos que requieren un enfoque proactivo y comunicación especializada" },
+    ],
+    dictation: "Una queja bien gestionada se convierte en oportunidad de mejora: hay que escuchar, agradecer, investigar e implementar acciones correctivas.",
+  },
+  // ══ COMUNICACIÓN (adicionales) ══
+  {
+    id: "redaccion-informes", title: "Redacción de informes técnicos", level: "Intermedio", category: "Comunicación", emoji: "📄",
+    description: "Estructura y lenguaje para redactar informes técnicos en español.",
+    readingTitle: "El informe que nadie entendió",
+    reading: [
+      "Un informe técnico de laboratorio tiene una función muy específica: comunicar hallazgos, análisis y conclusiones a una audiencia determinada de forma que esa información pueda usarse para tomar decisiones. Sin embargo, muchos informes técnicos fallan en esa misión porque están escritos para el redactor, no para el lector. Están llenos de jerga técnica sin contexto, de datos sin interpretación y de conclusiones sin recomendaciones.",
+      "La estructura estándar de un informe técnico en español incluye las siguientes secciones: resumen ejecutivo o síntesis, que permite al lector entender la conclusión principal sin leer todo el documento; introducción o contexto, que explica por qué se realizó el análisis; metodología, que describe cómo se obtuvo la información; resultados, que presenta los hallazgos de forma organizada; análisis e interpretación, que explica qué significan los resultados; conclusiones y recomendaciones.",
+      "El lenguaje del informe técnico debe adaptarse a la audiencia. Un informe dirigido a otros analistas puede usar terminología técnica específica. Un informe dirigido a la dirección del laboratorio debe usar un lenguaje más accesible, con énfasis en el impacto operativo y las decisiones que se desprenden de los hallazgos. Un informe dirigido a un organismo regulador debe ser preciso, documentado y referenciado.",
+      "El resumen ejecutivo es la parte más importante del informe porque es la que más personas van a leer completa. Debe poder entenderse de forma independiente del resto del documento y debe responder, en no más de media página, a las siguientes preguntas: ¿por qué se hizo este análisis?, ¿qué se encontró?, ¿qué significa?, ¿qué se recomienda hacer?",
+      "Los errores más frecuentes en la redacción de informes técnicos en español son: usar la voz pasiva en exceso cuando la activa sería más clara, mezclar tiempos verbales inconsistentemente, incluir datos sin analizarlos, presentar conclusiones sin evidencia que las sostenga, y no incluir recomendaciones concretas y accionables. Un informe que termina con 'se observan áreas de mejora' sin especificar cuáles y cómo abordarlas no ha cumplido su función.",
+    ],
+    vocab: [
+      { es: "resumen ejecutivo", pt: "resumo executivo" }, { es: "hallazgos", pt: "achados / resultados" },
+      { es: "metodología", pt: "metodologia" }, { es: "recomendación", pt: "recomendação" },
+      { es: "audiencia / destinatario", pt: "público-alvo / destinatário" }, { es: "conclusión accionable", pt: "conclusão acionável" },
+    ],
+    quiz: [
+      { question: "¿Cuál es la función principal de un informe técnico?", options: ["Demostrar el conocimiento técnico del redactor", "Comunicar hallazgos y análisis para que el lector pueda tomar decisiones", "Cumplir con un requisito burocrático", "Documentar el proceso completo en detalle"], answer: "Comunicar hallazgos y análisis para que el lector pueda tomar decisiones" },
+      { question: "¿Qué incluye la estructura estándar de un informe técnico?", options: ["Solo resultados y conclusiones", "Resumen, introducción, metodología, resultados, análisis, conclusiones y recomendaciones", "Solo la metodología y los resultados", "Solo el resumen ejecutivo y las recomendaciones"], answer: "Resumen, introducción, metodología, resultados, análisis, conclusiones y recomendaciones" },
+      { question: "¿Por qué el resumen ejecutivo es la parte más importante?", options: ["Es la más larga del informe", "Es la parte que más personas van a leer completa y debe poder entenderse de forma independiente", "Es la que primero revisan los auditores", "Es donde se presentan los datos más técnicos"], answer: "Es la parte que más personas van a leer completa y debe poder entenderse de forma independiente" },
+      { question: "¿Cómo debe adaptarse el lenguaje del informe?", options: ["Siempre con máxima tecnicidad", "Según la audiencia: técnica para analistas, accesible para directivos, precisa para reguladores", "Siempre simple para todos los públicos", "Siempre formal independientemente del destinatario"], answer: "Según la audiencia: técnica para analistas, accesible para directivos, precisa para reguladores" },
+      { question: "¿Qué debe responder el resumen ejecutivo?", options: ["Todos los detalles técnicos del proceso", "Por qué, qué se encontró, qué significa y qué se recomienda hacer", "Solo el problema planteado", "Solo las conclusiones sin contexto"], answer: "Por qué, qué se encontró, qué significa y qué se recomienda hacer" },
+      { question: "¿Qué error tiene un informe que termina con 'se observan áreas de mejora'?", options: ["Ninguno, es una conclusión válida", "No especifica cuáles son las áreas ni cómo abordarlas, por lo que no es accionable", "Es demasiado técnico para la audiencia", "Usa un tiempo verbal incorrecto"], answer: "No especifica cuáles son las áreas ni cómo abordarlas, por lo que no es accionable" },
+      { question: "¿Cuál es un error frecuente de redacción en informes técnicos?", options: ["Usar demasiados gráficos", "Incluir datos sin analizarlos y presentar conclusiones sin evidencia", "Hacer el informe demasiado breve", "Usar demasiados sinónimos"], answer: "Incluir datos sin analizarlos y presentar conclusiones sin evidencia" },
+      { question: "¿Qué caracteriza a una recomendación bien formulada?", options: ["Que sea general para aplicar en muchos contextos", "Que sea concreta, específica y accionable por quien la recibe", "Que use lenguaje técnico avanzado", "Que sea breve, de no más de una línea"], answer: "Que sea concreta, específica y accionable por quien la recibe" },
+    ],
+    dictation: "Un informe técnico efectivo adapta su lenguaje a la audiencia y termina con conclusiones concretas y recomendaciones accionables.",
+  },
+  {
+    id: "negociacion-tecnica", title: "Negociación técnica", level: "Avanzado", category: "Comunicación", emoji: "🤝",
+    description: "Estrategias y lenguaje para negociar en contextos técnicos y profesionales.",
+    readingTitle: "Cuando los números no alcanzan",
+    reading: [
+      "En el entorno laboral del laboratorio clínico, la negociación aparece en muchos contextos: la discusión de plazos para implementar correcciones con el responsable de calidad, la justificación de recursos adicionales ante la dirección, la definición de niveles de servicio con los clientes, y la resolución de desacuerdos técnicos entre especialistas. En todos esos casos, negociar bien requiere combinar argumentos técnicos sólidos con habilidades de comunicación efectivas.",
+      "El primer principio de una negociación técnica efectiva es separar los intereses de las posiciones. Una posición es lo que alguien dice que quiere: 'necesito el resultado en dos horas'. Un interés es la razón detrás de esa posición: 'necesito el resultado antes de que el médico de guardia tome una decisión terapéutica'. Cuando se trabaja sobre los intereses y no sobre las posiciones, el espacio para encontrar soluciones mutuamente aceptables es mucho mayor.",
+      "En español técnico, hay frases específicas que facilitan la negociación constructiva. Para explorar los intereses del otro: '¿Podría ayudarme a entender por qué esto es importante para usted?', 'Si entiendo bien, lo que más le preocupa es...'. Para proponer alternativas: 'Una opción que podría funcionar sería...', '¿Qué le parecería si...?'. Para manejar el desacuerdo sin confrontación: 'Entiendo su punto, aunque desde nuestra perspectiva...', 'Compartimos el objetivo, aunque diferimos en el camino'.",
+      "La preparación previa es un factor determinante del éxito en cualquier negociación. Antes de una reunión donde se va a negociar, es importante identificar cuál es el resultado ideal, cuál es el resultado aceptable mínimo, y cuál es la alternativa si no se llega a un acuerdo. También es importante anticipar los argumentos del otro lado y preparar respuestas fundamentadas.",
+      "Un aspecto específico del contexto técnico es que los argumentos deben estar respaldados por datos. En una negociación donde se discute el plazo para implementar una corrección identificada en una auditoría, presentar datos sobre el impacto de la no conformidad y un plan de acción detallado es mucho más efectivo que simplemente pedir más tiempo. Los datos dan credibilidad y orientan la discusión hacia los hechos y no hacia las percepciones.",
+    ],
+    vocab: [
+      { es: "negociación", pt: "negociação" }, { es: "interés vs posición", pt: "interesse vs posição" },
+      { es: "acuerdo mutuamente beneficioso", pt: "acordo mutuamente benéfico" }, { es: "alternativa", pt: "alternativa" },
+      { es: "concesión", pt: "concessão" }, { es: "punto de partida / límite", pt: "ponto de partida / limite" },
+    ],
+    quiz: [
+      { question: "¿En qué contextos aparece la negociación en el laboratorio?", options: ["Solo con clientes externos", "Plazos, recursos, niveles de servicio y desacuerdos técnicos internos y externos", "Solo con organismos reguladores", "Solo al momento de renovar contratos"], answer: "Plazos, recursos, niveles de servicio y desacuerdos técnicos internos y externos" },
+      { question: "¿Qué diferencia hay entre posición e interés?", options: ["Son sinónimos en el contexto de negociación", "La posición es lo que alguien dice querer; el interés es la razón real detrás de esa demanda", "El interés es siempre económico; la posición es técnica", "La posición cambia; el interés es siempre fijo"], answer: "La posición es lo que alguien dice querer; el interés es la razón real detrás de esa demanda" },
+      { question: "¿Por qué conviene trabajar sobre intereses y no posiciones?", options: ["Porque las posiciones no son negociables", "Porque amplía el espacio para encontrar soluciones mutuamente aceptables", "Porque los intereses siempre son más razonables", "Para ahorrar tiempo en la discusión"], answer: "Porque amplía el espacio para encontrar soluciones mutuamente aceptables" },
+      { question: "¿Qué frase sirve para explorar los intereses del otro?", options: ["'Le propongo que acepte mi posición'", "'¿Podría ayudarme a entender por qué esto es importante para usted?'", "'Necesito que decida ahora'", "'Este es mi límite final'"], answer: "'¿Podría ayudarme a entender por qué esto es importante para usted?'" },
+      { question: "¿Qué tres elementos deben definirse en la preparación de una negociación?", options: ["El tiempo, el lugar y los participantes", "El resultado ideal, el mínimo aceptable y la alternativa si no hay acuerdo", "Las concesiones posibles, el precio y los plazos", "El equipo negociador, los argumentos y los datos"], answer: "El resultado ideal, el mínimo aceptable y la alternativa si no hay acuerdo" },
+      { question: "¿Por qué los datos son especialmente importantes en negociaciones técnicas?", options: ["Porque impresionan más al interlocutor", "Porque dan credibilidad y orientan la discusión hacia hechos y no hacia percepciones", "Porque son obligatorios por norma", "Porque reducen el tiempo de la negociación"], answer: "Porque dan credibilidad y orientan la discusión hacia hechos y no hacia percepciones" },
+      { question: "¿Cómo se expresa desacuerdo sin confrontación en español técnico?", options: ["Diciendo directamente 'no estoy de acuerdo'", "Con frases como 'Entiendo su punto, aunque desde nuestra perspectiva...'", "Evitando responder directamente", "Cambiando el tema de la conversación"], answer: "Con frases como 'Entiendo su punto, aunque desde nuestra perspectiva...'" },
+      { question: "¿Qué hace más efectiva una propuesta en una negociación técnica?", options: ["Ser presentada primero antes de escuchar al otro", "Estar respaldada por datos y un plan concreto", "Ser lo más simple posible", "Incluir concesiones grandes desde el inicio"], answer: "Estar respaldada por datos y un plan concreto" },
+    ],
+    dictation: "En una negociación técnica es importante separar los intereses de las posiciones y respaldar cada propuesta con datos concretos.",
+  },
+  // ══ TECNOLOGÍA (adicional) ══
+  {
+    id: "automatizacion", title: "Automatización del laboratorio", level: "Avanzado", category: "Tecnología", emoji: "🤖",
+    description: "Sistemas de automatización, robótica y flujo de trabajo en el laboratorio moderno.",
+    readingTitle: "El laboratorio que no para",
+    reading: [
+      "La automatización del laboratorio clínico ha transformado radicalmente la forma en que se procesan las muestras. Los sistemas de automatización total o parcial integran múltiples instrumentos analíticos en una línea continua de procesamiento: desde la recepción y descongelación de muestras, pasando por el centrifugado, la alicuotación, la carga de los tubos en los analizadores, hasta el almacenamiento refrigerado de las muestras procesadas. Todo este flujo puede ocurrir con una intervención mínima del personal.",
+      "Los beneficios de la automatización son múltiples y bien documentados. La estandarización del proceso reduce la variabilidad introducida por el factor humano, especialmente en tareas repetitivas como el pipeteo o la manipulación de tubos. La trazabilidad es total: el sistema registra automáticamente quién hizo qué, con qué instrumento, a qué hora y con qué resultado de control. La capacidad de procesamiento aumenta significativamente sin aumentar el personal en la misma proporción.",
+      "Sin embargo, la automatización también introduce nuevos desafíos técnicos y de gestión. Los sistemas automatizados son más costosos de adquirir y mantener. Requieren personal técnico especializado para su operación y mantenimiento preventivo. Cuando fallan, pueden afectar a todo el flujo de trabajo simultáneamente, lo que hace que la planificación de contingencias sea especialmente importante.",
+      "La interfaz entre el sistema de automatización y el LIMS es un componente crítico. Los errores en esa interfaz pueden generar resultados asignados a muestras incorrectas, dobles registros o pérdida de información. Antes de activar cualquier nueva interfaz, el laboratorio debe realizar una validación exhaustiva con muestras de control y verificar que toda la cadena de información funciona correctamente de extremo a extremo.",
+      "El rol del analista en un laboratorio automatizado es diferente al rol tradicional, pero no menos importante. El analista deja de realizar tareas manuales repetitivas para asumir responsabilidades de supervisión del sistema, verificación de la calidad de los resultados, gestión de las excepciones y alertas, y mantenimiento de los controles de calidad analítica. Esa transición requiere formación específica y una reconceptualización del perfil profesional del analista de laboratorio.",
+    ],
+    vocab: [
+      { es: "automatización total", pt: "automação total" }, { es: "línea de procesamiento", pt: "linha de processamento" },
+      { es: "alicuotación automática", pt: "aliquotagem automática" }, { es: "trazabilidad total", pt: "rastreabilidade total" },
+      { es: "mantenimiento preventivo", pt: "manutenção preventiva" }, { es: "plan de contingencia", pt: "plano de contingência" },
+    ],
+    quiz: [
+      { question: "¿Qué integran los sistemas de automatización total del laboratorio?", options: ["Solo los analizadores bioquímicos", "Recepción, centrifugado, alicuotación, análisis y almacenamiento en una línea continua", "Solo el LIMS y los analizadores", "Solo los procesos preanalíticos"], answer: "Recepción, centrifugado, alicuotación, análisis y almacenamiento en una línea continua" },
+      { question: "¿Cuál es un beneficio documentado de la automatización?", options: ["Elimina completamente los errores del laboratorio", "Estandariza el proceso y reduce la variabilidad del factor humano", "Hace innecesario el control de calidad", "Reduce el costo de cada análisis a la mitad"], answer: "Estandariza el proceso y reduce la variabilidad del factor humano" },
+      { question: "¿Qué desafío introduce la automatización respecto a las fallas?", options: ["Las fallas son más frecuentes que en el trabajo manual", "Una falla puede afectar a todo el flujo de trabajo simultáneamente", "Las fallas son siempre fáciles de detectar", "Las fallas solo afectan a un instrumento aislado"], answer: "Una falla puede afectar a todo el flujo de trabajo simultáneamente" },
+      { question: "¿Por qué es crítica la interfaz entre el sistema de automatización y el LIMS?", options: ["Por razones estéticas de la interfaz visual", "Errores en ella pueden generar resultados asignados incorrectamente o pérdida de información", "Solo porque lo exige la norma ISO", "Para mejorar la velocidad de procesamiento"], answer: "Errores en ella pueden generar resultados asignados incorrectamente o pérdida de información" },
+      { question: "¿Qué debe hacerse antes de activar una nueva interfaz?", options: ["Solo verificar la velocidad de transferencia de datos", "Una validación exhaustiva con muestras de control de extremo a extremo", "Actualizar el LIMS a la última versión", "Capacitar a todo el personal en el nuevo sistema"], answer: "Una validación exhaustiva con muestras de control de extremo a extremo" },
+      { question: "¿Cómo cambia el rol del analista en un laboratorio automatizado?", options: ["El analista ya no es necesario", "Pasa de tareas manuales repetitivas a supervisión, gestión de excepciones y control de calidad", "Sus tareas se simplifican sin cambio de habilidades", "Solo debe operar el software del LIMS"], answer: "Pasa de tareas manuales repetitivas a supervisión, gestión de excepciones y control de calidad" },
+      { question: "¿Qué tipo de mantenimiento es esencial en sistemas automatizados?", options: ["Solo el mantenimiento correctivo cuando algo falla", "El mantenimiento preventivo programado regularmente", "Solo la limpieza diaria de los equipos", "Solo el mantenimiento anual del fabricante"], answer: "El mantenimiento preventivo programado regularmente" },
+      { question: "¿Qué requiere la transición del analista al rol en laboratorio automatizado?", options: ["Solo aprender a usar el software nuevo", "Formación específica y reconceptualización del perfil profesional", "Reducción de la carga de trabajo total", "Solo supervisión durante los primeros días"], answer: "Formación específica y reconceptualización del perfil profesional" },
+    ],
+    dictation: "La automatización del laboratorio estandariza el proceso y aumenta la trazabilidad, pero requiere planificación de contingencias ante posibles fallas del sistema.",
+  },
+  // ══ GRAMÁTICA (adicionales) ══
+  {
+    id: "preposiciones", title: "Preposiciones técnicas", level: "Intermedio", category: "Gramática", emoji: "🔧",
+    description: "Las preposiciones más frecuentes del español técnico y sus diferencias con el portugués.",
+    readingTitle: "Las pequeñas palabras que cambian el sentido",
+    reading: [
+      "Las preposiciones son palabras pequeñas pero fundamentales: conectan elementos de la oración e indican relaciones de tiempo, lugar, causa, modo, destino y otras. En español técnico, el uso correcto de las preposiciones es esencial para la claridad del mensaje. Un error preposicional puede cambiar completamente el sentido de una frase o crear ambigüedad donde debería haber precisión.",
+      "La preposición 'en' tiene usos muy amplios en español. Indica lugar ('las muestras están en el refrigerador'), tiempo ('en el turno de la mañana'), modo ('en condiciones de ayuno'), y medio ('en papel', 'en formato digital'). En portugués, muchos de estos usos se expresan con 'no/na', 'em' o 'de', lo que genera confusiones frecuentes.",
+      "La preposición 'de' expresa origen, pertenencia, material, contenido y muchas otras relaciones. 'El informe de laboratorio', 'la muestra de sangre', 'el tubo de coagulación', 'los resultados de control'. Un error muy frecuente de hablantes de portugués es omitir la 'de' en construcciones como 'análisis de orina' (en lugar de decir 'análisis orina' como en algunas construcciones del portugués coloquial).",
+      "La preposición 'por' y 'para' son una fuente clásica de dificultad. 'Por' indica causa ('se rechazó la muestra por hemólisis'), agente en voz pasiva ('fue detectado por el analista'), duración ('el equipo estuvo en mantenimiento por tres horas') e intercambio. 'Para' indica destino o finalidad ('el resultado es para el médico de guardia'), propósito ('se calibró para mejorar la precisión'), y plazo ('el informe debe estar listo para el viernes').",
+      "Las locuciones preposicionales son combinaciones de palabras que funcionan como una sola preposición. Son muy frecuentes en el lenguaje técnico: 'a partir de' (a partir del lunes, a partir de esta concentración), 'en función de' (en función del resultado, en función de la edad del paciente), 'de acuerdo con' (de acuerdo con el procedimiento, de acuerdo con los resultados), 'en relación con' (en relación con el mes anterior). Memorizar estas locuciones mejora significativamente la fluidez en la escritura técnica.",
+    ],
+    vocab: [
+      { es: "en ayunas / en condiciones de ayuno", pt: "em jejum" }, { es: "de acuerdo con", pt: "de acordo com" },
+      { es: "a partir de", pt: "a partir de" }, { es: "por / para (distinción)", pt: "por / para (distinção)" },
+      { es: "en función de", pt: "em função de" }, { es: "en relación con", pt: "em relação a" },
+    ],
+    quiz: [
+      { question: "¿Qué relaciones puede expresar la preposición 'en' en español técnico?", options: ["Solo lugar", "Lugar, tiempo, modo y medio entre otras relaciones", "Solo tiempo y modo", "Solo pertenencia y origen"], answer: "Lugar, tiempo, modo y medio entre otras relaciones" },
+      { question: "¿Cuál es un error frecuente con 'de' en hablantes de portugués?", options: ["Usarla demasiado frecuentemente", "Omitirla en construcciones como 'análisis de orina'", "Confundirla con 'desde'", "Usarla donde corresponde 'en'"], answer: "Omitirla en construcciones como 'análisis de orina'" },
+      { question: "¿Qué expresa 'por' en 'se rechazó la muestra por hemólisis'?", options: ["Destino o finalidad", "Causa del rechazo", "Agente en voz pasiva", "Duración del proceso"], answer: "Causa del rechazo" },
+      { question: "¿Cuándo se usa 'para' en lugar de 'por'?", options: ["Para indicar causa de algo que ocurrió", "Para indicar destino, finalidad o plazo", "Para indicar duración de una acción", "Para indicar el agente de la voz pasiva"], answer: "Para indicar destino, finalidad o plazo" },
+      { question: "¿Qué es una locución preposicional?", options: ["Una preposición simple muy frecuente", "Una combinación de palabras que funciona como una sola preposición", "Una preposición de origen latino", "Un sinónimo de preposición compuesta"], answer: "Una combinación de palabras que funciona como una sola preposición" },
+      { question: "¿Cómo se usa 'a partir de' en contexto técnico?", options: ["Solo para indicar personas", "Para indicar un punto de inicio en tiempo o en concentración", "Solo en textos formales escritos", "Como sinónimo de 'hasta'"], answer: "Para indicar un punto de inicio en tiempo o en concentración" },
+      { question: "¿Cómo se expresa 'de acordo com o procedimento' en español?", options: ["Según el procedimiento / De acuerdo con el procedimiento", "Con el procedimiento / Por el procedimiento", "Sobre el procedimiento / En el procedimiento", "Dentro del procedimiento / Bajo el procedimiento"], answer: "Según el procedimiento / De acuerdo con el procedimiento" },
+      { question: "¿Cuál es la preposición correcta en 'el resultado __ el médico de guardia'?", options: ["de", "por", "en", "para"], answer: "para" },
+    ],
+    dictation: "Las preposiciones por y para expresan relaciones diferentes: por indica causa o agente, mientras que para indica destino, finalidad o plazo.",
+  },
+  {
+    id: "condicional", title: "Condicional y hipótesis", level: "Avanzado", category: "Gramática", emoji: "💭",
+    description: "El condicional para formular hipótesis, recomendaciones y situaciones posibles.",
+    readingTitle: "Lo que haríamos si...",
+    reading: [
+      "El condicional es el tiempo verbal que se usa en español para hablar de situaciones hipotéticas, posibles o imaginadas, y para formular recomendaciones con un tono más atenuado y cortés que el imperativo. En el contexto técnico del laboratorio, aparece constantemente en la formulación de hipótesis diagnósticas, en las discusiones sobre qué hacer en situaciones que todavía no han ocurrido, y en las recomendaciones formales de los informes.",
+      "El condicional simple, que en español se forma añadiendo las terminaciones -ía, -ías, -ía, -íamos, -íais, -ían al infinitivo, expresa lo que ocurriría en una situación hipotética. 'Si el control fallara, detendríamos la corrida.' 'Con ese resultado, el médico probablemente modificaría el tratamiento.' 'En esas condiciones, la muestra sería inutilizable.' Esta forma es muy frecuente en las discusiones técnicas y en la redacción de protocolos de contingencia.",
+      "El condicional también se usa para hacer recomendaciones de forma cortés y atenuada, que es una estrategia comunicativa importante en el entorno laboral. 'Sería conveniente revisar el procedimiento antes de implementar el cambio.' 'Convendría comunicar este hallazgo al área de calidad antes del viernes.' 'Habría que considerar la posibilidad de una calibración adicional.' Estas frases son mucho más suaves que las equivalentes en imperativo.",
+      "La diferencia entre el condicional simple y el compuesto es importante para la precisión temporal. El condicional compuesto (habría + participio) se refiere a situaciones que habrían ocurrido en el pasado si las condiciones hubieran sido diferentes: 'Si hubiéramos detectado la desviación antes, habríamos evitado el error.' Esta forma aparece frecuentemente en el análisis retrospectivo de incidentes y no conformidades.",
+      "Para los hablantes de portugués, el condicional simple del español es relativamente familiar porque tiene una forma similar al futuro do pretérito del portugués. Sin embargo, en el portugués hablado coloquial, el futuro do pretérito frecuentemente se sustituye por el imperfeito (en portugués: 'se o controle falhasse, parávamos a corrida'). En español formal y técnico, el condicional simple es la forma correcta y esperada en estos contextos.",
+    ],
+    vocab: [
+      { es: "condicional simple (haría)", pt: "futuro do pretérito (faria)" },
+      { es: "sería conveniente", pt: "seria conveniente" },
+      { es: "convendría / habría que", pt: "conviria / seria necessário" },
+      { es: "si + imperfecto subjuntivo + condicional", pt: "se + imperfeito subjuntivo + futuro do pretérito" },
+      { es: "habría ocurrido (condicional compuesto)", pt: "teria ocorrido (condicional composto)" },
+      { es: "hipótesis / situación hipotética", pt: "hipótese / situação hipotética" },
+    ],
+    quiz: [
+      { question: "¿Para qué se usa el condicional en español técnico?", options: ["Solo para el futuro inmediato", "Para situaciones hipotéticas, recomendaciones atenuadas y protocolos de contingencia", "Solo en el lenguaje coloquial informal", "Solo para acciones del pasado reciente"], answer: "Para situaciones hipotéticas, recomendaciones atenuadas y protocolos de contingencia" },
+      { question: "¿Cómo se forma el condicional simple?", options: ["Con 'haber' + participio", "Añadiendo -ía, -ías, -ía, -íamos, -ían al infinitivo", "Igual que el futuro simple", "Con el auxiliar 'ir' + infinitivo"], answer: "Añadiendo -ía, -ías, -ía, -íamos, -ían al infinitivo" },
+      { question: "¿Por qué se usa el condicional para hacer recomendaciones?", options: ["Porque es gramaticalmente obligatorio", "Porque atenúa el tono y lo hace más cortés que el imperativo directo", "Porque es más formal que el imperativo", "Solo por convención académica"], answer: "Porque atenúa el tono y lo hace más cortés que el imperativo directo" },
+      { question: "¿Cuál de estas frases usa el condicional correctamente?", options: ["Mañana revisamos el procedimiento", "Sería conveniente revisar el procedimiento antes de implementar el cambio", "Revisad el procedimiento antes del cambio", "Hay que revisar el procedimiento"], answer: "Sería conveniente revisar el procedimiento antes de implementar el cambio" },
+      { question: "¿Cuándo se usa el condicional compuesto (habría + participio)?", options: ["Para situaciones futuras posibles", "Para situaciones que habrían ocurrido en el pasado si las condiciones hubieran sido diferentes", "Como sinónimo del condicional simple", "Solo en el lenguaje escrito muy formal"], answer: "Para situaciones que habrían ocurrido en el pasado si las condiciones hubieran sido diferentes" },
+      { question: "¿En qué contexto laboral es frecuente el condicional compuesto?", options: ["En la redacción de procedimientos futuros", "En el análisis retrospectivo de incidentes y no conformidades", "En las comunicaciones cotidianas con clientes", "En los informes de resultados analíticos"], answer: "En el análisis retrospectivo de incidentes y no conformidades" },
+      { question: "¿Cómo se expresa 'sería necessário' en español?", options: ["Sería necesario / habría que / convendría", "Es necesario / se necesita / hay que", "Será necesario / habrá que", "Fue necesario / hubo que"], answer: "Sería necesario / habría que / convendría" },
+      { question: "¿Cómo expresa el español coloquial la hipótesis que el portugués coloquial hace con imperfeito?", options: ["Con el mismo imperfeito también", "Con el condicional simple, que es la forma correcta en español técnico formal", "Con el futuro simple", "Con el presente de indicativo"], answer: "Con el condicional simple, que es la forma correcta en español técnico formal" },
+    ],
+    dictation: "Si el control fallara, detendríamos la corrida y sería conveniente investigar la causa antes de continuar con el procesamiento.",
+  },
 ];
+
 
 
 const defaultStudents: Student[] = [
@@ -1825,7 +2058,7 @@ export default function Home() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
                 <span style={{fontSize:13,fontWeight:600,color:TEXT,fontFamily:FONT}}>Escuchá mientras estudiás</span>
               </div>
-              <iframe style={{borderRadius:"0 0 24px 24px",display:"block"}} src="https://open.spotify.com/embed/playlist/37i9dQZF1DX3LyU02BhDVu?utm_source=generator&theme=0" width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"/>
+              <iframe style={{borderRadius:"0 0 24px 24px",display:"block"}} src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcOFHFBj89A5?utm_source=generator&theme=0" width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"/>
             </div>
           </div>
         </div>
