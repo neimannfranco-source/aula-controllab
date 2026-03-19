@@ -710,6 +710,11 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState(QUIZ_TIME);
   const [timerOn, setTimerOn] = useState(false);
   const [showCert, setShowCert] = useState(false);
+  const [showTranslator, setShowTranslator] = useState(false);
+  const [transInput, setTransInput] = useState("");
+  const [transResult, setTransResult] = useState("");
+  const [transDir, setTransDir] = useState<"es-pt" | "pt-es">("es-pt");
+  const [transLoading, setTransLoading] = useState(false);
 
   useEffect(() => {
     try { const s = localStorage.getItem(STORAGE_KEY); if (s) setAppState({ ...createInitialState(), ...JSON.parse(s) }); } catch { }
@@ -816,47 +821,187 @@ export default function Home() {
     setAppState(p => ({ ...p, dictations: { ...p.dictations, [student.id]: { ...(p.dictations[student.id] || {}), [selectedModuleId]: r } } }));
   };
 
+  const translate = async () => {
+    if (!transInput.trim()) return;
+    setTransLoading(true); setTransResult("");
+    const from = transDir === "es-pt" ? "español" : "portugués";
+    const to = transDir === "es-pt" ? "portugués" : "español";
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514", max_tokens: 300,
+          messages: [{ role: "user", content: `Traducí este texto de ${from} a ${to} en contexto técnico de laboratorio clínico. Respondé SOLO con la traducción, sin explicaciones:\n\n${transInput}` }]
+        })
+      });
+      const data = await res.json();
+      setTransResult(data.content?.[0]?.text || "No se pudo traducir.");
+    } catch { setTransResult("Error de conexión."); }
+    setTransLoading(false);
+  };
+
   // LOGIN
+  const loginRanking = appState.students.map(s => {
+    const p = appState.progress[s.id] || {};
+    const pts = MODULES.reduce((x, m) => x + (p[m.id]?.score || 0), 0) * 10;
+    const cm = Object.keys(p).length;
+    return { ...s, pts, cm };
+  }).sort((a, b) => b.pts - a.pts).slice(0, 5);
+
   if (!student) return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8 overflow-x-hidden">
       <style>{STYLES}</style>
-      <div className="w-full max-w-5xl">
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="glass rounded-3xl p-8 md:p-10" style={{ boxShadow: "0 0 40px rgba(99,202,183,0.15)" }}>
-            <div className="mono text-xs tracking-widest text-slate-400 mb-4">CONTROLLAB · ES-PT</div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">Aula<br /><span className="accent">Controllab</span></h1>
-            <p className="mt-4 text-slate-300 leading-7">{MODULES.length} módulos de español técnico: laboratorio, gestión, TI, comunicación y gramática.</p>
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              {[{ n: MODULES.length, l: "Módulos" }, { n: defaultStudents.length, l: "Alumnos" }, { n: "6", l: "Áreas" }, { n: "🏆", l: "Ranking" }].map(x => (
-                <div key={x.l} className="glass rounded-2xl p-4"><div className="text-2xl font-bold text-white mono">{x.n}</div><div className="text-sm text-slate-300 mt-1">{x.l}</div></div>
-              ))}
+
+      {/* BG blobs */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+        <div style={{ position: "absolute", top: "-10%", left: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,202,183,0.12) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", bottom: "-10%", right: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,202,183,0.08) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", top: "40%", left: "50%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(74,171,151,0.06) 0%, transparent 70%)" }} />
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto">
+
+        {/* HERO */}
+        <div className="text-center mb-10 ani">
+          <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 text-xs mono tracking-widest text-slate-400 mb-6">
+            <span className="w-2 h-2 rounded-full accent-bg inline-block" style={{ animation: "pulse 2s infinite" }} />
+            CONTROLLAB · PLATAFORMA DE ESPAÑOL TÉCNICO
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black text-white leading-none tracking-tight">
+            Aula<br /><span className="accent" style={{ textShadow: "0 0 60px rgba(99,202,183,0.4)" }}>Controllab</span>
+          </h1>
+          <p className="mt-5 text-slate-300 text-lg max-w-xl mx-auto leading-7">
+            Español técnico para el equipo Controllab.<br />
+            <span className="accent font-semibold">{MODULES.length} módulos</span> · laboratorio · gestión · TI · comunicación · gramática
+          </p>
+        </div>
+
+        {/* STATS ROW */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 ani">
+          {[
+            { icon: "🧪", n: MODULES.length, l: "Módulos", sub: "32 lecciones completas" },
+            { icon: "👥", n: defaultStudents.length, l: "Alumnos", sub: "Equipo Controllab" },
+            { icon: "📚", n: "6", l: "Áreas", sub: "Lab · TI · Gestión · más" },
+            { icon: "🏆", n: "Top 5", l: "Ranking", sub: "Competencia entre colegas" },
+          ].map(x => (
+            <div key={x.l} className="glass rounded-2xl p-4 text-center" style={{ borderColor: "rgba(99,202,183,0.1)" }}>
+              <div className="text-2xl mb-1">{x.icon}</div>
+              <div className="text-2xl font-black mono text-white">{x.n}</div>
+              <div className="text-sm font-bold text-white mt-0.5">{x.l}</div>
+              <div className="text-xs text-slate-500 mt-1">{x.sub}</div>
             </div>
-            <div className="mt-6 glass rounded-2xl p-4">
-              <div className="text-xs mono text-slate-400 mb-3 tracking-widest">ALUMNOS</div>
-              <div className="flex flex-wrap gap-2">{defaultStudents.map(s => <span key={s.id} className="glass text-slate-200 text-xs px-3 py-1 rounded-full">{s.name}</span>)}</div>
+          ))}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+
+          {/* LEFT: ranking preview + alumnos + módulos preview */}
+          <div className="space-y-4">
+
+            {/* Ranking preview */}
+            <div className="glass rounded-3xl p-5" style={{ boxShadow: "0 0 30px rgba(99,202,183,0.08)" }}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="mono text-xs text-slate-400 tracking-widest">🏆 RANKING ACTUAL</div>
+                <div className="text-xs text-slate-500">Top 5 alumnos</div>
+              </div>
+              {loginRanking.length === 0 ? (
+                <div className="text-center py-6">
+                  <div className="text-3xl mb-2">🚀</div>
+                  <div className="text-slate-400 text-sm">¡Nadie ha completado módulos todavía! Sé el primero.</div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {loginRanking.map((r, i) => (
+                    <div key={r.id} className={`flex items-center gap-3 rounded-xl px-4 py-3 ${i === 0 ? "bg-yellow-500/10 border border-yellow-500/20" : "glass"}`}>
+                      <span className={`text-lg w-7 ${i === 0 ? "m1" : i === 1 ? "m2" : i === 2 ? "m3" : "text-slate-500"}`}>{i < 3 ? ["🥇", "🥈", "🥉"][i] : `${i + 1}.`}</span>
+                      <span className="flex-1 font-semibold text-sm">{r.name}</span>
+                      <span className="text-xs text-slate-400">{r.cm} mód.</span>
+                      <span className="mono text-sm font-black accent">{r.pts} pts</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Módulos preview */}
+            <div className="glass rounded-3xl p-5">
+              <div className="mono text-xs text-slate-400 tracking-widest mb-4">📚 MÓDULOS DISPONIBLES</div>
+              <div className="grid grid-cols-4 gap-2">
+                {MODULES.map(m => (
+                  <div key={m.id} className="glass rounded-xl p-2.5 text-center" title={m.title}>
+                    <div className="text-xl">{m.emoji}</div>
+                    <div className="text-xs text-slate-400 mt-1 truncate" style={{ fontSize: "9px" }}>{m.title}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Alumnos */}
+            <div className="glass rounded-3xl p-5">
+              <div className="mono text-xs text-slate-400 tracking-widest mb-3">👥 ALUMNOS</div>
+              <div className="flex flex-wrap gap-2">
+                {defaultStudents.map(s => <span key={s.id} className="glass text-slate-200 text-xs px-3 py-1.5 rounded-full font-medium">{s.name}</span>)}
+              </div>
             </div>
           </div>
-          <div className="glass rounded-3xl p-8 md:p-10">
-            <div className="mono text-xs tracking-widest text-slate-400 mb-4">INGRESO</div>
-            <h2 className="text-2xl font-bold text-white">Entrar como alumno</h2>
-            <p className="mt-2 text-slate-400 text-sm">Usá tu nombre y el código que te dio el profe.</p>
-            <div className="mt-8 space-y-4">
-              <div><label className="block text-sm text-slate-300 mb-2">Nombre</label>
-                <input value={loginName} onChange={e => setLoginName(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Ej: Marília" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3" /></div>
-              <div><label className="block text-sm text-slate-300 mb-2">Código</label>
-                <input value={loginCode} onChange={e => setLoginCode(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Ej: MARILIA" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 mono" /></div>
-              {loginError && <p className="text-rose-400 text-sm">{loginError}</p>}
-              <button onClick={login} className="btn-accent w-full px-5 py-3.5 text-sm">Ingresar →</button>
+
+          {/* RIGHT: login + translator */}
+          <div className="space-y-4">
+            {/* LOGIN */}
+            <div className="glass rounded-3xl p-7" style={{ boxShadow: "0 0 40px rgba(99,202,183,0.12)", borderColor: "rgba(99,202,183,0.15)" }}>
+              <div className="mono text-xs tracking-widest text-slate-400 mb-1">INGRESO</div>
+              <h2 className="text-2xl font-bold text-white mb-1">Entrar como alumno</h2>
+              <p className="text-slate-400 text-sm mb-6">Usá tu nombre y el código que te dio el profe.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2 font-medium">Nombre</label>
+                  <input value={loginName} onChange={e => setLoginName(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Ej: Marília" className="w-full rounded-xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3.5" />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2 font-medium">Código de acceso</label>
+                  <input value={loginCode} onChange={e => setLoginCode(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Ej: MARILIA" className="w-full rounded-xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3.5 mono" />
+                </div>
+                {loginError && <p className="text-rose-400 text-sm">{loginError}</p>}
+                <button onClick={login} className="btn-accent w-full px-5 py-4 text-sm">Ingresar a la plataforma →</button>
+              </div>
+              <div className="mt-5 glass rounded-2xl p-4">
+                <button onClick={openPanel} className="w-full text-left text-sm text-slate-300 hover:text-white transition flex justify-between items-center">
+                  <span>🔐 Panel del profesor</span><span className="text-slate-500">{showPanel ? "▲" : "▼"}</span>
+                </button>
+                {showPanel && <div className="mt-4 space-y-3">
+                  <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
+                  <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm mono" />
+                  <button onClick={addStudent} className="btn-accent w-full px-4 py-2.5 text-sm">+ Agregar alumno</button>
+                </div>}
+              </div>
             </div>
-            <div className="mt-6 glass rounded-2xl p-4">
-              <button onClick={openPanel} className="w-full text-left text-sm text-slate-300 hover:text-white transition flex justify-between items-center">
-                <span>🔐 Panel del profesor</span><span className="text-slate-500">{showPanel ? "▲" : "▼"}</span>
+
+            {/* TRANSLATOR */}
+            <div className="glass rounded-3xl p-5" style={{ borderColor: "rgba(99,202,183,0.15)" }}>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="mono text-xs text-slate-400 tracking-widest mb-0.5">🌐 TRADUCTOR RÁPIDO</div>
+                  <div className="text-sm font-semibold text-white">Español ↔ Portugués técnico</div>
+                </div>
+                <button onClick={() => setTransDir(d => d === "es-pt" ? "pt-es" : "es-pt")}
+                  className="glass rounded-xl px-3 py-2 text-xs font-bold accent hover:border-[#63CAB7] transition">
+                  {transDir === "es-pt" ? "ES → PT" : "PT → ES"} ⇄
+                </button>
+              </div>
+              <textarea value={transInput} onChange={e => setTransInput(e.target.value)}
+                rows={3} placeholder={transDir === "es-pt" ? "Escribí en español..." : "Escreva em português..."}
+                className="w-full rounded-2xl bg-slate-800/80 border border-slate-700 text-white px-4 py-3 text-sm leading-6 resize-none" />
+              <button onClick={translate} disabled={transLoading || !transInput.trim()} className="btn-accent w-full mt-3 py-3 text-sm">
+                {transLoading ? "Traduciendo..." : "Traducir"}
               </button>
-              {showPanel && <div className="mt-4 space-y-3">
-                <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
-                <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm mono" />
-                <button onClick={addStudent} className="btn-accent w-full px-4 py-2.5 text-sm">+ Agregar alumno</button>
-              </div>}
+              {transResult && (
+                <div className="mt-3 glass-dark rounded-2xl p-4 ani">
+                  <div className="text-xs text-slate-400 mono mb-2 tracking-widest">{transDir === "es-pt" ? "PORTUGUÉS" : "ESPAÑOL"}</div>
+                  <p className="text-slate-100 text-sm leading-6">{transResult}</p>
+                  <button onClick={() => speak(transResult, 0.85)} className="mt-2 text-xs text-slate-400 hover:accent transition">🔊 Escuchar</button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -905,6 +1050,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {allDone && <button onClick={() => setShowCert(true)} className="btn-accent px-3 py-2 text-xs">🎓 Certificado</button>}
+            <button onClick={() => setShowTranslator(t => !t)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showTranslator ? "accent border-[#63CAB7]" : "text-slate-300 hover:text-white"}`}>🌐 Traductor</button>
             <button onClick={openPanel} className="glass rounded-xl px-3 py-2 text-xs text-slate-300 hover:text-white transition">{showPanel ? "✕ Panel" : "📊 Panel profe"}</button>
             <button onClick={logout} className="glass rounded-xl px-3 py-2 text-xs text-slate-300 hover:text-white transition">Salir →</button>
           </div>
@@ -915,6 +1061,39 @@ export default function Home() {
       </header>
 
       <div className="max-w-screen-2xl mx-auto px-4 py-6">
+
+        {/* TRANSLATOR PANEL */}
+        {showTranslator && (
+          <div className="glass rounded-3xl p-5 mb-6 ani">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <div>
+                <div className="mono text-xs text-slate-400 tracking-widest mb-0.5">🌐 TRADUCTOR RÁPIDO</div>
+                <div className="text-sm font-semibold text-white">Español ↔ Portugués técnico · IA</div>
+              </div>
+              <button onClick={() => setTransDir(d => d === "es-pt" ? "pt-es" : "es-pt")} className="glass rounded-xl px-4 py-2 text-sm font-bold accent hover:border-[#63CAB7] transition">
+                {transDir === "es-pt" ? "ES → PT" : "PT → ES"} ⇄
+              </button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-slate-400 mono mb-2">{transDir === "es-pt" ? "ESPAÑOL" : "PORTUGUÉS"}</div>
+                <textarea value={transInput} onChange={e => setTransInput(e.target.value)} rows={4}
+                  placeholder={transDir === "es-pt" ? "Escribí en español..." : "Escreva em português..."}
+                  className="w-full rounded-2xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm leading-6 resize-none" />
+                <button onClick={translate} disabled={transLoading || !transInput.trim()} className="btn-accent w-full mt-2 py-2.5 text-sm">
+                  {transLoading ? "Traduciendo..." : "Traducir →"}
+                </button>
+              </div>
+              <div>
+                <div className="text-xs text-slate-400 mono mb-2">{transDir === "es-pt" ? "PORTUGUÉS" : "ESPAÑOL"}</div>
+                <div className="w-full rounded-2xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm leading-6 min-h-[104px] text-slate-100">
+                  {transLoading ? <span className="text-slate-500 animate-pulse">Traduciendo...</span> : transResult || <span className="text-slate-600">La traducción aparece aquí...</span>}
+                </div>
+                {transResult && <button onClick={() => speak(transResult, 0.85)} className="mt-2 text-xs text-slate-400 hover:text-white transition">🔊 Escuchar traducción</button>}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* PANEL */}
         {showPanel && (
