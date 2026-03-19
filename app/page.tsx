@@ -1150,34 +1150,42 @@ export default function Home() {
 
   useEffect(() => {
     let mounted = true;
+    const LSKEY = "aula-controllab-v7";
     const bootstrap = async () => {
+      // Try Supabase first, fall back to localStorage silently
       try {
-        if (!supabase) { setAppState(createInitialState()); setLoadStatus("ready"); return; }
-        const remote = await loadRemoteState();
-        if (!mounted) return;
-        if (remote) {
-          setAppState({ students: Array.isArray(remote.students) && remote.students.length ? remote.students : defaultStudents, currentStudentId: null, progress: remote.progress || {}, dictations: remote.dictations || {} });
-        } else {
-          const initial = createInitialState();
-          setAppState(initial);
-          await saveRemoteState(initial);
+        if (supabase) {
+          const remote = await loadRemoteState();
+          if (!mounted) return;
+          if (remote) {
+            setAppState({ students: Array.isArray(remote.students) && remote.students.length ? remote.students : defaultStudents, currentStudentId: null, progress: remote.progress || {}, dictations: remote.dictations || {} });
+            setLoadStatus("ready"); return;
+          }
         }
-        setLoadStatus("ready");
-      } catch { if (!mounted) return; setLoadStatus("error"); }
+      } catch { /* Supabase failed, fall through to localStorage */ }
+      // Fallback: localStorage
+      if (!mounted) return;
+      try {
+        const saved = localStorage.getItem(LSKEY);
+        if (saved) { const parsed = JSON.parse(saved); setAppState({ ...createInitialState(), ...parsed, currentStudentId: null }); }
+        else { setAppState(createInitialState()); }
+      } catch { setAppState(createInitialState()); }
+      setLoadStatus("ready");
     };
     bootstrap();
     return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
-    if (loadStatus !== "ready" || !supabase) return;
+    if (loadStatus !== "ready") return;
+    const LSKEY = "aula-controllab-v7";
     const timeout = setTimeout(async () => {
-      try {
-        await saveRemoteState(appState);
-        setSaveError("");
-      } catch (err) {
-        console.error("Save error:", err);
-        setSaveError("⚠️ No se pudo guardar en la nube. Revisá la conexión.");
+      // Always save to localStorage
+      try { localStorage.setItem(LSKEY, JSON.stringify(appState)); } catch {}
+      // Try Supabase silently
+      if (supabase) {
+        try { await saveRemoteState(appState); setSaveError(""); }
+        catch { /* silently ignore, localStorage is the backup */ }
       }
     }, 500);
     return () => clearTimeout(timeout);
