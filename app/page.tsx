@@ -1374,6 +1374,7 @@ export default function Home() {
     ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);border-radius:99px}
   `;
 
+  if (loadStatus === "loading") return (
     <div className="min-h-screen text-white flex items-center justify-center" style={{background:"#060A12"}}>
       <div className="text-center"><div className="text-2xl font-bold">Cargando Aula Controllab...</div><div className="text-slate-400 mt-2 text-sm">Sincronizando progreso en la nube ☁️</div></div>
     </div>
