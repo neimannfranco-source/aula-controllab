@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://bjufnjnijkzypnktdxql.supabase.co";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdWZuam5pamt6eXBua3RkeHFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzUyMjgsImV4cCI6MjA4OTUxMTIyOH0.VWEtmhvSB8Crtjf2vcoFMJaIiDQ5ejkaQB1B2zEBnbw";
 const supabase: SupabaseClient | null =
   supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 const DB_ROW_ID = "global-app-state";
@@ -645,6 +645,25 @@ const defaultStudents: Student[] = [
 
 const CATEGORIES = ["Todos", "Laboratorio", "Gestión", "Comunicación", "Tecnología", "Gramática"];
 
+// ─── Shuffle options with deterministic seed (stable per module+question) ────
+function strSeed(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; }
+  return h;
+}
+function shuffleOpts(opts: string[], seed: number): string[] {
+  const arr = [...opts];
+  let s = seed || 1;
+  for (let i = arr.length - 1; i > 0; i--) {
+    s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s = s >>> 0;
+    const j = s % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+
 const LEVEL_COLOR: Record<string, string> = {
   Básico: "bg-emerald-100 text-emerald-800",
   Intermedio: "bg-amber-100 text-amber-800",
@@ -718,9 +737,14 @@ export default function Home() {
   useEffect(() => {
     if (loadStatus !== "ready" || !supabase) return;
     const timeout = setTimeout(async () => {
-      try { await saveRemoteState(appState); setSaveError(""); }
-      catch { setSaveError("No se pudo guardar en la nube."); }
-    }, 350);
+      try {
+        await saveRemoteState(appState);
+        setSaveError("");
+      } catch (err) {
+        console.error("Save error:", err);
+        setSaveError("⚠️ No se pudo guardar en la nube. Revisá la conexión.");
+      }
+    }, 500);
     return () => clearTimeout(timeout);
   }, [appState, loadStatus]);
 
@@ -730,6 +754,7 @@ export default function Home() {
   const studentDictations = currentStudent ? appState.dictations[currentStudent.id] || {} : {};
   const moduleProgress: ModuleProgress = studentProgress[selectedModuleId] || { completed: false, score: 0, total: selectedModule.quiz.length, attempts: 0 };
   const currentQuestion = selectedModule.quiz[currentQuestionIndex];
+  const shuffledOpts = shuffleOpts(currentQuestion.options, strSeed(selectedModule.id + String(currentQuestionIndex)));
   const isCorrect = submitted && selectedOption === currentQuestion.answer;
   const currentDictation = studentDictations[selectedModuleId] || null;
   const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);
@@ -1150,7 +1175,7 @@ export default function Home() {
                 <div className="glass-dark rounded-2xl p-6">
                   <p className="text-lg font-semibold mb-5 leading-7">{currentQuestion.question}</p>
                   <div className="space-y-3">
-                    {currentQuestion.options.map(option=>{
+                    {shuffledOpts.map(option=>{
                       const sel=selectedOption===option; const correct=submitted&&option===currentQuestion.answer; const wrong=submitted&&sel&&option!==currentQuestion.answer;
                       return <button key={option} onClick={()=>!submitted&&setAnswerMemory(option)} disabled={submitted} className={`option-btn ${correct?"correct":wrong?"wrong":sel?"selected":""}`}>{option}</button>;
                     })}
