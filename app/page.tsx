@@ -8,7 +8,7 @@ type ModuleType = {
   description: string; readingTitle: string; reading: string[];
   vocab: VocabItem[]; quiz: QuizQuestion[]; dictation: string;
 };
-type Student = { id: string; name: string; code: string };
+type Student = { id: string; name: string; code: string; password?: string; passwordChanged?: boolean };
 type ModuleProgress = { completed: boolean; score: number; total: number; attempts: number };
 type DictationResult = { exact: boolean; score: number; written: string; expected: string; updatedAt: string };
 type AppState = {
@@ -1080,7 +1080,7 @@ const defaultStudents: Student[] = [
   { id: "thiago", name: "Thiago", code: "THIAGO" },
 ];
 
-const STORAGE_KEY = "aula-controllab-v4";
+const STORAGE_KEY = "aula-controllab-v5";
 const PROFESSOR_PASSWORD = "controllab2025";
 const CATEGORIES = ["Todos", "Laboratorio", "Gestión", "Comunicación", "Tecnología", "Gramática"];
 const LEVEL_COLOR: Record<string, string> = {
@@ -1188,6 +1188,10 @@ export default function Home() {
   const [transResult, setTransResult] = useState("");
   const [transDir, setTransDir] = useState<"es-pt" | "pt-es">("es-pt");
   const [transLoading, setTransLoading] = useState(false);
+  const [showChangePass, setShowChangePass] = useState(false);
+  const [newPass, setNewPass] = useState("");
+  const [newPassConfirm, setNewPassConfirm] = useState("");
+  const [passMsg, setPassMsg] = useState("");
   const [examMode, setExamMode] = useState(false);
   const [examModuleIdx, setExamModuleIdx] = useState(0);
   const [examAnswers, setExamAnswers] = useState<Record<string, Record<number, string>>>({});
@@ -1289,12 +1293,36 @@ export default function Home() {
   };
 
   const login = () => {
-    const found = appState.students.find(s => normalize(s.name) === normalize(loginName) && normalize(s.code) === normalize(loginCode));
-    if (!found) { setLoginError("Nombre o código incorrecto."); return; }
+    const found = appState.students.find(s => {
+      const nameMatch = normalize(s.name) === normalize(loginName);
+      const validPass = s.password ? normalize(s.password) === normalize(loginCode) : normalize(s.code) === normalize(loginCode);
+      return nameMatch && validPass;
+    });
+    if (!found) { setLoginError("Nombre o código incorrecto. Si cambiaste tu contraseña, usá la nueva."); return; }
     setAppState(p => ({ ...p, currentStudentId: found.id }));
     setLoginError(""); setLoginName(""); setLoginCode("");
   };
-  const logout = () => { setAppState(p => ({ ...p, currentStudentId: null })); setShowPanel(false); };
+  const logout = () => { setAppState(p => ({ ...p, currentStudentId: null })); setShowPanel(false); setShowChangePass(false); };
+
+  const changePassword = () => {
+    if (!student) return;
+    if (newPass.trim().length < 4) { setPassMsg("La contraseña debe tener al menos 4 caracteres."); return; }
+    if (newPass !== newPassConfirm) { setPassMsg("Las contraseñas no coinciden."); return; }
+    setAppState(p => ({
+      ...p,
+      students: p.students.map(s => s.id === student.id ? { ...s, password: newPass.trim(), passwordChanged: true } : s)
+    }));
+    setPassMsg("✓ Contraseña actualizada correctamente.");
+    setNewPass(""); setNewPassConfirm("");
+    setTimeout(() => { setShowChangePass(false); setPassMsg(""); }, 1500);
+  };
+
+  const resetStudentPassword = (studentId: string) => {
+    setAppState(p => ({
+      ...p,
+      students: p.students.map(s => s.id === studentId ? { ...s, password: undefined, passwordChanged: false } : s)
+    }));
+  };
   const saveProg = (score: number, total: number) => {
     if (!student) return;
     setAppState(p => {
@@ -1652,6 +1680,7 @@ export default function Home() {
             {reviewModules.length > 0 && <button onClick={() => { setReviewMode(r => !r); setActiveCategory("Todos"); }} className={`glass rounded-xl px-3 py-2 text-xs transition font-semibold ${reviewMode ? "text-yellow-300 border-yellow-500/50" : "text-slate-300 hover:text-white"}`}>🔁 Repaso {reviewMode ? "ON" : `(${reviewModules.length})`}</button>}
             <button onClick={() => setShowTranslator(t => !t)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showTranslator ? "accent" : "text-slate-300 hover:text-white"}`}>🌐 Traductor</button>
             <button onClick={openPanel} className="glass rounded-xl px-3 py-2 text-xs text-slate-300 hover:text-white transition">{showPanel ? "✕ Panel" : "📊 Panel profe"}</button>
+            <button onClick={() => setShowChangePass(c => !c)} className={`glass rounded-xl px-3 py-2 text-xs transition ${showChangePass ? "accent" : "text-slate-300 hover:text-white"}`}>🔑 Contraseña</button>
             <button onClick={logout} className="glass rounded-xl px-3 py-2 text-xs text-slate-300 hover:text-white transition">Salir →</button>
           </div>
         </div>
@@ -1681,6 +1710,52 @@ export default function Home() {
                 {transResult && <button onClick={() => speak(transResult, 0.85)} className="mt-2 text-xs text-slate-400 hover:text-white transition">🔊 Escuchar</button>}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* CHANGE PASSWORD PANEL */}
+        {showChangePass && (
+          <div className="glass rounded-3xl p-5 mb-6 ani glow-teal">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="mono text-xs text-slate-400 tracking-widest mb-1">🔑 CAMBIAR CONTRASEÑA</div>
+                <div className="text-sm text-white font-semibold">Nueva contraseña para <span className="accent">{student?.name}</span></div>
+              </div>
+              <button onClick={() => { setShowChangePass(false); setPassMsg(""); setNewPass(""); setNewPassConfirm(""); }} className="glass rounded-xl px-3 py-2 text-xs text-slate-400 hover:text-white transition">✕</button>
+            </div>
+            {student && (
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1.5 font-medium">Nueva contraseña (mín. 4 caracteres)</label>
+                    <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)}
+                      placeholder="Nueva contraseña..." className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1.5 font-medium">Confirmar contraseña</label>
+                    <input type="password" value={newPassConfirm} onChange={e => setNewPassConfirm(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && changePassword()}
+                      placeholder="Repetí la contraseña..." className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
+                  </div>
+                  <button onClick={changePassword} disabled={!newPass || !newPassConfirm} className="btn-accent w-full py-3 text-sm">Guardar nueva contraseña</button>
+                  {passMsg && <p className={`text-sm font-medium ${passMsg.startsWith("✓") ? "accent" : "text-rose-400"}`}>{passMsg}</p>}
+                </div>
+                <div className="glass-dark rounded-2xl p-4">
+                  <div className="text-xs text-slate-400 mono tracking-widest mb-3">ℹ️ INFORMACIÓN</div>
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <p>• Tu contraseña actual es tu <strong className="text-white">código de acceso</strong> {student.passwordChanged ? "personalizado" : `(${student.code})`}.</p>
+                    <p>• Solo vos conocés tu nueva contraseña.</p>
+                    <p>• Si olvidás tu contraseña, pedile al profe que la resetee.</p>
+                    <p>• El profe puede restablecer tu código original pero <strong className="text-white">no puede ver tu nueva contraseña</strong>.</p>
+                  </div>
+                  {student.passwordChanged && (
+                    <div className="mt-3 glass rounded-xl px-3 py-2">
+                      <span className="badge badge-green">✓ Contraseña personalizada activa</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1748,8 +1823,14 @@ export default function Home() {
                   <div className="mono text-xs text-slate-400 tracking-widest mb-4">ALUMNOS ({appState.students.length})</div>
                   <div className="space-y-2 max-h-60 overflow-y-auto">{appState.students.map(s => (
                     <div key={s.id} className="flex items-center justify-between glass rounded-xl px-4 py-3">
-                      <div><div className="font-medium text-sm">{s.name}</div><div className="mono text-xs text-slate-500">{s.code}</div></div>
-                      {!defaultStudents.some(d => d.id === s.id) && <button onClick={() => removeStudent(s.id)} className="text-rose-400 text-xs hover:text-rose-300">Eliminar</button>}
+                      <div>
+                        <div className="font-medium text-sm flex items-center gap-2">{s.name} {s.passwordChanged && <span className="badge badge-green" style={{fontSize:"9px"}}>🔑 pass propia</span>}</div>
+                        <div className="mono text-xs text-slate-500">{s.code}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {s.passwordChanged && <button onClick={() => { if (window.confirm("Resetear la contraseña de " + s.name + " al código original?")) resetStudentPassword(s.id); }} className="text-yellow-400 text-xs hover:text-yellow-300 transition">Resetear</button>}
+                        {!defaultStudents.some(d => d.id === s.id) && <button onClick={() => removeStudent(s.id)} className="text-rose-400 text-xs hover:text-rose-300">Eliminar</button>}
+                      </div>
                     </div>
                   ))}</div>
                 </div>
