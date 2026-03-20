@@ -10,7 +10,6 @@ const supabase: SupabaseClient | null =
 const DB_ROW_ID = "global-app-state";
 const PROFESSOR_PASSWORD = "controllab2025";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 type VocabItem = { es: string; pt: string };
 type QuizQuestion = { question: string; options: string[]; answer: string };
 type ModuleType = {
@@ -28,104 +27,42 @@ type AppState = {
 };
 type LoadStatus = "loading" | "ready" | "error";
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const BG      = "#060b14";
-const SURFACE = "rgba(15,23,42,0.85)";
-const GLASS   = "rgba(255,255,255,0.04)";
-const BORDER  = "rgba(255,255,255,0.08)";
-const BORDER_A= "rgba(45,212,191,0.35)";
-const TEAL    = "#2dd4bf";
-const TEXT    = "#f1f5f9";
-const TEXT_MID= "#94a3b8";
-const TEXT_DIM= "#475569";
-const MONO    = "'JetBrains Mono', 'Fira Code', monospace";
-const FONT    = "'DM Sans', 'Inter', sans-serif";
+const BG = "#060b14";
+const GLASS: React.CSSProperties = { background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" };
+const glassDark: React.CSSProperties = { background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.08)" };
+const TEAL = "#2dd4bf";
+const TEXT = "#f1f5f9";
+const TEXT_MID = "#94a3b8";
+const TEXT_DIM = "#475569";
+const BORDER = "rgba(255,255,255,0.08)";
+const BORDER_A = "rgba(45,212,191,0.35)";
+const MONO = "'JetBrains Mono','Fira Code',monospace";
+const FONT = "'DM Sans','Inter',sans-serif";
 
-const glass: React.CSSProperties = {
-  background: GLASS,
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  border: `1px solid ${BORDER}`,
-};
-const glassDark: React.CSSProperties = {
-  background: "rgba(0,0,0,0.25)",
-  border: `1px solid ${BORDER}`,
-};
-const input: React.CSSProperties = {
-  width: "100%",
-  background: "rgba(0,0,0,0.3)",
-  border: `1px solid ${BORDER}`,
-  borderRadius: 12,
-  padding: "12px 16px",
-  color: TEXT,
-  fontSize: 14,
-  fontFamily: FONT,
-  outline: "none",
-  boxSizing: "border-box",
-};
-const btnAccent: React.CSSProperties = {
-  background: `linear-gradient(135deg, ${TEAL}, #0d9488)`,
-  color: "#042f2e",
-  border: "none",
-  borderRadius: 12,
-  padding: "12px 24px",
-  fontSize: 14,
-  fontWeight: 700,
-  cursor: "pointer",
-  fontFamily: FONT,
-  transition: "opacity 0.15s",
-};
-const optBtn = (sel: boolean, correct: boolean, wrong: boolean): React.CSSProperties => ({
-  textAlign: "left",
-  padding: "14px 18px",
-  borderRadius: 14,
-  border: `1px solid ${correct ? "rgba(52,211,153,0.5)" : wrong ? "rgba(251,113,133,0.5)" : sel ? BORDER_A : BORDER}`,
-  background: correct ? "rgba(52,211,153,0.12)" : wrong ? "rgba(251,113,133,0.12)" : sel ? "rgba(45,212,191,0.08)" : "rgba(0,0,0,0.2)",
-  color: correct ? "#34d399" : wrong ? "#fb7185" : sel ? TEAL : TEXT_MID,
-  cursor: "pointer",
-  fontFamily: FONT,
-  fontSize: 14,
-  transition: "all 0.15s",
-  width: "100%",
-});
+const input: React.CSSProperties = { width: "100%", background: "rgba(0,0,0,0.3)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "12px 16px", color: TEXT, fontSize: 14, fontFamily: FONT, outline: "none", boxSizing: "border-box" };
+const btnAccent: React.CSSProperties = { background: `linear-gradient(135deg,${TEAL},#0d9488)`, color: "#042f2e", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT };
+const optBtn = (sel: boolean, correct: boolean, wrong: boolean): React.CSSProperties => ({ textAlign: "left", padding: "14px 18px", borderRadius: 14, border: `1px solid ${correct ? "rgba(52,211,153,0.5)" : wrong ? "rgba(251,113,133,0.5)" : sel ? BORDER_A : BORDER}`, background: correct ? "rgba(52,211,153,0.12)" : wrong ? "rgba(251,113,133,0.12)" : sel ? "rgba(45,212,191,0.08)" : "rgba(0,0,0,0.2)", color: correct ? "#34d399" : wrong ? "#fb7185" : sel ? TEAL : TEXT_MID, cursor: "pointer", fontFamily: FONT, fontSize: 14, width: "100%" });
 
 function catColor(cat: string): string {
-  const m: Record<string, string> = {
-    Laboratorio: "#60a5fa", Gestión: "#f472b6",
-    Comunicación: "#fb923c", Tecnología: "#a78bfa",
-    Gramática: "#facc15", Controllab: TEAL,
-  };
+  const m: Record<string, string> = { Laboratorio: "#60a5fa", Gestión: "#f472b6", Comunicación: "#fb923c", Tecnología: "#a78bfa", Gramática: "#facc15", Controllab: TEAL };
   return m[cat] || TEXT_MID;
 }
 
-// ─── Modules data ─────────────────────────────────────────────────────────────
 const MODULES: ModuleType[] = [
+  // ══ LABORATORIO ══
   {
     id: "control-interno", title: "Control interno", level: "Intermedio", category: "Laboratorio", emoji: "🔬",
     description: "Monitoreo analítico, tendencias y decisiones preventivas.",
     readingTitle: "Una desviación que parecía pequeña",
-    reading: [
-      "Durante una revisión de rutina en el laboratorio de bioquímica, el equipo técnico detectó una desviación en los controles internos de uno de los analitos más procesados de la semana. A primera vista, la diferencia parecía mínima: apenas unos pocos puntos por encima del límite de advertencia establecido en el gráfico de Levey-Jennings. Sin embargo, al comparar los datos actuales con los registros históricos del mes anterior, la imagen fue mucho más preocupante: la tendencia se repetía desde hacía cinco días consecutivos, siempre en la misma dirección.",
-      "La supervisora del turno decidió pausar la emisión de resultados y reunir al equipo para hacer una revisión sistemática. Examinaron con detalle los materiales de control utilizados, incluyendo los viales abiertos y los lotes en stock. Revisaron las curvas de calibración recientes para verificar si había habido algún cambio significativo en los últimos días. También inspeccionaron los lotes de reactivos en uso, comparando sus códigos con los registros de recepción.",
-      "Después de analizar toda esa información, concluyeron que la causa más probable era una combinación entre una variación dentro del lote del reactivo principal y una calibración que ya no representaba con suficiente precisión el desempeño real del método en las condiciones actuales. Esta es una situación más difícil de detectar que una falla obvia, pero también más frecuente en la práctica diaria del laboratorio.",
-      "Como medida preventiva inmediata, suspendieron la liberación de los resultados de ese analito correspondientes a las últimas doce horas. Repitieron las corridas con material de control fresco proveniente de un vial diferente y realizaron una recalibración completa del equipo.",
-      "El caso fue documentado como un incidente de calidad y se presentó en la reunión mensual del equipo como ejemplo de buena práctica. Se decidió actualizar el procedimiento de control interno para incluir una alerta automática cuando tres puntos consecutivos superen el límite de advertencia en la misma dirección.",
-    ],
-    vocab: [
-      { es: "control interno", pt: "controle interno" },
-      { es: "desviación", pt: "desvio" },
-      { es: "liberación de resultados", pt: "liberação de resultados" },
-      { es: "reactivo", pt: "reagente" },
-      { es: "tendencia", pt: "tendência" },
-      { es: "corrida analítica", pt: "corrida analítica" },
-    ],
+    reading: ["Durante una revisión de rutina en el laboratorio de bioquímica, el equipo técnico detectó una desviación en los controles internos de uno de los analitos más procesados de la semana. A primera vista, la diferencia parecía mínima: apenas unos pocos puntos por encima del límite de advertencia establecido en el gráfico de Levey-Jennings. Sin embargo, al comparar los datos actuales con los registros históricos del mes anterior, la imagen fue mucho más preocupante: la tendencia se repetía desde hacía cinco días consecutivos, siempre en la misma dirección.", "La supervisora del turno decidió pausar la emisión de resultados y reunir al equipo para hacer una revisión sistemática. Examinaron con detalle los materiales de control utilizados, incluyendo los viales abiertos y los lotes en stock. Revisaron las curvas de calibración recientes y también inspeccionaron los lotes de reactivos en uso.", "Después de analizar toda esa información, concluyeron que la causa más probable era una combinación entre una variación dentro del lote del reactivo principal y una calibración que ya no representaba con suficiente precisión el desempeño real del método. Esta es una situación más difícil de detectar que una falla obvia, pero también más frecuente en la práctica diaria.", "Como medida preventiva inmediata, suspendieron la liberación de los resultados de ese analito correspondientes a las últimas doce horas. Repitieron las corridas con material de control fresco proveniente de un vial diferente y realizaron una recalibración completa del equipo.", "El caso fue documentado como un incidente de calidad y se presentó en la reunión mensual como ejemplo de buena práctica. Se decidió actualizar el procedimiento para incluir una alerta automática cuando tres puntos consecutivos superen el límite de advertencia en la misma dirección."],
+    vocab: [{ es: "control interno", pt: "controle interno" }, { es: "desviación", pt: "desvio" }, { es: "liberación de resultados", pt: "liberação de resultados" }, { es: "reactivo", pt: "reagente" }, { es: "tendencia", pt: "tendência" }, { es: "corrida analítica", pt: "corrida analítica" }],
     quiz: [
       { question: "¿Qué detectó el equipo técnico durante la revisión de rutina?", options: ["Un error en la facturación", "Una desviación en los controles internos", "Una falla en el refrigerador", "Un vial de control vacío"], answer: "Una desviación en los controles internos" },
       { question: "¿Cuántos días llevaba repitiéndose la tendencia?", options: ["Un día", "Dos días", "Cinco días consecutivos", "Todo el mes"], answer: "Cinco días consecutivos" },
       { question: "¿Qué elementos revisó el equipo en la investigación?", options: ["Solo los reactivos", "Reactivos, calibración, controles y almacenamiento", "Solo el equipo analítico", "Solo los registros del mes anterior"], answer: "Reactivos, calibración, controles y almacenamiento" },
       { question: "¿Cuál fue la causa identificada?", options: ["Falla total del equipo", "Variación del reactivo y calibración desactualizada combinadas", "Error del operador", "Muestra contaminada"], answer: "Variación del reactivo y calibración desactualizada combinadas" },
       { question: "¿Qué hicieron como medida preventiva inmediata?", options: ["Cambiaron al personal", "Suspendieron la liberación de algunos resultados y repitieron corridas", "Descartaron el equipamiento", "Cerraron el laboratorio"], answer: "Suspendieron la liberación de algunos resultados y repitieron corridas" },
-      { question: "¿Cómo se comunicaron los resultados fuera de rango al repetirlos?", options: ["No se comunicaron", "Directamente al médico solicitante con explicación", "Por correo electrónico al día siguiente", "Solo se registraron internamente"], answer: "Directamente al médico solicitante con explicación" },
+      { question: "¿Cómo se comunicaron los resultados fuera de rango?", options: ["No se comunicaron", "Directamente al médico solicitante con explicación", "Por correo electrónico al día siguiente", "Solo se registraron internamente"], answer: "Directamente al médico solicitante con explicación" },
       { question: "¿Qué mejora preventiva se implementó en el procedimiento?", options: ["Eliminar los controles internos", "Alerta cuando tres puntos consecutivos superen el límite en la misma dirección", "Reducir la frecuencia de los controles", "Cambiar de proveedor de reactivos"], answer: "Alerta cuando tres puntos consecutivos superen el límite en la misma dirección" },
       { question: "¿Por qué es importante identificar tendencias antes del límite de rechazo?", options: ["Para reducir reuniones", "Para evitar errores mayores antes de que ocurran y proteger la calidad", "Para eliminar controles", "Para justificar más personal"], answer: "Para evitar errores mayores antes de que ocurran y proteger la calidad" },
     ],
@@ -135,21 +72,8 @@ const MODULES: ModuleType[] = [
     id: "westgard", title: "Reglas de Westgard", level: "Intermedio", category: "Laboratorio", emoji: "📊",
     description: "Análisis de reglas y toma de decisiones estadísticas en el laboratorio.",
     readingTitle: "Una alerta en el turno de la mañana",
-    reading: [
-      "Un lunes a las siete de la mañana, durante la revisión inicial de los controles internos del turno, una analista con varios años de experiencia notó algo que la detuvo. Los valores del control de nivel medio no estaban fuera de rango, pero al mirar la secuencia de los últimos seis puntos en el gráfico de Levey-Jennings, todos caían por debajo de la media, aunque dentro de los límites de advertencia. Ese patrón, conocido como regla 6x, indica que algo está cambiando de forma sistemática en el proceso analítico.",
-      "Las reglas de Westgard son un conjunto de criterios estadísticos desarrollados por el Dr. James Westgard en los años setenta para ayudar a los laboratorios a distinguir entre dos tipos de variación: la aleatoria, que es inherente a todo proceso de medición, y la sistemática, que indica un problema real que debe investigarse.",
-      "Entre las reglas más utilizadas se encuentran la 1₃ₛ, que es una regla de advertencia cuando un control supera tres desviaciones estándar; la 2₂ₛ, que rechaza la corrida cuando dos controles consecutivos superan dos desviaciones estándar en la misma dirección; la R₄ₛ, que detecta errores aleatorios grandes; y la 4₁ₛ, que señala errores sistemáticos.",
-      "En el caso del turno de la mañana, la analista aplicó correctamente la regla 6x y decidió investigar la causa antes de continuar. Repitió los controles con material de un vial diferente del mismo lote y encontró un registro de temperatura que mostraba una leve variación durante la noche.",
-      "Comprender las reglas de Westgard no es solo una obligación técnica: es una herramienta de razonamiento analítico que permite actuar con criterio en lugar de reaccionar de forma mecánica.",
-    ],
-    vocab: [
-      { es: "regla de advertencia", pt: "regra de alerta" },
-      { es: "media", pt: "média" },
-      { es: "precisión", pt: "precisão" },
-      { es: "rechazar la corrida", pt: "rejeitar a corrida" },
-      { es: "error sistemático", pt: "erro sistemático" },
-      { es: "variación aleatoria", pt: "variação aleatória" },
-    ],
+    reading: ["Un lunes a las siete de la mañana, durante la revisión inicial de los controles internos del turno, una analista notó que los valores del control de nivel medio, al mirar la secuencia de los últimos seis puntos en el gráfico de Levey-Jennings, todos caían por debajo de la media. Ese patrón, conocido como regla 6x, indica que algo está cambiando de forma sistemática en el proceso analítico.", "Las reglas de Westgard son un conjunto de criterios estadísticos desarrollados por el Dr. James Westgard en los años setenta para ayudar a los laboratorios a distinguir entre variación aleatoria, que es inherente a todo proceso de medición, y variación sistemática, que indica un problema real.", "Entre las reglas más utilizadas se encuentran la 1₃ₛ, que es una regla de advertencia cuando un control supera tres desviaciones estándar; la 2₂ₛ, que rechaza la corrida cuando dos controles consecutivos superan dos desviaciones en la misma dirección; la R₄ₛ, que detecta errores aleatorios grandes; y la 4₁ₛ, que señala errores sistemáticos.", "En el caso del turno de la mañana, la analista aplicó correctamente la regla 6x y decidió investigar. Repitió los controles con material de un vial diferente y verificó si la temperatura del equipo había fluctuado durante la noche, encontrando una leve variación.", "Comprender las reglas de Westgard es una herramienta de razonamiento analítico que permite actuar con criterio. Un laboratorio que las aplica correctamente demuestra madurez técnica y capacidad para justificar sus decisiones frente a auditorías."],
+    vocab: [{ es: "regla de advertencia", pt: "regra de alerta" }, { es: "media", pt: "média" }, { es: "precisión", pt: "precisão" }, { es: "rechazar la corrida", pt: "rejeitar a corrida" }, { es: "error sistemático", pt: "erro sistemático" }, { es: "variación aleatoria", pt: "variação aleatória" }],
     quiz: [
       { question: "¿Qué patrón observó la analista en el gráfico de Levey-Jennings?", options: ["Valores fuera del límite de rechazo", "Seis puntos consecutivos por debajo de la media", "Dos valores muy elevados", "Un valor imposiblemente alto"], answer: "Seis puntos consecutivos por debajo de la media" },
       { question: "¿Qué indica la regla 6x?", options: ["Que hay un error aleatorio grande", "Que algo está cambiando sistemáticamente aunque no sea urgente aún", "Que la corrida debe rechazarse inmediatamente", "Que el reactivo está vencido"], answer: "Que algo está cambiando sistemáticamente aunque no sea urgente aún" },
@@ -166,21 +90,8 @@ const MODULES: ModuleType[] = [
     id: "hemograma", title: "Hemograma completo", level: "Intermedio", category: "Laboratorio", emoji: "🩸",
     description: "Interpretación clínica y comunicación de resultados hematológicos.",
     readingTitle: "Los números que cuentan la historia",
-    reading: [
-      "El hemograma completo es uno de los análisis más solicitados en cualquier laboratorio clínico. Proporciona datos sobre tres grandes líneas celulares de la sangre: los eritrocitos, cuya función principal es transportar oxígeno; los leucocitos, que son los principales actores del sistema inmune; y las plaquetas, responsables de la hemostasia primaria.",
-      "Cuando el analista revisa un hemograma, no solo verifica si los valores individuales están dentro del rango de referencia. También evalúa la coherencia interna del informe: ¿son consistentes entre sí el hematocrito, la hemoglobina y el recuento de glóbulos rojos?",
-      "Un aspecto crítico es la detección de hallazgos que requieren acción inmediata, conocidos como valores de pánico. Un recuento de glóbulos blancos extremadamente elevado con morfología anormal puede orientar hacia una leucemia aguda y requiere comunicación urgente al médico.",
-      "Los factores preanalíticos son otra fuente importante de variación. La hemólisis de la muestra puede elevar falsamente la hemoglobina libre. Una muestra con microcoágulos invisibles puede dar un recuento de plaquetas falsamente bajo.",
-      "Comunicar un hemograma de forma útil al médico implica saber identificar cuáles hallazgos son clínicamente relevantes, cuáles son urgentes y cuáles pueden incluirse como observación en el informe escrito.",
-    ],
-    vocab: [
-      { es: "hemograma", pt: "hemograma" },
-      { es: "glóbulo rojo / eritrocito", pt: "glóbulo vermelho / eritrócito" },
-      { es: "glóbulo blanco / leucocito", pt: "glóbulo branco / leucócito" },
-      { es: "plaqueta", pt: "plaqueta" },
-      { es: "valor crítico / pánico", pt: "valor crítico / pânico" },
-      { es: "frotis de sangre", pt: "esfregaço de sangue" },
-    ],
+    reading: ["El hemograma completo es uno de los análisis más solicitados en cualquier laboratorio clínico. Proporciona datos sobre tres grandes líneas celulares: los eritrocitos, cuya función principal es transportar oxígeno; los leucocitos, que son los principales actores del sistema inmune; y las plaquetas, responsables de la hemostasia primaria.", "Cuando el analista revisa un hemograma, no solo verifica si los valores individuales están dentro del rango de referencia. También evalúa la coherencia interna del informe: ¿son consistentes entre sí el hematocrito, la hemoglobina y el recuento de glóbulos rojos?", "Un aspecto crítico es la detección de valores de pánico o resultados críticos. Un recuento de glóbulos blancos extremadamente elevado con morfología anormal puede orientar hacia una leucemia aguda y requiere comunicación urgente al médico.", "Los factores preanalíticos son otra fuente importante de variación. La hemólisis puede elevar falsamente la hemoglobina libre. Una muestra con microcoágulos puede dar un recuento de plaquetas falsamente bajo.", "Comunicar un hemograma de forma útil al médico implica identificar cuáles hallazgos son clínicamente relevantes, cuáles son urgentes y cuáles pueden incluirse como observación en el informe escrito."],
+    vocab: [{ es: "hemograma", pt: "hemograma" }, { es: "glóbulo rojo / eritrocito", pt: "glóbulo vermelho / eritrócito" }, { es: "glóbulo blanco / leucocito", pt: "glóbulo branco / leucócito" }, { es: "plaqueta", pt: "plaqueta" }, { es: "valor crítico / pánico", pt: "valor crítico / pânico" }, { es: "frotis de sangre", pt: "esfregaço de sangue" }],
     quiz: [
       { question: "¿Qué tres líneas celulares evalúa el hemograma completo?", options: ["Glucosa, colesterol y triglicéridos", "Eritrocitos, leucocitos y plaquetas", "Sodio, potasio y cloro", "TGO, TGP y bilirrubina"], answer: "Eritrocitos, leucocitos y plaquetas" },
       { question: "¿Cuál es la función principal de los eritrocitos?", options: ["Defender contra infecciones", "Transportar oxígeno a los tejidos", "Controlar la coagulación", "Producir anticuerpos"], answer: "Transportar oxígeno a los tejidos" },
@@ -194,24 +105,47 @@ const MODULES: ModuleType[] = [
     dictation: "El analista debe identificar los resultados críticos del hemograma y comunicarlos al médico antes de liberar el informe formal.",
   },
   {
+    id: "bioquimica", title: "Bioquímica clínica", level: "Intermedio", category: "Laboratorio", emoji: "⚗️",
+    description: "Glucosa, perfil lipídico, función renal y hepática en contexto clínico.",
+    readingTitle: "El perfil que habla por el paciente",
+    reading: ["La bioquímica clínica abarca una gran variedad de análisis: la glucosa y la hemoglobina glicosilada para el metabolismo de los hidratos de carbono; el colesterol total, HDL, LDL y triglicéridos para el perfil lipídico; la creatinina, urea y tasa de filtración glomerular para la función renal; las transaminasas TGO y TGP, la bilirrubina, fosfatasa alcalina y GGT para la función hepática.", "Cuando el médico solicita un perfil metabólico completo, el analista debe garantizar no solo que cada valor individual sea correcto, sino también que el conjunto sea coherente. Un aumento de creatinina acompañado de disminución de la filtración glomerular y aumento de urea refuerza la sospecha de compromiso renal.", "La interpretación clínica requiere conocer el contexto del paciente. Una glucosa de 180 mg/dL tiene un significado completamente diferente en un paciente diabético conocido que en una persona sin antecedentes que no había ayunado.", "Si un control falla durante la corrida, el analista debe determinar qué muestras se vieron afectadas, retener esos resultados, investigar la causa y repetir tanto los controles como las muestras comprometidas.", "En la comunicación con el médico, el lenguaje técnico accesible es una habilidad clave. Un laboratorio que sabe comunicar bien sus resultados genera confianza y fidelidad en sus clientes."],
+    vocab: [{ es: "glucosa", pt: "glicose" }, { es: "creatinina", pt: "creatinina" }, { es: "perfil lipídico", pt: "perfil lipídico" }, { es: "función hepática", pt: "função hepática" }, { es: "filtración glomerular", pt: "filtração glomerular" }, { es: "transaminasas", pt: "transaminases" }],
+    quiz: [
+      { question: "¿Qué marcadores evalúan la función hepática?", options: ["Glucosa y creatinina", "TGO, TGP, bilirrubina, fosfatasa alcalina y GGT", "Colesterol y triglicéridos", "Hemoglobina y hematocrito"], answer: "TGO, TGP, bilirrubina, fosfatasa alcalina y GGT" },
+      { question: "¿Qué marcadores evalúan la función renal?", options: ["TGO y TGP", "Creatinina, urea y filtración glomerular estimada", "Glucosa y hemoglobina glicosilada", "Colesterol HDL y LDL"], answer: "Creatinina, urea y filtración glomerular estimada" },
+      { question: "¿Qué combinación refuerza la sospecha de compromiso renal?", options: ["Creatinina alta sola", "Creatinina alta más filtración glomerular baja más urea elevada", "Solo filtración glomerular baja", "TGO y TGP elevadas"], answer: "Creatinina alta más filtración glomerular baja más urea elevada" },
+      { question: "¿Por qué importa el contexto clínico del paciente en bioquímica?", options: ["No importa, los valores son absolutos", "El mismo valor puede tener significados muy distintos según el paciente", "Solo importa para la facturación", "Solo para pacientes diabéticos"], answer: "El mismo valor puede tener significados muy distintos según el paciente" },
+      { question: "¿Qué hace el analista si un control falla durante la corrida?", options: ["Libera todos los resultados igual", "Retiene resultados afectados, investiga y repite muestras comprometidas", "Solo repite el control fallido", "Avisa al médico y sigue procesando"], answer: "Retiene resultados afectados, investiga y repite muestras comprometidas" },
+      { question: "¿Por qué la bilirrubina en una muestra hemolizada puede ser engañosa?", options: ["Porque siempre indica daño hepático real", "Porque la hemólisis libera contenido intracelular que no refleja el nivel real del paciente", "Porque la bilirrubina no se ve afectada por hemólisis", "Porque es un valor técnicamente imposible"], answer: "Porque la hemólisis libera contenido intracelular que no refleja el nivel real del paciente" },
+      { question: "¿Por qué la creatinina puede interpretarse diferente en dos pacientes con el mismo valor?", options: ["Porque los equipos dan resultados distintos", "Porque la masa muscular, el sexo y la edad influyen en la interpretación", "Porque los rangos de referencia son incorrectos", "Porque depende del método analítico"], answer: "Porque la masa muscular, el sexo y la edad influyen en la interpretación" },
+      { question: "¿Qué genera confianza y fidelidad en los clientes del laboratorio?", options: ["Tener los equipos más modernos", "Saber comunicar bien los resultados con claridad y contexto clínico", "Tener los precios más bajos", "Procesar más muestras por día"], answer: "Saber comunicar bien los resultados con claridad y contexto clínico" },
+    ],
+    dictation: "La bioquímica clínica evalúa el funcionamiento de órganos a través de marcadores como glucosa, creatinina y perfil lipídico, siempre en contexto clínico.",
+  },
+  {
+    id: "microbiologia", title: "Microbiología básica", level: "Avanzado", category: "Laboratorio", emoji: "🦠",
+    description: "Cultivos, antibiogramas y comunicación de resultados microbiológicos.",
+    readingTitle: "El cultivo que tardó tres días",
+    reading: ["La microbiología es el área del laboratorio clínico con los tiempos de respuesta más largos y con algunos de los resultados de mayor impacto sobre las decisiones terapéuticas. Un cultivo microbiológico puede tardar entre veinticuatro y setenta y dos horas en mostrar crecimiento visible.", "El proceso comienza con la siembra de la muestra en medios de cultivo seleccionados según el tipo de microorganismo que se sospecha. Después de la incubación, el analista examina las placas, evalúa su morfología, realiza la coloración de Gram y procede a la identificación formal del microorganismo.", "El antibiograma informa al médico qué antibióticos son eficaces contra el microorganismo identificado. Los resultados se expresan como sensible, intermedio o resistente. La detección de un MRSA o de una enterobacteria productora de carbapenemasas cambia completamente el esquema de tratamiento.", "Durante el período de espera del cultivo, el médico frecuentemente necesita información parcial para iniciar un tratamiento empírico. El laboratorio puede colaborar informando los resultados de la tinción de Gram como resultado preliminar.", "La resistencia bacteriana es hoy uno de los desafíos de salud pública más urgentes. El laboratorio juega un papel clave: informar correctamente los perfiles de sensibilidad y alertar cuando se detectan mecanismos de resistencia emergentes."],
+    vocab: [{ es: "cultivo", pt: "cultura" }, { es: "antibiograma", pt: "antibiograma" }, { es: "microorganismo", pt: "micro-organismo" }, { es: "resultado preliminar", pt: "resultado preliminar" }, { es: "resistencia bacteriana", pt: "resistência bacteriana" }, { es: "tratamiento empírico", pt: "tratamento empírico" }],
+    quiz: [
+      { question: "¿Cuánto puede tardar un cultivo microbiológico completo?", options: ["Solo minutos", "Entre 24 y 72 horas y el antibiograma puede extenderse más días", "Exactamente 1 hora", "Solo 6 horas en laboratorios acreditados"], answer: "Entre 24 y 72 horas y el antibiograma puede extenderse más días" },
+      { question: "¿Por qué se siembra en diferentes medios de cultivo?", options: ["Por razones estéticas", "Porque distintos medios favorecen el crecimiento de diferentes microorganismos", "Para ahorrar reactivos", "Por exigencia normativa únicamente"], answer: "Porque distintos medios favorecen el crecimiento de diferentes microorganismos" },
+      { question: "¿Qué información proporciona el antibiograma al médico?", options: ["La cantidad de bacterias presentes", "Qué antibióticos son sensibles, intermedios o resistentes para el microorganismo identificado", "El origen anatómico de la infección", "El tiempo de evolución de la infección"], answer: "Qué antibióticos son sensibles, intermedios o resistentes para el microorganismo identificado" },
+      { question: "¿Qué es un tratamiento empírico?", options: ["Un tratamiento basado en experiencia personal sin evidencia", "Un tratamiento basado en probabilidad estadística mientras se espera el cultivo", "Un tratamiento sin medicamentos", "El tratamiento definitivo confirmado por el cultivo"], answer: "Un tratamiento basado en probabilidad estadística mientras se espera el cultivo" },
+      { question: "¿Qué información preliminar puede dar el laboratorio antes del cultivo definitivo?", options: ["El antibiograma completo estimado", "Los resultados de la coloración de Gram como orientación inicial", "El nombre exacto del microorganismo probable", "La concentración mínima inhibitoria"], answer: "Los resultados de la coloración de Gram como orientación inicial" },
+      { question: "¿Qué debe acompañar siempre a un resultado microbiológico preliminar?", options: ["El tratamiento antibiótico recomendado", "La indicación clara de que es provisorio y el definitivo está en proceso", "La firma del director técnico", "El precio del análisis"], answer: "La indicación clara de que es provisorio y el definitivo está en proceso" },
+      { question: "¿Qué caracteriza a una cepa MRSA?", options: ["Es resistente a absolutamente todos los antibióticos", "Es un Staphylococcus aureus resistente a meticilina que cambia el esquema de tratamiento", "Es una bacteria exclusivamente hospitalaria", "Es una bacteria de baja patogenicidad"], answer: "Es un Staphylococcus aureus resistente a meticilina que cambia el esquema de tratamiento" },
+      { question: "¿Qué papel tiene el laboratorio frente a la resistencia bacteriana?", options: ["Ninguno, es un problema exclusivo de los médicos", "Informar perfiles de sensibilidad, alertar sobre resistencias emergentes y participar en vigilancia epidemiológica", "Solo procesar los cultivos más rápido", "Reducir el número de cultivos procesados"], answer: "Informar perfiles de sensibilidad, alertar sobre resistencias emergentes y participar en vigilancia epidemiológica" },
+    ],
+    dictation: "El laboratorio debe comunicar los resultados microbiológicos preliminares con claridad, indicando que son provisorios y que el informe definitivo está en proceso.",
+  },
+  {
     id: "preanalítica", title: "Fase preanalítica", level: "Básico", category: "Laboratorio", emoji: "🩺",
     description: "El origen de la mayoría de los errores: todo lo que ocurre antes del análisis.",
     readingTitle: "El error que ocurrió antes de llegar al laboratorio",
-    reading: [
-      "Estudios realizados en diferentes países coinciden en un dato sorprendente: entre el sesenta y el setenta por ciento de todos los errores en el laboratorio clínico ocurren durante la fase preanalítica, es decir, antes de que la muestra llegue al analizador.",
-      "La fase preanalítica comienza en el momento en que el médico decide solicitar un análisis. Incluye la solicitud médica, la preparación del paciente, la extracción de la muestra, el transporte y la recepción en el laboratorio.",
-      "Uno de los errores preanalíticos más frecuentes es la hemólisis, la ruptura de los glóbulos rojos durante o después de la extracción. La hemólisis libera el contenido intracelular al plasma, elevando falsamente marcadores como la potasemia, la LDH y la hemoglobina libre.",
-      "El orden de llenado de los tubos es otro aspecto crítico. Si se llena primero un tubo con anticoagulante antes de uno sin anticoagulante, puede producirse contaminación cruzada que afecta los estudios de coagulación.",
-      "La gestión de la fase preanalítica requiere una visión sistémica que incluye la formación continua del personal, el diseño de formularios para reducir errores y la instalación de sistemas de trazabilidad como el código de barras.",
-    ],
-    vocab: [
-      { es: "fase preanalítica", pt: "fase pré-analítica" },
-      { es: "hemólisis", pt: "hemólise" },
-      { es: "anticoagulante", pt: "anticoagulante" },
-      { es: "centrifugado", pt: "centrifugação" },
-      { es: "orden de llenado", pt: "ordem de coleta" },
-      { es: "solicitud médica", pt: "pedido médico" },
-    ],
+    reading: ["Estudios realizados en diferentes países coinciden en un dato sorprendente: entre el sesenta y el setenta por ciento de todos los errores en el laboratorio clínico ocurren durante la fase preanalítica, antes de que la muestra llegue al analizador.", "La fase preanalítica comienza en el momento en que el médico decide solicitar un análisis. Incluye la solicitud médica, la preparación del paciente, la extracción de la muestra, el transporte y la recepción en el laboratorio.", "Uno de los errores preanalíticos más frecuentes es la hemólisis, la ruptura de los glóbulos rojos durante o después de la extracción. La hemólisis libera el contenido intracelular al plasma, elevando falsamente marcadores como la potasemia, la LDH y la hemoglobina libre.", "El orden de llenado de los tubos es otro aspecto crítico. Si se llena primero un tubo con anticoagulante antes de uno sin anticoagulante, puede producirse contaminación cruzada que afecta los estudios de coagulación.", "La gestión de la fase preanalítica requiere una visión sistémica que incluye la formación continua del personal, el diseño de formularios y la instalación de sistemas de trazabilidad como el código de barras."],
+    vocab: [{ es: "fase preanalítica", pt: "fase pré-analítica" }, { es: "hemólisis", pt: "hemólise" }, { es: "anticoagulante", pt: "anticoagulante" }, { es: "centrifugado", pt: "centrifugação" }, { es: "orden de llenado", pt: "ordem de coleta" }, { es: "solicitud médica", pt: "pedido médico" }],
     quiz: [
       { question: "¿Qué porcentaje de los errores del laboratorio ocurren en la fase preanalítica?", options: ["10 a 20%", "60 a 70%", "Menos del 5%", "Exactamente el 50%"], answer: "60 a 70%" },
       { question: "¿Cuándo comienza realmente la fase preanalítica?", options: ["Cuando la muestra llega al laboratorio", "Cuando el médico decide solicitar el análisis", "Cuando se centrifuga la muestra", "Cuando el analista recibe el tubo"], answer: "Cuando el médico decide solicitar el análisis" },
@@ -225,24 +159,84 @@ const MODULES: ModuleType[] = [
     dictation: "Entre el sesenta y el setenta por ciento de los errores del laboratorio ocurren en la fase preanalítica, antes de que la muestra llegue al analizador.",
   },
   {
+    id: "muestras", title: "Manejo de muestras", level: "Básico", category: "Laboratorio", emoji: "🧪",
+    description: "Recepción, identificación, conservación y rechazo de muestras.",
+    readingTitle: "La muestra que llegó sin identificar",
+    reading: ["Un martes a las siete de la mañana, el área de recepción del laboratorio recibió un lote de muestras provenientes de un hospital con el que acababan de firmar un nuevo convenio. Tres tubos venían completamente sin etiqueta y otros dos tenían información incompleta.", "Según el protocolo de recepción vigente, una muestra sin identificación completa no puede procesarse bajo ninguna circunstancia. Si un resultado se asigna a un paciente equivocado, las consecuencias pueden ser gravísimas. Los tres tubos sin etiqueta fueron colocados en cuarentena.", "Para los tubos con información incompleta, el analista llamó directamente al hospital para obtener los datos faltantes. En uno de los casos, el número de historia clínica pudo confirmarse en menos de diez minutos.", "El episodio fue una oportunidad para revisar el protocolo de rechazo de muestras. Se actualizó el formulario agregando un campo para registrar si el cliente había sido notificado y un campo de observaciones.", "El laboratorio organizó una reunión técnica con el equipo de enfermería del hospital para revisar en conjunto el proceso de extracción, identificación y empaque de las muestras."],
+    vocab: [{ es: "muestra", pt: "amostra" }, { es: "recepción", pt: "recepção" }, { es: "etiqueta", pt: "etiqueta / rótulo" }, { es: "rechazo", pt: "rejeição" }, { es: "conservación", pt: "conservação" }, { es: "criterio de aceptación", pt: "critério de aceitação" }],
+    quiz: [
+      { question: "¿Cuántos tubos llegaron sin etiqueta en el incidente descrito?", options: ["Uno", "Dos", "Tres", "Cinco"], answer: "Tres" },
+      { question: "¿Por qué no puede procesarse una muestra sin identificación completa?", options: ["Es muy costoso procesarla", "El riesgo de asignar un resultado a un paciente equivocado es inaceptable", "El sistema no lo permite técnicamente", "El proveedor lo prohíbe en el contrato"], answer: "El riesgo de asignar un resultado a un paciente equivocado es inaceptable" },
+      { question: "¿Qué se hizo con los tres tubos sin etiqueta?", options: ["Se procesaron con nota de advertencia", "Se colocaron en cuarentena y se pidió nueva extracción", "Se descartaron sin avisar al hospital", "Se asignaron al último paciente registrado"], answer: "Se colocaron en cuarentena y se pidió nueva extracción" },
+      { question: "¿Por qué era relevante la fecha y hora de extracción?", options: ["Solo era un requisito formal", "Era necesaria para interpretar correctamente un análisis de coagulación", "Por exigencia del sistema informático", "Para calcular el tiempo de transporte"], answer: "Era necesaria para interpretar correctamente un análisis de coagulación" },
+      { question: "¿Qué debe quedar documentado cuando se llama al hospital?", options: ["Solo el resultado final obtenido", "Quién llamó, con quién habló, qué información se obtuvo y en qué horario", "Solo el nombre del paciente", "Solo la fecha de la llamada"], answer: "Quién llamó, con quién habló, qué información se obtuvo y en qué horario" },
+      { question: "¿Cuáles son los criterios de aceptación de una muestra?", options: ["Solo la identificación del paciente", "Identificación, volumen mínimo, tipo de tubo, temperatura y tiempo desde extracción", "Solo el tipo de tubo y el volumen", "Solo la temperatura de transporte"], answer: "Identificación, volumen mínimo, tipo de tubo, temperatura y tiempo desde extracción" },
+      { question: "¿Qué se agregó al formulario de rechazo actualizado?", options: ["Se simplificó eliminando campos", "Campo para registrar si el cliente fue notificado y un campo de observaciones", "Se cambió a formato solo digital", "Se agregó la firma del director técnico"], answer: "Campo para registrar si el cliente fue notificado y un campo de observaciones" },
+      { question: "¿Qué se creó para el hospital como mejora preventiva?", options: ["Un contrato de penalidades por errores", "Un instructivo visual con imágenes del etiquetado correcto y número de contacto", "Un sistema de penalidades económicas", "Un formulario adicional de solicitud"], answer: "Un instructivo visual con imágenes del etiquetado correcto y número de contacto" },
+    ],
+    dictation: "Cuando una muestra no cumple los criterios de recepción, el analista debe comunicarlo de forma profesional y documentar el motivo del rechazo.",
+  },
+  {
+    id: "coagulacion", title: "Coagulación y hemostasia", level: "Avanzado", category: "Laboratorio", emoji: "🩹",
+    description: "Estudios de coagulación, hemostasia primaria y secundaria en el laboratorio.",
+    readingTitle: "Cuando la sangre no se detiene",
+    reading: ["La hemostasia es el conjunto de mecanismos que el organismo activa para detener un sangrado cuando se produce una lesión vascular. Este proceso se divide en hemostasia primaria, que involucra a las plaquetas y forma un tapón provisional, y hemostasia secundaria o coagulación, que consolida ese tapón mediante una red de fibrina.", "El laboratorio evalúa este sistema mediante el tiempo de protrombina (TP) que evalúa la vía extrínseca, utilizado principalmente para monitorear el tratamiento con anticoagulantes orales como warfarina; y el KPTT que evalúa la vía intrínseca y es fundamental para monitorear la heparina.", "Una particularidad del laboratorio de coagulación es que los resultados son especialmente sensibles a los factores preanalíticos. La proporción correcta entre la sangre y el anticoagulante citrato en el tubo azul es crítica: si el tubo no está completamente llenado, el resultado puede ser falsamente prolongado.", "El dímero D es un producto de degradación de la fibrina que se eleva cuando hay formación y lisis de coágulos. Se utiliza principalmente para descartar tromboembolismo venoso, aunque tiene alta sensibilidad pero baja especificidad.", "El laboratorio debe tener establecidos los valores de pánico para cada prueba de coagulación y el procedimiento para comunicarlos al médico de forma inmediata, documentada y verificada."],
+    vocab: [{ es: "coagulación", pt: "coagulação" }, { es: "hemostasia", pt: "hemostasia" }, { es: "tiempo de protrombina", pt: "tempo de protrombina" }, { es: "anticoagulante", pt: "anticoagulante" }, { es: "dímero D", pt: "dímero D" }, { es: "trombosis", pt: "trombose" }],
+    quiz: [
+      { question: "¿Qué evalúa el tiempo de protrombina (TP)?", options: ["La vía intrínseca de coagulación", "La vía extrínseca de coagulación", "El número de plaquetas", "La función renal"], answer: "La vía extrínseca de coagulación" },
+      { question: "¿Para qué se usa el INR principalmente?", options: ["Diagnóstico de anemia", "Monitoreo del tratamiento con anticoagulantes orales", "Evaluación de la función plaquetaria", "Diagnóstico de infecciones"], answer: "Monitoreo del tratamiento con anticoagulantes orales" },
+      { question: "¿Qué evalúa el KPTT?", options: ["La vía extrínseca", "La vía intrínseca de la coagulación", "Las plaquetas", "El fibrinógeno únicamente"], answer: "La vía intrínseca de la coagulación" },
+      { question: "¿Por qué es crítica la proporción sangre-citrato en el tubo azul?", options: ["Por razones estéticas", "Una relación alterada puede generar resultados falsamente prolongados", "Para facilitar el centrifugado", "Por exigencia del fabricante únicamente"], answer: "Una relación alterada puede generar resultados falsamente prolongados" },
+      { question: "¿Qué indica el dímero D elevado?", options: ["Deficiencia de vitamina K", "Formación y lisis de coágulos en el organismo", "Anemia grave", "Infección bacteriana"], answer: "Formación y lisis de coágulos en el organismo" },
+      { question: "¿Por qué el dímero D tiene baja especificidad?", options: ["Porque no es confiable", "Porque se eleva en muchas situaciones además de tromboembolismo", "Porque el equipo tiene poca sensibilidad", "Porque varía según la edad del paciente"], answer: "Porque se eleva en muchas situaciones además de tromboembolismo" },
+      { question: "¿Qué factores preanalíticos afectan los resultados de coagulación?", options: ["Solo la temperatura del laboratorio", "Tubo no completamente lleno, hemólisis, coágulos y temperatura inadecuada", "Solo el tiempo de transporte", "Solo el tipo de anticoagulante del tubo"], answer: "Tubo no completamente lleno, hemólisis, coágulos y temperatura inadecuada" },
+      { question: "¿Qué debe hacer el laboratorio ante un valor crítico de coagulación?", options: ["Esperar a que el médico llame", "Comunicarlo inmediatamente de forma documentada y verificada", "Repetir el análisis sin avisar", "Solo anotarlo en el informe"], answer: "Comunicarlo inmediatamente de forma documentada y verificada" },
+    ],
+    dictation: "El tiempo de protrombina evalúa la vía extrínseca de la coagulación y se expresa como INR para monitorear el tratamiento anticoagulante oral.",
+  },
+  {
+    id: "urinalisis", title: "Análisis de orina", level: "Básico", category: "Laboratorio", emoji: "🔭",
+    description: "Examen físico, químico y microscópico del sedimento urinario.",
+    readingTitle: "Lo que revela una muestra de orina",
+    reading: ["El uroanálisis o análisis completo de orina permite obtener datos sobre el funcionamiento del riñón, el estado de hidratación, la presencia de infección urinaria, alteraciones metabólicas como diabetes o cetosis, y patologías renales como glomerulonefritis.", "El análisis se divide en tres componentes. El examen físico evalúa el color, la transparencia y el olor. El examen químico se realiza mediante tiras reactivas que detectan glucosa, proteínas, sangre, leucocitos, nitritos, cetonas, bilirrubina, urobilinógeno y pH.", "El examen microscópico del sedimento es el más informativo. Los elementos que pueden observarse incluyen eritrocitos, leucocitos, células epiteliales, cilindros renales de diferentes tipos, cristales, bacterias, levaduras y parásitos.", "Los cilindros renales merecen especial atención porque se forman en los túbulos renales y su presencia indica que algo está ocurriendo a nivel renal. Los cilindros eritrocitarios son altamente específicos de glomerulonefritis activa.", "La muestra debe procesarse dentro de las dos horas posteriores a la recolección, porque después de ese tiempo los elementos celulares comienzan a degradarse. La primera orina de la mañana es la más concentrada y representativa."],
+    vocab: [{ es: "sedimento urinario", pt: "sedimento urinário" }, { es: "cilindro renal", pt: "cilindro renal" }, { es: "proteinuria", pt: "proteinúria" }, { es: "glucosuria", pt: "glicosúria" }, { es: "tira reactiva", pt: "fita reagente" }, { es: "turbidez", pt: "turbidez" }],
+    quiz: [
+      { question: "¿Qué tres componentes tiene el análisis completo de orina?", options: ["Solo físico y químico", "Físico, químico y microscópico del sedimento", "Solo microscópico y químico", "Solo físico y microscópico"], answer: "Físico, químico y microscópico del sedimento" },
+      { question: "¿Qué puede indicar una orina muy oscura y concentrada?", options: ["Buena hidratación", "Deshidratación o daño hepático", "Infección bacteriana", "Solo un artefacto del recipiente"], answer: "Deshidratación o daño hepático" },
+      { question: "¿Qué detectan las tiras reactivas?", options: ["Solo glucosa y proteínas", "Glucosa, proteínas, sangre, leucocitos, nitritos, cetonas, bilirrubina y pH", "Solo bacterias y levaduras", "Solo pH y color"], answer: "Glucosa, proteínas, sangre, leucocitos, nitritos, cetonas, bilirrubina y pH" },
+      { question: "¿Por qué los cilindros renales son clínicamente importantes?", options: ["Son normales y no tienen significado", "Son exclusivos del riñón e indican que algo ocurre a nivel renal", "Solo aparecen en personas sanas", "Son artefactos del proceso analítico"], answer: "Son exclusivos del riñón e indican que algo ocurre a nivel renal" },
+      { question: "¿Qué indica la presencia de cilindros eritrocitarios?", options: ["Infección bacteriana", "Glomerulonefritis activa", "Deshidratación leve", "Diabetes no controlada"], answer: "Glomerulonefritis activa" },
+      { question: "¿Cuánto tiempo máximo puede pasar antes de procesar la muestra?", options: ["24 horas refrigerada", "Dos horas desde la recolección", "Solo 30 minutos", "Hasta 6 horas a temperatura ambiente"], answer: "Dos horas desde la recolección" },
+      { question: "¿Por qué se prefiere la primera orina de la mañana?", options: ["Por ser más fácil de obtener", "Es la más concentrada y representativa para detectar alteraciones", "Tiene menos bacterias contaminantes", "Es más fácil de centrifugar"], answer: "Es la más concentrada y representativa para detectar alteraciones" },
+      { question: "¿Qué sugiere una orina turbia?", options: ["Buena hidratación", "Presencia de bacterias, leucocitos o cristales", "Alta concentración de glucosa", "Ausencia de elementos celulares"], answer: "Presencia de bacterias, leucocitos o cristales" },
+    ],
+    dictation: "El análisis de orina evalúa características físicas, químicas y microscópicas y debe procesarse dentro de las dos horas de recolección.",
+  },
+  {
+    id: "marcadores-cardiacos", title: "Marcadores cardíacos", level: "Avanzado", category: "Laboratorio", emoji: "❤️",
+    description: "Troponina, CK-MB y BNP en el diagnóstico de eventos cardiovasculares.",
+    readingTitle: "Cuando el corazón deja huella en la sangre",
+    reading: ["Los marcadores cardíacos son proteínas o enzimas que normalmente se encuentran dentro de las células del músculo cardíaco y que se liberan al torrente sanguíneo cuando esas células sufren daño. Su detección en sangre es una señal de lesión miocárdica.", "La troponina cardíaca es actualmente el marcador de elección para el diagnóstico de infarto agudo de miocardio. Las troponinas comienzan a elevarse entre tres y seis horas después del inicio del daño miocárdico, alcanzan su pico entre doce y veinticuatro horas y pueden permanecer elevadas hasta catorce días.", "La CK-MB fue el marcador estándar antes de la troponina. Aunque ha sido desplazada para el diagnóstico de infarto, sigue siendo útil para detectar reinfartos, porque sus niveles vuelven a la normalidad más rápidamente que la troponina.", "El BNP o péptido natriurético cerebral y su precursor NT-proBNP se elevan cuando el corazón trabaja bajo una presión o volumen excesivos, como ocurre en la insuficiencia cardíaca.", "La interpretación de los marcadores cardíacos siempre debe realizarse en contexto clínico y en función del tiempo transcurrido desde el inicio de los síntomas. Una troponina normal en las primeras dos horas no descarta infarto."],
+    vocab: [{ es: "troponina", pt: "troponina" }, { es: "infarto agudo de miocardio", pt: "infarto agudo do miocárdio" }, { es: "CK-MB", pt: "CK-MB" }, { es: "BNP / NT-proBNP", pt: "BNP / NT-proBNP" }, { es: "insuficiencia cardíaca", pt: "insuficiência cardíaca" }, { es: "marcador de daño miocárdico", pt: "marcador de dano miocárdico" }],
+    quiz: [
+      { question: "¿Por qué la troponina cardíaca es el marcador de elección para infarto?", options: ["Porque es más barata", "Por su alta especificidad por tejido cardíaco y su sensibilidad", "Porque se eleva antes que cualquier otro marcador", "Porque no se ve afectada por ejercicio físico"], answer: "Por su alta especificidad por tejido cardíaco y su sensibilidad" },
+      { question: "¿Cuándo comienza a elevarse la troponina tras el daño miocárdico?", options: ["Inmediatamente al inicio del daño", "Entre 3 y 6 horas después del inicio del daño", "Solo después de 24 horas", "A las 48 horas"], answer: "Entre 3 y 6 horas después del inicio del daño" },
+      { question: "¿Por qué la CK-MB sigue siendo útil a pesar de la troponina?", options: ["Es más específica que la troponina", "Vuelve a la normalidad más rápido y sirve para detectar reinfartos", "Tiene mayor sensibilidad diagnóstica", "Es el único marcador cuantificable"], answer: "Vuelve a la normalidad más rápido y sirve para detectar reinfartos" },
+      { question: "¿Qué indica una elevación de BNP o NT-proBNP?", options: ["Infarto agudo de miocardio", "Estrés mecánico ventricular como en insuficiencia cardíaca", "Daño renal agudo", "Infección bacteriana severa"], answer: "Estrés mecánico ventricular como en insuficiencia cardíaca" },
+      { question: "¿Una troponina normal descarta infarto en las primeras 2 horas?", options: ["Sí, siempre descarta infarto", "No, porque el marcador puede no haberse elevado aún", "Sí, con las troponinas de alta sensibilidad siempre", "Solo si se acompaña de ECG normal"], answer: "No, porque el marcador puede no haberse elevado aún" },
+      { question: "¿Qué estrategia diagnóstica es la correcta para marcadores cardíacos?", options: ["Una sola medición es suficiente", "Mediciones seriadas en el tiempo para evaluar la cinética del marcador", "Solo medir al ingreso del paciente", "Medir solo si el ECG es anormal"], answer: "Mediciones seriadas en el tiempo para evaluar la cinética del marcador" },
+      { question: "¿Cuánto tiempo puede permanecer elevada la troponina tras un infarto?", options: ["Solo 24 horas", "Hasta 14 días", "Solo 6 horas", "Exactamente 3 días"], answer: "Hasta 14 días" },
+      { question: "¿Cuál es la responsabilidad del laboratorio ante resultados críticos de troponina?", options: ["Esperar la solicitud del médico", "Comunicarlos de forma inmediata y documentada", "Incluirlos solo en el informe impreso", "Solo si supera 10 veces el valor normal"], answer: "Comunicarlos de forma inmediata y documentada" },
+    ],
+    dictation: "La troponina cardíaca es el marcador de elección para el diagnóstico de infarto y debe medirse de forma seriada en el tiempo.",
+  },
+  // ══ GESTIÓN ══
+  {
     id: "indicadores", title: "Indicadores de calidad", level: "Intermedio", category: "Gestión", emoji: "📈",
     description: "Interpretar, discutir y gestionar indicadores, metas y desvíos operativos.",
     readingTitle: "Cuando el indicador no cuenta toda la historia",
-    reading: [
-      "En la reunión mensual de revisión de indicadores, el equipo presentó el informe de desempeño del período. A primera vista, los números parecían buenos: el tiempo medio de respuesta se mantenía dentro del objetivo. Sin embargo, cuando la coordinadora comenzó a hacer preguntas más específicas, la imagen empezó a complicarse.",
-      "Una analista señaló que el tiempo medio de respuesta como número global era engañoso. Si bien el promedio estaba dentro del objetivo, existían dos o tres casos por semana en los que muestras urgentes llegaban con retrasos superiores a cuatro horas.",
-      "La coordinación propuso desagregar los indicadores en al menos tres categorías: muestras de rutina, muestras urgentes de ambulatorio y muestras urgentes de internación.",
-      "Los indicadores de calidad son herramientas de gestión, no fines en sí mismos. Un indicador que siempre está verde puede ser una buena noticia o puede ser señal de que se está midiendo lo incorrecto.",
-      "La reunión terminó con un acuerdo concreto: durante los próximos dos meses, el equipo implementaría los indicadores desagregados, definiría metas específicas y presentaría análisis de causa para los casos que superaran el límite.",
-    ],
-    vocab: [
-      { es: "indicador", pt: "indicador" },
-      { es: "desagregar datos", pt: "desagregar dados" },
-      { es: "no conformidad", pt: "não conformidade" },
-      { es: "promedio / media", pt: "média" },
-      { es: "meta / objetivo", pt: "meta / objetivo" },
-      { es: "mejora continua", pt: "melhoria contínua" },
-    ],
+    reading: ["En la reunión mensual de revisión de indicadores, el equipo presentó el informe de desempeño del período. A primera vista, los números parecían buenos: el tiempo medio de respuesta se mantenía dentro del objetivo. Sin embargo, cuando la coordinadora comenzó a hacer preguntas más específicas, la imagen empezó a complicarse.", "Una analista señaló que el tiempo medio de respuesta como número global era engañoso. Si bien el promedio estaba dentro del objetivo, existían dos o tres casos por semana en los que muestras urgentes llegaban con retrasos superiores a cuatro horas.", "La coordinación propuso desagregar los indicadores en al menos tres categorías: muestras de rutina, muestras urgentes de ambulatorio y muestras urgentes de internación.", "Los indicadores de calidad son herramientas de gestión, no fines en sí mismos. Un indicador que siempre está verde puede ser una buena noticia o puede ser señal de que se está midiendo lo incorrecto.", "La reunión terminó con un acuerdo concreto: durante los próximos dos meses, el equipo implementaría los indicadores desagregados, definiría metas específicas y presentaría análisis de causa para los casos que superaran el límite."],
+    vocab: [{ es: "indicador", pt: "indicador" }, { es: "desagregar datos", pt: "desagregar dados" }, { es: "no conformidad", pt: "não conformidade" }, { es: "promedio / media", pt: "média" }, { es: "meta / objetivo", pt: "meta / objetivo" }, { es: "mejora continua", pt: "melhoria contínua" }],
     quiz: [
       { question: "¿Por qué era engañoso el tiempo medio de respuesta como indicador global?", options: ["Porque era demasiado alto", "Porque ocultaba retrasos graves en muestras urgentes de pacientes críticos", "Porque no se medía correctamente", "Porque no era el indicador adecuado"], answer: "Porque ocultaba retrasos graves en muestras urgentes de pacientes críticos" },
       { question: "¿Cuántos casos de retraso grave se detectaban por semana?", options: ["Más de veinte", "Dos o tres casos con retrasos mayores a cuatro horas", "Ninguno según el indicador global", "Solo uno al mes"], answer: "Dos o tres casos con retrasos mayores a cuatro horas" },
@@ -259,21 +253,8 @@ const MODULES: ModuleType[] = [
     id: "no-conformidades", title: "No conformidades y CAPA", level: "Intermedio", category: "Gestión", emoji: "⚠️",
     description: "Detección, análisis de causa raíz y acciones correctivas y preventivas.",
     readingTitle: "El mismo error dos veces",
-    reading: [
-      "El área de calidad registró una nueva no conformidad relacionada con un error en el etiquetado de muestras durante el proceso de recepción. Al revisar el historial, el equipo encontró un incidente casi idéntico registrado seis meses antes, cerrado con una nota de 'informado al personal' pero sin ninguna acción correctiva formal.",
-      "La situación planteaba una pregunta necesaria: ¿por qué el mismo error había ocurrido dos veces en el mismo proceso? La respuesta estaba en el tipo de cierre. Informar verbalmente al personal puede generar conciencia momentánea, pero sin un cambio en el proceso, el sistema sigue siendo igualmente vulnerable.",
-      "Esta vez, el equipo decidió aplicar un análisis formal de causa raíz usando la técnica de los '5 Por qué'. La causa raíz identificada fue que el procedimiento escrito estaba desactualizado y no reflejaba el flujo real del proceso.",
-      "Con la causa raíz identificada, el equipo diseñó una CAPA que incluía la actualización del procedimiento y un control de doble verificación antes de que la muestra avance al siguiente paso.",
-      "A los treinta días de implementadas las acciones, se realizó la verificación de eficacia. El indicador de no conformidades relacionadas con el proceso de recepción mostró una reducción del ochenta por ciento.",
-    ],
-    vocab: [
-      { es: "no conformidad", pt: "não conformidade" },
-      { es: "acción correctiva", pt: "ação corretiva" },
-      { es: "acción preventiva", pt: "ação preventiva" },
-      { es: "causa raíz", pt: "causa raiz" },
-      { es: "verificación de eficacia", pt: "verificação de eficácia" },
-      { es: "CAPA", pt: "CAPA" },
-    ],
+    reading: ["El área de calidad registró una nueva no conformidad relacionada con un error en el etiquetado de muestras durante el proceso de recepción. Al revisar el historial, el equipo encontró un incidente casi idéntico registrado seis meses antes, cerrado con una nota de 'informado al personal' pero sin ninguna acción correctiva formal.", "La situación planteaba una pregunta necesaria: ¿por qué el mismo error había ocurrido dos veces? Informar verbalmente al personal puede generar conciencia momentánea, pero sin un cambio en el proceso, el sistema sigue siendo igualmente vulnerable.", "Esta vez, el equipo decidió aplicar un análisis formal de causa raíz usando la técnica de los '5 Por qué'. La causa raíz identificada fue que el procedimiento escrito estaba desactualizado y no reflejaba el flujo real del proceso.", "Con la causa raíz identificada, el equipo diseñó una CAPA que incluía la actualización del procedimiento y un control de doble verificación: el operador que etiqueta un tubo debe confirmarlo con otro analista antes de que la muestra avance al siguiente paso.", "A los treinta días de implementadas las acciones, el indicador de no conformidades relacionadas con el proceso de recepción mostró una reducción del ochenta por ciento."],
+    vocab: [{ es: "no conformidad", pt: "não conformidade" }, { es: "acción correctiva", pt: "ação corretiva" }, { es: "acción preventiva", pt: "ação preventiva" }, { es: "causa raíz", pt: "causa raiz" }, { es: "verificación de eficacia", pt: "verificação de eficácia" }, { es: "CAPA", pt: "CAPA" }],
     quiz: [
       { question: "¿Qué tipo de error generó la no conformidad?", options: ["Un resultado incorrecto que fue liberado", "Un tubo asignado al número de solicitud equivocado durante la recepción", "Una muestra perdida durante el proceso", "Un informe enviado con retraso"], answer: "Un tubo asignado al número de solicitud equivocado durante la recepción" },
       { question: "¿Cuándo había ocurrido un incidente similar anteriormente?", options: ["Nunca había ocurrido antes", "Seis meses antes, cerrado sin acción correctiva real", "Un año antes con acción correctiva documentada", "La semana anterior"], answer: "Seis meses antes, cerrado sin acción correctiva real" },
@@ -287,24 +268,48 @@ const MODULES: ModuleType[] = [
     dictation: "Una acción correctiva real debe identificar la causa raíz, cambiar el proceso y verificar la eficacia de las acciones implementadas.",
   },
   {
+    id: "auditorias", title: "Auditorías internas", level: "Avanzado", category: "Gestión", emoji: "🔍",
+    description: "Planificación, ejecución y seguimiento de auditorías del sistema de calidad.",
+    readingTitle: "El día de la auditoría",
+    reading: ["Una auditoría interna bien concebida no debería ser una instancia que el personal teme. Su propósito es verificar de forma objetiva y sistemática que los procesos se ejecutan de acuerdo con lo documentado, identificar brechas y generar oportunidades concretas de mejora.", "La planificación de la auditoría es tan importante como su ejecución. El auditor prepara un plan que incluye los objetivos específicos, el alcance, los criterios de auditoría, el programa de actividades y la lista de verificación.", "Durante la ejecución, el auditor combina revisión de registros, observación directa de los procesos en tiempo real y entrevistas con el personal. Cada hallazgo debe registrarse con evidencia objetiva.", "Los hallazgos se clasifican según su impacto: una no conformidad mayor es una falla sistémica que compromete seriamente la calidad; una no conformidad menor es una falla puntual; una observación es donde el sistema funciona correctamente pero podría mejorar.", "El valor real de una auditoría se mide en el seguimiento que se hace de sus hallazgos. Si los planes de acción se presentan pero nunca se verifica su implementación efectiva, la auditoría pierde su razón de ser."],
+    vocab: [{ es: "auditoría", pt: "auditoria" }, { es: "hallazgo", pt: "achado / constatação" }, { es: "evidencia objetiva", pt: "evidência objetiva" }, { es: "mejora continua", pt: "melhoria contínua" }, { es: "plan de acción", pt: "plano de ação" }, { es: "no conformidad mayor", pt: "não conformidade maior" }],
+    quiz: [
+      { question: "¿Cuál es el verdadero propósito de una auditoría interna?", options: ["Encontrar culpables y aplicar sanciones", "Verificar que los procesos se ejecutan como documentado e identificar oportunidades de mejora", "Demostrar que el laboratorio cumple todas las normas", "Reducir los costos operativos"], answer: "Verificar que los procesos se ejecutan como documentado e identificar oportunidades de mejora" },
+      { question: "¿Quién debe realizar la auditoría de un proceso?", options: ["El mismo responsable habitual del proceso", "Una persona diferente de quien trabaja habitualmente en ese proceso", "El director técnico exclusivamente", "Un auditor externo en todos los casos"], answer: "Una persona diferente de quien trabaja habitualmente en ese proceso" },
+      { question: "¿Qué incluye un plan de auditoría bien elaborado?", options: ["Solo la fecha y el nombre del auditor", "Objetivos, alcance, criterios, programa de actividades y lista de verificación", "Solo los hallazgos que se espera encontrar", "Solo los procesos que se sospecha que tienen problemas"], answer: "Objetivos, alcance, criterios, programa de actividades y lista de verificación" },
+      { question: "¿Cuáles son las tres actividades del auditor durante la ejecución?", options: ["Encuestas, mediciones y cálculos estadísticos", "Revisión de registros, observación directa y entrevistas al personal", "Solo revisión exhaustiva de documentos", "Mediciones de equipos, entrevistas y verificación de stocks"], answer: "Revisión de registros, observación directa y entrevistas al personal" },
+      { question: "¿Qué es una no conformidad mayor?", options: ["Un problema pequeño que debe monitorearse", "Una falla sistémica que compromete seriamente la calidad o incumple un requisito crítico", "Una oportunidad de mejora sin urgencia real", "Un hallazgo que ya fue corregido antes de la auditoría"], answer: "Una falla sistémica que compromete seriamente la calidad o incumple un requisito crítico" },
+      { question: "¿Qué diferencia a una observación de una no conformidad?", options: ["La observación no requiere documentación", "La observación es donde el sistema funciona pero podría mejorar; la no conformidad es un incumplimiento", "Solo la puede hacer el auditor externo", "No hay diferencia real entre ambas"], answer: "La observación es donde el sistema funciona pero podría mejorar; la no conformidad es un incumplimiento" },
+      { question: "¿Dónde se mide el valor real de una auditoría interna?", options: ["En el número total de hallazgos identificados", "En el seguimiento y verificación de que los planes de acción se implementaron efectivamente", "En la duración total de la auditoría", "En la satisfacción del equipo auditado"], answer: "En el seguimiento y verificación de que los planes de acción se implementaron efectivamente" },
+      { question: "¿Qué completa el ciclo de mejora continua en el contexto de auditorías?", options: ["Publicar los resultados en el informe anual", "Planificación, ejecución, plan de acción y verificación de su implementación efectiva", "Contratar más auditores", "Comprar software especializado de gestión de calidad"], answer: "Planificación, ejecución, plan de acción y verificación de su implementación efectiva" },
+    ],
+    dictation: "El valor de una auditoría se mide en el seguimiento que se hace de sus hallazgos y en la implementación efectiva de los planes de acción.",
+  },
+  {
+    id: "iso15189", title: "ISO 15189", level: "Avanzado", category: "Gestión", emoji: "🏅",
+    description: "Requisitos de la norma internacional para laboratorios clínicos.",
+    readingTitle: "El estándar que define la excelencia",
+    reading: ["La norma ISO 15189 es el estándar internacional que establece los requisitos específicos de calidad y competencia para los laboratorios clínicos. Está diseñada específicamente para el contexto del laboratorio médico, a diferencia de la ISO 17025, que aplica a laboratorios de ensayo en general.", "La norma está estructurada en dos grandes bloques: los requisitos de gestión, que incluyen el sistema de gestión de la calidad, el control de documentos, la gestión de no conformidades y las auditorías internas; y los requisitos técnicos, que abordan el personal, las instalaciones, los equipos y los procesos.", "Uno de los conceptos centrales de la ISO 15189 es el enfoque en el paciente. El laboratorio no es solo un proveedor de datos numéricos: es un actor clave en la cadena de atención al paciente.", "La acreditación bajo ISO 15189 es un proceso formal en el que un organismo evaluador independiente verifica que el laboratorio cumple con todos los requisitos de la norma. Los evaluadores son profesionales con experiencia en laboratorio clínico.", "Implementar ISO 15189 no es solo cumplir con una lista de requisitos formales. Es adoptar una cultura de mejora continua en la que cada proceso es documentado, medido, evaluado y mejorado de manera sistemática."],
+    vocab: [{ es: "acreditación", pt: "acreditação" }, { es: "norma ISO 15189", pt: "norma ISO 15189" }, { es: "requisito técnico", pt: "requisito técnico" }, { es: "revisión por la dirección", pt: "análise crítica pela direção" }, { es: "mejora continua", pt: "melhoria contínua" }, { es: "evaluación de pares", pt: "avaliação por pares" }],
+    quiz: [
+      { question: "¿Para qué tipo de laboratorio fue diseñada específicamente la ISO 15189?", options: ["Para laboratorios industriales de control de calidad", "Para laboratorios clínicos médicos específicamente", "Para laboratorios ambientales", "Para cualquier tipo de laboratorio de ensayo"], answer: "Para laboratorios clínicos médicos específicamente" },
+      { question: "¿Cuáles son los dos grandes bloques de requisitos de la ISO 15189?", options: ["Recursos humanos y equipamiento", "Requisitos de gestión y requisitos técnicos", "Documentación y control de calidad", "Procesos analíticos y postanalíticos"], answer: "Requisitos de gestión y requisitos técnicos" },
+      { question: "¿Cuál es el concepto central de la ISO 15189?", options: ["La rentabilidad del laboratorio", "El enfoque en el paciente como actor clave de la cadena de atención", "La velocidad de procesamiento", "La reducción de costos operativos"], answer: "El enfoque en el paciente como actor clave de la cadena de atención" },
+      { question: "¿Qué diferencia la acreditación ISO 15189 de la certificación ISO 9001?", options: ["Son equivalentes y se usan indistintamente", "La 15189 evalúa competencia técnica específica; la 9001 solo el sistema de gestión", "La 9001 es más exigente técnicamente", "Solo difieren en el costo del proceso"], answer: "La 15189 evalúa competencia técnica específica; la 9001 solo el sistema de gestión" },
+      { question: "¿Quiénes son los evaluadores en una acreditación ISO 15189?", options: ["Auditores financieros generales", "Profesionales con experiencia en laboratorio clínico", "Funcionarios del gobierno de salud", "Solo personal del organismo acreditador sin experiencia técnica"], answer: "Profesionales con experiencia en laboratorio clínico" },
+      { question: "¿Qué exige la norma respecto a los resultados críticos?", options: ["Incluirlos solo en el informe impreso", "Informarlos de manera oportuna al médico", "Solo documentarlos internamente", "Repetirlos antes de comunicarlos"], answer: "Informarlos de manera oportuna al médico" },
+      { question: "¿Qué reportan los laboratorios que implementan ISO 15189?", options: ["Solo mejoras en documentación formal", "Mejoras en calidad, satisfacción del cliente y motivación del personal", "Solo reducción de costos operativos", "Solo mejoras en tiempos de respuesta"], answer: "Mejoras en calidad, satisfacción del cliente y motivación del personal" },
+      { question: "¿La ISO 15189 es un fin en sí misma?", options: ["Sí, cumplirla es el objetivo principal", "No, es un medio para adoptar una cultura de mejora continua", "Sí, el certificado es lo que importa", "Depende del tipo de laboratorio"], answer: "No, es un medio para adoptar una cultura de mejora continua" },
+    ],
+    dictation: "La ISO 15189 establece requisitos de calidad y competencia para laboratorios clínicos con enfoque en el paciente y en la mejora continua.",
+  },
+  // ══ COMUNICACIÓN ══
+  {
     id: "atencion-cliente", title: "Atención técnica al cliente", level: "Intermedio", category: "Comunicación", emoji: "📞",
     description: "Español profesional para explicar resultados y gestionar consultas técnicas.",
     readingTitle: "Una llamada que exigía claridad",
-    reading: [
-      "A media mañana, una analista del área de atención al cliente recibió una llamada de un médico clínico que estaba confundido porque el informe de laboratorio de uno de sus pacientes mostraba un valor de creatinina diferente al del mes anterior.",
-      "La analista escuchó el planteo completo sin interrumpir. Luego pidió al médico que le confirmara el número de solicitud y el nombre del paciente para poder acceder al historial.",
-      "Al revisar el historial, la analista encontró la explicación: el laboratorio había implementado un nuevo método para la determinación de creatinina el mes anterior, con una calibración trazable a un estándar de referencia diferente.",
-      "La analista explicó la situación con claridad, describió el cambio de método, la razón del cambio y el impacto clínico real. También se disculpó por no haber comunicado el cambio proactivamente.",
-      "La llamada terminó con el médico agradecido. El laboratorio estableció un procedimiento formal para comunicar cualquier cambio de método con al menos quince días de anticipación.",
-    ],
-    vocab: [
-      { es: "duda / consulta", pt: "dúvida / consulta" },
-      { es: "informe", pt: "relatório" },
-      { es: "validado", pt: "validado" },
-      { es: "trazabilidad metrológica", pt: "rastreabilidade metrológica" },
-      { es: "transmitir confianza", pt: "transmitir confiança" },
-      { es: "comunicación proactiva", pt: "comunicação proativa" },
-    ],
+    reading: ["A media mañana, una analista del área de atención al cliente recibió una llamada de un médico clínico que estaba confundido porque el informe de laboratorio de uno de sus pacientes mostraba un valor de creatinina diferente al del mes anterior.", "La analista escuchó el planteo completo sin interrumpir. Luego pidió al médico que le confirmara el número de solicitud y el nombre del paciente para poder acceder al historial.", "Al revisar el historial, la analista encontró la explicación: el laboratorio había implementado un nuevo método para la determinación de creatinina el mes anterior, con una calibración trazable a un estándar de referencia diferente.", "La analista explicó la situación con claridad, describió el cambio de método y el impacto clínico real. También se disculpó por no haber comunicado el cambio proactivamente y ofreció enviar una carta técnica con la información completa.", "La llamada terminó con el médico agradecido. El laboratorio estableció un procedimiento formal para comunicar a los médicos cualquier cambio de método con al menos quince días de anticipación."],
+    vocab: [{ es: "duda / consulta", pt: "dúvida / consulta" }, { es: "informe", pt: "relatório" }, { es: "validado", pt: "validado" }, { es: "trazabilidad metrológica", pt: "rastreabilidade metrológica" }, { es: "transmitir confianza", pt: "transmitir confiança" }, { es: "comunicación proactiva", pt: "comunicação proativa" }],
     quiz: [
       { question: "¿Por qué llamó el médico al laboratorio?", options: ["Para cambiar de proveedor", "Por una diferencia aparente en el valor de creatinina entre dos meses consecutivos", "Por un error en la factura", "Para solicitar un análisis urgente"], answer: "Por una diferencia aparente en el valor de creatinina entre dos meses consecutivos" },
       { question: "¿Qué hizo la analista mientras buscaba información en el sistema?", options: ["Puso al médico en espera en silencio", "Verbalizó en voz alta lo que estaba haciendo para transmitir atención y profesionalismo", "Le pidió que llamara más tarde", "Le transfirió la llamada"], answer: "Verbalizó en voz alta lo que estaba haciendo para transmitir atención y profesionalismo" },
@@ -318,24 +323,121 @@ const MODULES: ModuleType[] = [
     dictation: "En atención técnica, no alcanza con tener razón: también es necesario comunicar proactivamente para evitar que las dudas se conviertan en problemas.",
   },
   {
+    id: "correo-tecnico", title: "Correo técnico profesional", level: "Básico", category: "Comunicación", emoji: "✉️",
+    description: "Estructura y redacción de correos técnicos claros y profesionales en español.",
+    readingTitle: "Un correo que generó confusión",
+    reading: ["El área de soporte técnico del laboratorio enviaba regularmente comunicaciones por correo electrónico a sus clientes. Un martes, el coordinador recibió una respuesta inusualmente negativa de un cliente luego de enviar un correo informando un cambio en el horario de retiro de muestras.", "Al releer el correo enviado, el equipo notó varios problemas: comenzaba directamente con los detalles técnicos sin ningún saludo ni contexto previo, el asunto del correo decía simplemente 'Actualización', y no había ninguna indicación de qué debía hacer el cliente ni a quién contactar.", "La estructura de un correo técnico profesional efectivo tiene elementos bien definidos: el asunto debe ser específico y descriptivo, el saludo debe ser cordial, el párrafo inicial debe contextualizar el motivo y el cuerpo debe presentar la información de forma organizada.", "El equipo reescribió el correo. El nuevo asunto decía: 'Cambio en horario de retiro de muestras: a partir del lunes 15'. Comenzaba con saludo personalizado, contexto, información concreta y cerraba con firma completa.", "El cliente respondió al nuevo correo agradeciéndolo. La experiencia fue aprovechada para revisar todos los templates de comunicación existentes y organizar un taller interno sobre redacción técnica."],
+    vocab: [{ es: "redacción", pt: "redação" }, { es: "asunto del correo", pt: "assunto do e-mail" }, { es: "cierre cordial", pt: "encerramento cordial" }, { es: "próximos pasos", pt: "próximos passos" }, { es: "destinatario", pt: "destinatário" }, { es: "firma", pt: "assinatura" }],
+    quiz: [
+      { question: "¿Cuál fue el problema principal del primer correo enviado?", options: ["Tenía errores técnicos en la información", "Le faltaba estructura, contexto, claridad y datos de contacto", "Fue enviado al destinatario equivocado", "Era demasiado extenso"], answer: "Le faltaba estructura, contexto, claridad y datos de contacto" },
+      { question: "¿Qué decía el asunto del correo problemático?", options: ["No tenía asunto definido", "Solo 'Actualización', sin indicar de qué se trataba", "Un asunto muy largo y confuso", "Solo una fecha sin descripción"], answer: "Solo 'Actualización', sin indicar de qué se trataba" },
+      { question: "¿Cómo debe redactarse el asunto de un correo técnico efectivo?", options: ["Con solo una palabra clave", "De forma específica y descriptiva, anticipando el contenido para el receptor", "Con la fecha y el número de referencia interno", "Con el nombre completo del remitente"], answer: "De forma específica y descriptiva, anticipando el contenido para el receptor" },
+      { question: "¿Qué elementos debe tener un correo técnico profesional?", options: ["Solo la información técnica relevante", "Asunto claro, saludo, contexto inicial, información organizada, próximos pasos y firma", "Solo saludo y despedida formal", "Asunto, información técnica y fecha únicamente"], answer: "Asunto claro, saludo, contexto inicial, información organizada, próximos pasos y firma" },
+      { question: "¿Cómo respondió el cliente al correo reescrito?", options: ["Negativamente, pidiendo más detalles", "Agradeciéndolo y confirmando que ahora entendía perfectamente", "Sin responder al correo", "Con otra queja"], answer: "Agradeciéndolo y confirmando que ahora entendía perfectamente" },
+      { question: "¿Qué se revisó en el laboratorio después de esta experiencia?", options: ["Solo el correo específico que causó el problema", "Todos los templates de comunicación existentes, actualizándolos", "Solo los correos del área técnica", "Nada, fue considerado un caso aislado"], answer: "Todos los templates de comunicación existentes, actualizándolos" },
+      { question: "¿Qué actividad de formación se organizó para el personal?", options: ["Un curso de informática básica", "Un taller sobre redacción de comunicaciones técnicas para todo el personal", "Una capacitación sobre el nuevo horario de atención", "Una reunión informativa de 15 minutos"], answer: "Un taller sobre redacción de comunicaciones técnicas para todo el personal" },
+      { question: "¿Por qué la forma de comunicar información técnica no es un detalle menor?", options: ["Porque es obligatorio por la norma de calidad", "Porque refleja el profesionalismo del laboratorio y afecta la percepción de calidad del servicio", "Solo porque los clientes lo exigen en el contrato", "Porque mejora la velocidad de respuesta"], answer: "Porque refleja el profesionalismo del laboratorio y afecta la percepción de calidad del servicio" },
+    ],
+    dictation: "Un correo técnico profesional necesita un asunto claro, contexto inicial, información organizada, próximos pasos y una firma completa.",
+  },
+  {
+    id: "reuniones", title: "Reuniones efectivas", level: "Básico", category: "Comunicación", emoji: "🗣️",
+    description: "Vocabulario y estrategias para participar activamente en reuniones en español.",
+    readingTitle: "La reunión que no terminaba",
+    reading: ["El equipo del laboratorio tenía una reunión semanal de coordinación que, en teoría, duraba una hora. En la práctica, rara vez terminaba antes de las dos horas y generalmente concluía sin que quedara claro qué habían decidido exactamente.", "Una consultora externa identificó tres problemas principales: no había una agenda previamente distribuida, no había un moderador claro, y no existía ningún mecanismo para registrar las decisiones tomadas.", "Con esas observaciones, el coordinador implementó tres cambios simples pero poderosos. Una semana antes de cada reunión, enviaba por correo la agenda con los temas, el objetivo y el tiempo asignado a cada punto.", "La participación activa en reuniones requiere habilidades lingüísticas específicas. Pedir la palabra de forma respetuosa ('¿Puedo agregar algo?'), expresar acuerdo ('Estoy de acuerdo con lo que planteó') y manifestar desacuerdo constructivo ('Entiendo el punto, pero me preocupa que...') son competencias que marcan la diferencia.", "A los dos meses, las reuniones pasaron a durar en promedio cincuenta minutos y el porcentaje de compromisos cumplidos en el plazo acordado aumentó significativamente."],
+    vocab: [{ es: "agenda / orden del día", pt: "pauta / agenda" }, { es: "moderador", pt: "moderador" }, { es: "acta de reunión", pt: "ata de reunião" }, { es: "pedir la palabra", pt: "pedir a palavra" }, { es: "compromiso", pt: "compromisso" }, { es: "plazo", pt: "prazo" }],
+    quiz: [
+      { question: "¿Cuáles eran los tres problemas principales de las reuniones?", options: ["Duración, temperatura y ruido", "Sin agenda previa, sin moderador claro y sin registro formal de decisiones", "Demasiados participantes, pocos temas y poco tiempo", "Horario inconveniente, sala pequeña y muchas interrupciones"], answer: "Sin agenda previa, sin moderador claro y sin registro formal de decisiones" },
+      { question: "¿Cuándo debe enviarse la agenda de la reunión?", options: ["El mismo día de la reunión", "Una semana antes con temas, objetivo y tiempo asignado a cada punto", "Solo si los participantes la solicitan", "Al finalizar la reunión anterior"], answer: "Una semana antes con temas, objetivo y tiempo asignado a cada punto" },
+      { question: "¿Cuál es el rol del moderador activo durante la reunión?", options: ["Solo tomar nota de lo que se dice", "Presentar temas, facilitar discusión, controlar tiempos y cerrar cada punto con síntesis explícita", "Hablar la mayor parte del tiempo", "Solo controlar el tiempo de cada participante"], answer: "Presentar temas, facilitar discusión, controlar tiempos y cerrar cada punto con síntesis explícita" },
+      { question: "¿En cuánto tiempo debe enviarse el acta de reunión?", options: ["En la semana siguiente", "En menos de veinticuatro horas", "Solo si alguien lo solicita", "Al final del mes"], answer: "En menos de veinticuatro horas" },
+      { question: "¿Cómo se expresa desacuerdo de forma constructiva en una reunión?", options: ["Interrumpiendo al orador", "Con frases como 'Entiendo el punto, pero me preocupa que...'", "Saliendo de la reunión como señal de protesta", "Enviando un correo después"], answer: "Con frases como 'Entiendo el punto, pero me preocupa que...'" },
+      { question: "¿Cómo se pide la palabra de forma respetuosa en español?", options: ["Levantando la voz", "Con frases como '¿Puedo agregar algo?' o 'Si me permiten, quisiera comentar algo'", "Interrumpiendo cuando hay una breve pausa", "Enviando un mensaje por el chat"], answer: "Con frases como '¿Puedo agregar algo?' o 'Si me permiten, quisiera comentar algo'" },
+      { question: "¿Qué resultado cuantitativo se obtuvo después de implementar los cambios?", options: ["Las reuniones duraron igual pero fueron más intensas", "Las reuniones bajaron a 50 minutos promedio y los compromisos cumplidos aumentaron significativamente", "Las reuniones se hicieron más largas pero más productivas", "No hubo cambios significativos"], answer: "Las reuniones bajaron a 50 minutos promedio y los compromisos cumplidos aumentaron significativamente" },
+      { question: "¿Qué define una reunión verdaderamente efectiva?", options: ["Que termina antes del tiempo asignado", "Que logra sus objetivos, respeta el tiempo y genera compromisos concretos que se cumplen", "Que todos los participantes hablan por igual tiempo", "Que el moderador habla la mayor parte del tiempo"], answer: "Que logra sus objetivos, respeta el tiempo y genera compromisos concretos que se cumplen" },
+    ],
+    dictation: "Una reunión efectiva necesita agenda previa, un moderador activo y un acta con compromisos, responsables y fechas límite.",
+  },
+  {
+    id: "llamada-urgente", title: "Llamada urgente al médico", level: "Intermedio", category: "Comunicación", emoji: "🚨",
+    description: "Protocolo y lenguaje para comunicar resultados críticos por teléfono.",
+    readingTitle: "La llamada que no puede esperar",
+    reading: ["Hay resultados de laboratorio que no pueden esperar a que el médico revise el informe en el sistema. Son los llamados valores críticos o de pánico: resultados tan extremos que indican una amenaza inmediata para la vida del paciente y que requieren comunicación verbal directa.", "La lista de valores críticos incluye ejemplos como glucosa menor a 40 mg/dL o mayor a 500 mg/dL, potasio menor a 2.5 o mayor a 6.5 mEq/L, hemoglobina menor a 7 g/dL en adultos, y troponina muy elevada en contexto agudo.", "El procedimiento estándar implica varios pasos: el analista debe verificar el resultado antes de llamar, confirmando la identidad de la muestra y descartando errores preanalíticos. Luego llama al médico solicitante o, si no está disponible, al médico responsable del paciente.", "Durante la llamada, el analista comunica el nombre del paciente, el número de muestra, el análisis y el resultado, indica que se trata de un valor crítico, y espera confirmación verbal de que el médico recibió y entendió la información.", "Todo el proceso debe quedar documentado: fecha y hora de detección, resultado, nombre del analista que llamó, nombre del médico que recibió la llamada, hora de la llamada y confirmación de recepción."],
+    vocab: [{ es: "valor crítico / de pánico", pt: "valor crítico / de pânico" }, { es: "protocolo de comunicación", pt: "protocolo de comunicação" }, { es: "escalar", pt: "escalar / acionar" }, { es: "confirmar recepción", pt: "confirmar recebimento" }, { es: "guardia / servicio de urgencias", pt: "plantão / pronto-socorro" }, { es: "trazabilidad de comunicación", pt: "rastreabilidade da comunicação" }],
+    quiz: [
+      { question: "¿Por qué existen los protocolos de valores críticos?", options: ["Por exigencia burocrática solamente", "Porque ciertos resultados indican amenaza inmediata para la vida y no pueden esperar", "Para reducir la carga de trabajo del analista", "Solo para cumplir con la acreditación"], answer: "Porque ciertos resultados indican amenaza inmediata para la vida y no pueden esperar" },
+      { question: "¿Qué debe verificar el analista antes de llamar?", options: ["Que el médico esté en su consultorio", "El resultado y la identidad de la muestra descartando errores preanalíticos", "Solo que el resultado esté fuera de rango", "Que el sistema registró el resultado"], answer: "El resultado y la identidad de la muestra descartando errores preanalíticos" },
+      { question: "¿Es suficiente dejar un mensaje de voz o correo para comunicar un valor crítico?", options: ["Sí, si queda registrado", "No, la comunicación debe ser en tiempo real y verificada verbalmente", "Sí, si es fuera del horario habitual", "Solo si el médico no tiene disponibilidad inmediata"], answer: "No, la comunicación debe ser en tiempo real y verificada verbalmente" },
+      { question: "¿Qué información debe comunicar el analista durante la llamada?", options: ["Solo el resultado y el nombre del paciente", "Nombre del paciente, número de muestra, análisis, resultado y confirmación de que es valor crítico", "Solo el análisis y el resultado numérico", "Solo el nombre del paciente y su diagnóstico previo"], answer: "Nombre del paciente, número de muestra, análisis, resultado y confirmación de que es valor crítico" },
+      { question: "¿Qué debe documentarse en el registro de valores críticos?", options: ["Solo la fecha y el resultado", "Fecha, hora, resultado, analista, médico contactado, hora de llamada y confirmación", "Solo el nombre del médico y el resultado", "Solo si el médico hizo algún cambio en el tratamiento"], answer: "Fecha, hora, resultado, analista, médico contactado, hora de llamada y confirmación" },
+      { question: "¿Qué se hace si no se puede contactar al médico solicitante?", options: ["Se deja el resultado en el sistema y se espera", "Se escala siguiendo el procedimiento: médico responsable, guardia o supervisor", "Se cancela el resultado hasta que el médico llame", "Se informa al día siguiente en el informe"], answer: "Se escala siguiendo el procedimiento: médico responsable, guardia o supervisor" },
+      { question: "¿Es un valor crítico de glucosa 300 mg/dL?", options: ["Sí, siempre es crítico", "No, el rango crítico típico es menor a 40 o mayor a 500 mg/dL", "Depende solo de la edad del paciente", "Sí, cualquier glucosa elevada es crítica"], answer: "No, el rango crítico típico es menor a 40 o mayor a 500 mg/dL" },
+      { question: "¿Por qué la trazabilidad de la comunicación puede tener consecuencias legales?", options: ["Solo por requisito de la norma de calidad", "Porque documenta si se actuó correctamente ante una emergencia clínica", "Solo si el paciente hace una queja formal", "No tiene consecuencias legales reales"], answer: "Porque documenta si se actuó correctamente ante una emergencia clínica" },
+    ],
+    dictation: "La comunicación de valores críticos debe ser verbal, en tiempo real, verificada y documentada con nombre, hora y confirmación del médico.",
+  },
+  // ══ TECNOLOGÍA ══
+  {
+    id: "helpdesk", title: "Soporte técnico (Helpdesk)", level: "Básico", category: "Tecnología", emoji: "💻",
+    description: "Vocabulario y comunicación efectiva para el soporte técnico interno.",
+    readingTitle: "El sistema que no abría",
+    reading: ["Un lunes por la mañana, cuando el laboratorio estaba en plena actividad de inicio de turno, comenzaron a llegar reportes de varios analistas diciendo que el sistema de gestión no respondía. En cuestión de minutos, el área de TI recibió más de diez tickets simultáneos.", "El primer paso del equipo de TI fue clasificar el incidente antes de actuar: ¿era un problema que afectaba a todos los usuarios o solo a algunos? ¿Era un problema de acceso al sistema o el sistema en sí no estaba funcionando?", "Después de verificar que el problema era generalizado, el técnico revisó los registros del servidor y encontró que una actualización automática de seguridad programada para las tres de la madrugada había generado un conflicto con un módulo crítico del sistema. El problema fue resuelto en menos de noventa minutos.", "Mientras el técnico trabajaba en la resolución, otro miembro del equipo se encargó de la comunicación con los usuarios. Envió un mensaje por el canal interno informando que se había identificado el problema y que estimaban una resolución en aproximadamente una hora.", "La experiencia generó dos mejoras: establecer una ventana de mantenimiento definida para las actualizaciones automáticas con un ambiente de prueba, y crear un protocolo de comunicación de incidentes con mensajes mínimos a los quince minutos, a los treinta minutos y al momento de la resolución."],
+    vocab: [{ es: "ticket / incidente", pt: "chamado / incidente" }, { es: "servidor", pt: "servidor" }, { es: "actualización", pt: "atualização" }, { es: "librería / módulo", pt: "biblioteca / módulo" }, { es: "usuario", pt: "usuário" }, { es: "ventana de mantenimiento", pt: "janela de manutenção" }],
+    quiz: [
+      { question: "¿Qué reportaron los analistas el lunes por la mañana?", options: ["Resultados incorrectos en los equipos", "El sistema de gestión no respondía y no podían acceder", "Los equipos analíticos no funcionaban", "Los reactivos estaban vencidos"], answer: "El sistema de gestión no respondía y no podían acceder" },
+      { question: "¿Cuántos tickets recibió TI simultáneamente?", options: ["Dos o tres tickets", "Cinco tickets", "Más de diez tickets", "Solo un ticket general"], answer: "Más de diez tickets" },
+      { question: "¿Cuál fue el primer paso estratégico del equipo de TI?", options: ["Reiniciar inmediatamente todos los servidores", "Clasificar el incidente para entender si era generalizado o afectaba solo a algunos", "Llamar al proveedor del sistema", "Pedir al personal que volviera más tarde"], answer: "Clasificar el incidente para entender si era generalizado o afectaba solo a algunos" },
+      { question: "¿Qué causó el problema en el sistema de gestión?", options: ["Un ataque de virus", "Una actualización automática de seguridad que conflictuó con el sistema", "Un usuario borró archivos críticos", "El disco duro del servidor estaba lleno"], answer: "Una actualización automática de seguridad que conflictuó con el sistema" },
+      { question: "¿Por qué la comunicación proactiva durante el incidente fue valiosa?", options: ["Para cumplir con un requisito de la norma", "Redujo la ansiedad del personal y evitó llamadas que hubieran distraído al técnico", "Para demostrar que TI siempre está trabajando", "Solo para registrar el incidente"], answer: "Redujo la ansiedad del personal y evitó llamadas que hubieran distraído al técnico" },
+      { question: "¿En cuánto tiempo se resolvió el problema desde la detección?", options: ["Quince minutos exactos", "Treinta minutos", "Menos de noventa minutos", "Varias horas con múltiples intervenciones"], answer: "Menos de noventa minutos" },
+      { question: "¿Qué mejora se implementó para las futuras actualizaciones del sistema?", options: ["Desactivarlas completamente", "Definir un ambiente de prueba para validar compatibilidad antes de aplicarlas en producción", "Aplicarlas solo manualmente una vez por año", "Contratar un especialista externo"], answer: "Definir un ambiente de prueba para validar compatibilidad antes de aplicarlas en producción" },
+      { question: "¿Qué protocolo de comunicación de incidentes se creó?", options: ["Solo un correo de disculpas posterior", "Mensajes mínimos a los 15 minutos, a los 30 minutos y al momento de la resolución", "Un informe técnico solo para la dirección", "Solo comunicar cuando el problema esté completamente resuelto"], answer: "Mensajes mínimos a los 15 minutos, a los 30 minutos y al momento de la resolución" },
+    ],
+    dictation: "Documentar los incidentes técnicos y aprender de ellos es lo que transforma un problema puntual en una mejora sistémica del área de TI.",
+  },
+  {
+    id: "seguridad-datos", title: "Seguridad de datos", level: "Intermedio", category: "Tecnología", emoji: "🔒",
+    description: "Protección de datos, accesos, contraseñas y buenas prácticas en sistemas.",
+    readingTitle: "Una contraseña compartida",
+    reading: ["Durante una auditoría de seguridad informática realizada por un consultor externo, se descubrió algo que nadie en el laboratorio había pensado que era un problema: cuatro analistas del área de bioquímica compartían la misma contraseña de acceso al sistema de gestión.", "El auditor explicó el problema de fondo: si todos los usuarios comparten la misma credencial, el registro de auditoría del sistema se vuelve completamente inútil. Si alguien modifica un resultado o accede a información confidencial, es imposible saber quién fue.", "El área de TI implementó inmediatamente varias medidas: restableció contraseñas individuales únicas para cada usuario, con requisitos de complejidad mínima de ocho caracteres; configuró el sistema para que las contraseñas expiraran cada noventa días; y activó el registro de auditoría detallado.", "Para los módulos más críticos del sistema, como la liberación de resultados y el acceso a datos históricos de pacientes, se implementó autenticación de doble factor.", "La seguridad de los datos en un laboratorio clínico no es solo una cuestión tecnológica: es también una responsabilidad ética y legal. Una brecha de seguridad que exponga datos de pacientes puede tener consecuencias graves e irreparables."],
+    vocab: [{ es: "contraseña", pt: "senha" }, { es: "doble factor de autenticación", pt: "autenticação de dois fatores" }, { es: "registro de auditoría", pt: "registro de auditoria" }, { es: "credencial", pt: "credencial" }, { es: "brecha de seguridad", pt: "brecha de segurança" }, { es: "integridad de datos", pt: "integridade de dados" }],
+    quiz: [
+      { question: "¿Qué práctica de riesgo descubrió la auditoría?", options: ["El servidor no tenía contraseña", "Cuatro analistas compartían la misma contraseña de acceso al sistema", "Los datos se almacenaban sin cifrado", "El sistema no tenía copias de seguridad"], answer: "Cuatro analistas compartían la misma contraseña de acceso al sistema" },
+      { question: "¿Por qué compartir contraseñas inutiliza el registro de auditoría?", options: ["Porque el sistema falla cuando hay muchos usuarios activos", "Porque es imposible saber quién realizó cada acción si todos usan la misma credencial", "Porque las contraseñas compartidas se vencen más rápido", "Porque viola automáticamente la norma ISO"], answer: "Porque es imposible saber quién realizó cada acción si todos usan la misma credencial" },
+      { question: "¿Cuáles son los requisitos mínimos de complejidad de contraseña implementados?", options: ["Solo 4 caracteres numéricos", "Al menos 8 caracteres con mayúsculas, minúsculas, números y caracteres especiales", "Solo letras y números sin mayúsculas", "Sin requisitos especiales"], answer: "Al menos 8 caracteres con mayúsculas, minúsculas, números y caracteres especiales" },
+      { question: "¿Cada cuánto tiempo deben renovarse las contraseñas?", options: ["Cada año", "Cada noventa días", "Cada seis meses", "Solo cuando el usuario lo decide"], answer: "Cada noventa días" },
+      { question: "¿Qué es el doble factor de autenticación?", options: ["Tener dos contraseñas diferentes", "Confirmar la identidad con un segundo método además de la contraseña, como un código al teléfono", "Usar contraseñas del doble de longitud", "Que dos personas autorizan cada acción"], answer: "Confirmar la identidad con un segundo método además de la contraseña, como un código al teléfono" },
+      { question: "¿Para qué módulos se implementó el doble factor?", options: ["Para todos los módulos sin excepción", "Para los módulos más críticos: liberación de resultados y acceso a datos históricos de pacientes", "Solo para el módulo de facturación", "Para ninguno, quedó como propuesta"], answer: "Para los módulos más críticos: liberación de resultados y acceso a datos históricos de pacientes" },
+      { question: "¿Por qué algunos analistas mostraron resistencia al doble factor?", options: ["Por razones políticas internas", "Porque genera fricción adicional al proceso habitual de acceso", "Porque no entendían su funcionamiento técnico", "Porque creían que su contraseña individual era suficiente"], answer: "Porque genera fricción adicional al proceso habitual de acceso" },
+      { question: "¿Por qué la seguridad de datos es una responsabilidad ética en el laboratorio?", options: ["Solo porque lo exige la norma", "Porque los datos de los pacientes son información sensible cuya exposición tiene consecuencias legales y daña la confianza", "Solo para proteger los datos económicos del laboratorio", "Porque los organismos acreditadores lo auditan"], answer: "Porque los datos de los pacientes son información sensible cuya exposición tiene consecuencias legales y daña la confianza" },
+    ],
+    dictation: "La seguridad de los datos en un laboratorio es una responsabilidad ética y legal: los datos de los pacientes deben protegerse con el máximo rigor.",
+  },
+  {
+    id: "lims", title: "Sistema LIMS", level: "Intermedio", category: "Tecnología", emoji: "🖥️",
+    description: "Gestión digital del laboratorio: flujo de muestras, trazabilidad y reportes automáticos.",
+    readingTitle: "El flujo digital de una muestra",
+    reading: ["Cuando una muestra ingresa al laboratorio, en ese mismo instante comienza a dejar un rastro digital en el LIMS. El número de recepción, el nombre y el código de barras del paciente, los análisis solicitados, el analista que recibió la muestra, la fecha y hora de ingreso: todo queda registrado y vinculado de forma automática.", "El LIMS permite al laboratorio responder con precisión y rapidez cuando un cliente solicita información sobre el estado de su análisis o cuando un médico necesita verificar un resultado histórico. Sin el LIMS, esa búsqueda requeriría revisar registros en papel en varios archivos físicos.", "El LIMS también permite automatizar gran parte del proceso de generación de informes. Una vez que el analista valida un resultado en el sistema, el LIMS puede generar automáticamente el informe con los rangos de referencia correspondientes, señalar los resultados fuera de rango, e incluso enviar el informe por correo electrónico al cliente.", "La integración del LIMS con los equipos analíticos mediante interfaces bidireccionales es otro aspecto crítico. Una interfaz bidireccional significa que el LIMS puede enviar automáticamente las solicitudes al equipo y recibir automáticamente los resultados, prácticamente eliminando los errores de transcripción.", "La implementación de un nuevo LIMS es un proyecto complejo que requiere planificación cuidadosa, formación del personal, validación del sistema y un plan de contingencia. Un LIMS mal configurado puede generar más problemas de los que resuelve."],
+    vocab: [{ es: "LIMS", pt: "LIMS" }, { es: "interfaz bidireccional", pt: "interface bidirecional" }, { es: "trazabilidad digital", pt: "rastreabilidade digital" }, { es: "informe automático", pt: "relatório automático" }, { es: "validación del sistema", pt: "validação do sistema" }, { es: "transcripción manual", pt: "transcrição manual" }],
+    quiz: [
+      { question: "¿Qué información queda registrada automáticamente en el LIMS desde el ingreso?", options: ["Solo el resultado final validado", "Número de recepción, paciente, análisis, analista, instrumento y resultado", "Solo el nombre del paciente y el análisis pedido", "Solo el resultado y la fecha de entrega"], answer: "Número de recepción, paciente, análisis, analista, instrumento y resultado" },
+      { question: "¿Cómo responde el LIMS ante una solicitud de revisión histórica?", options: ["Requiere buscar en archivos físicos", "Recupera toda la información de trazabilidad en segundos", "Solo puede recuperar los últimos 30 días", "Necesita intervención manual del administrador"], answer: "Recupera toda la información de trazabilidad en segundos" },
+      { question: "¿Qué puede hacer el LIMS automáticamente después de que el analista valida un resultado?", options: ["Solo guardarlo en la base de datos", "Generar el informe con rangos de referencia, marcadores y enviarlo al cliente sin intervención manual", "Solo imprimir el resultado en papel", "Solo notificar al médico por teléfono"], answer: "Generar el informe con rangos de referencia, marcadores y enviarlo al cliente sin intervención manual" },
+      { question: "¿Qué es una interfaz bidireccional entre el LIMS y el equipo analítico?", options: ["Una interfaz que solo recibe datos del equipo", "Una interfaz que envía solicitudes al equipo Y recibe resultados automáticamente", "Una conexión que funciona en ambos turnos del día", "Una interfaz que conecta dos laboratorios diferentes"], answer: "Una interfaz que envía solicitudes al equipo Y recibe resultados automáticamente" },
+      { question: "¿Qué error elimina prácticamente la interfaz bidireccional?", options: ["Los errores de calibración del equipo", "Los errores de transcripción manual de resultados", "Los errores de identificación de pacientes", "Los errores de control de calidad analítico"], answer: "Los errores de transcripción manual de resultados" },
+      { question: "¿Qué requiere la implementación exitosa de un nuevo LIMS?", options: ["Solo comprar el software más moderno", "Planificación cuidadosa, formación del personal, validación y plan de contingencia", "Solo migrar los datos del sistema anterior", "Solo capacitar al área de TI"], answer: "Planificación cuidadosa, formación del personal, validación y plan de contingencia" },
+      { question: "¿Por qué es fundamental la participación del equipo técnico en la implementación?", options: ["Para ahorrar costos de consultoría", "Porque conocen los flujos de trabajo reales y pueden garantizar que el sistema se configure correctamente", "Solo para aprobar el sistema ante el organismo acreditador", "Para justificar el presupuesto"], answer: "Porque conocen los flujos de trabajo reales y pueden garantizar que el sistema se configure correctamente" },
+      { question: "¿Qué puede ocurrir con un LIMS mal configurado?", options: ["Funciona igual que uno bien configurado", "Puede generar más problemas de los que resuelve en la operación diaria", "Solo afecta la velocidad de procesamiento", "Solo afecta la estética de los informes"], answer: "Puede generar más problemas de los que resuelve en la operación diaria" },
+    ],
+    dictation: "El LIMS registra toda la cadena de información de cada muestra y permite automatizar la generación de informes, reduciendo errores de transcripción.",
+  },
+  // ══ GRAMÁTICA ══
+  {
     id: "ser-estar", title: "Ser vs. Estar", level: "Básico", category: "Gramática", emoji: "🔄",
     description: "La distinción más importante entre español y portugués: ser y estar.",
     readingTitle: "¿Es o está? La diferencia que cambia el significado",
-    reading: [
-      "La distinción entre 'ser' y 'estar' es probablemente el aspecto gramatical que más confunde a los hablantes de portugués cuando aprenden español. La regla más general: 'ser' se usa para características que se perciben como permanentes o esenciales, mientras que 'estar' se usa para estados o condiciones temporales.",
-      "En el contexto del laboratorio, esta distinción aparece constantemente. 'El reactivo es vencido' es incorrecto: el vencimiento es un estado temporal, por lo que la forma correcta es 'el reactivo está vencido'. De la misma manera, 'el equipo está en mantenimiento' usa estar porque es una condición temporal.",
-      "Los adjetivos que funcionan de forma diferente con 'ser' y 'estar' son una fuente constante de confusión. 'El analista es aburrido' significa que tiene una personalidad aburrida como característica permanente. 'El analista está aburrido' significa que en este momento se siente aburrido.",
-      "La ubicación y las condiciones físicas o emocionales van casi siempre con 'estar': 'las muestras están en el refrigerador', 'el resultado está validado'. La excepción son los eventos: 'La reunión es en la sala de conferencias'.",
-      "Para los hablantes de portugués, 'é casado' en portugués equivale a 'está casado' en español, porque el matrimonio se percibe como un estado más que como una característica identitaria permanente.",
-    ],
-    vocab: [
-      { es: "ser (identidad/permanente)", pt: "ser (identidade/permanente)" },
-      { es: "estar (estado/temporal)", pt: "estar (estado/temporário)" },
-      { es: "el reactivo está vencido", pt: "o reagente está vencido" },
-      { es: "el resultado está validado", pt: "o resultado está validado" },
-      { es: "el equipo está en mantenimiento", pt: "o equipamento está em manutenção" },
-      { es: "ella es analista", pt: "ela é analista" },
-    ],
+    reading: ["La distinción entre 'ser' y 'estar' es probablemente el aspecto gramatical que más confunde a los hablantes de portugués cuando aprenden español. La regla más general: 'ser' se usa para características que se perciben como permanentes, esenciales o definitivas, mientras que 'estar' se usa para estados, condiciones o situaciones temporales.", "En el contexto del laboratorio, esta distinción aparece constantemente. 'El reactivo es vencido' es incorrecto: el vencimiento es un estado temporal, por lo que la forma correcta es 'el reactivo está vencido'. De la misma manera, 'el equipo está en mantenimiento' usa estar porque es una condición temporal.", "Los adjetivos que funcionan de forma diferente con 'ser' y 'estar' son una fuente constante de confusión. 'El analista es aburrido' significa que tiene una personalidad aburrida como característica permanente. 'El analista está aburrido' significa que en este momento se siente aburrido.", "La ubicación y las condiciones físicas van casi siempre con 'estar': 'las muestras están en el refrigerador', 'el resultado está validado'. La excepción son los eventos: 'La reunión es en la sala de conferencias'.", "Para los hablantes de portugués, 'é casado' en portugués equivale a 'está casado' en español, porque el matrimonio se percibe como un estado más que como una característica identitaria permanente."],
+    vocab: [{ es: "ser (identidad/permanente)", pt: "ser (identidade/permanente)" }, { es: "estar (estado/temporal)", pt: "estar (estado/temporário)" }, { es: "el reactivo está vencido", pt: "o reagente está vencido" }, { es: "el resultado está validado", pt: "o resultado está validado" }, { es: "el equipo está en mantenimiento", pt: "o equipamento está em manutenção" }, { es: "ella es analista", pt: "ela é analista" }],
     quiz: [
       { question: "¿Cuál es la regla general para usar 'ser' en español?", options: ["Para estados y condiciones temporales", "Para características que se perciben como permanentes, esenciales o de identidad", "Para indicar ubicación siempre", "Para describir cómo está alguien en un momento específico"], answer: "Para características que se perciben como permanentes, esenciales o de identidad" },
       { question: "¿Cuál es correcto en español para el estado de un reactivo vencido?", options: ["El reactivo es vencido", "El reactivo está vencido", "El reactivo fue vencido siempre", "El reactivo ser vencido hoy"], answer: "El reactivo está vencido" },
@@ -349,24 +451,66 @@ const MODULES: ModuleType[] = [
     dictation: "El equipo está en mantenimiento, el resultado está validado y el reactivo está vencido: todos son estados temporales que usan estar, no ser.",
   },
   {
+    id: "conectores", title: "Conectores y cohesión", level: "Intermedio", category: "Gramática", emoji: "🔗",
+    description: "Conectores para textos técnicos: informes, hallazgos y comunicaciones formales.",
+    readingTitle: "El informe que fluía",
+    reading: ["Un informe técnico de laboratorio es, ante todo, un texto que debe comunicar información compleja de forma clara y organizada. Los conectores son las palabras y expresiones que guían al lector de una idea a la siguiente y señalan relaciones lógicas entre los datos.", "Los conectores de adición son los más simples y los más utilizados: además, también, asimismo, igualmente, del mismo modo, por otra parte. Por ejemplo: 'El control de nivel bajo fue rechazado. Además, el control de nivel alto mostró una tendencia descendente.'", "Los conectores de contraste son fundamentales en los informes técnicos: sin embargo, no obstante, aunque, a pesar de que, por el contrario, en cambio. Por ejemplo: 'Los resultados del control de nivel bajo fueron aceptables. Sin embargo, el control de nivel alto presentó valores fuera del rango.'", "Los conectores de causa y consecuencia son esenciales para explicar por qué ocurrió algo y qué efectos tuvo. Los causales son: porque, ya que, dado que, debido a que. Los de consecuencia son: por lo tanto, en consecuencia, como resultado, por ende.", "El dominio de los conectores no solo mejora la calidad de los textos escritos: también mejora la claridad de la comunicación oral en reuniones, presentaciones y llamadas con clientes."],
+    vocab: [{ es: "sin embargo / no obstante", pt: "no entanto / porém" }, { es: "además / asimismo", pt: "além disso / igualmente" }, { es: "por lo tanto / en consecuencia", pt: "portanto / consequentemente" }, { es: "dado que / ya que", pt: "dado que / uma vez que" }, { es: "aunque / a pesar de que", pt: "embora / apesar de que" }, { es: "por el contrario / en cambio", pt: "pelo contrário / em vez disso" }],
+    quiz: [
+      { question: "¿Por qué son importantes los conectores en un texto técnico?", options: ["Para hacer el texto más largo", "Porque guían al lector entre ideas y señalan las relaciones lógicas entre los datos", "Para complicar la lectura y demostrar conocimiento", "Solo por razones estéticas"], answer: "Porque guían al lector entre ideas y señalan las relaciones lógicas entre los datos" },
+      { question: "¿Qué tipo de relación expresa el conector 'por lo tanto'?", options: ["Adición de información nueva", "Contraste con lo expresado anteriormente", "Consecuencia lógica de lo que se dijo antes", "Causa de lo que se expresará después"], answer: "Consecuencia lógica de lo que se dijo antes" },
+      { question: "¿Cuál de estos conectores expresa contraste?", options: ["Además", "Asimismo", "Sin embargo", "Dado que"], answer: "Sin embargo" },
+      { question: "¿Qué conectores sirven para indicar causa?", options: ["Sin embargo, aunque, a pesar de que", "Porque, ya que, dado que, debido a que", "Además, también, asimismo, igualmente", "Por lo tanto, en consecuencia, así que"], answer: "Porque, ya que, dado que, debido a que" },
+      { question: "¿Qué diferencia hay entre 'además' y 'sin embargo'?", options: ["Son sinónimos en español técnico", "'Además' añade en la misma dirección; 'sin embargo' introduce una idea contraria o inesperada", "'Sin embargo' es más formal que 'además' siempre", "Solo se diferencian en el nivel de registro"], answer: "'Además' añade en la misma dirección; 'sin embargo' introduce una idea contraria o inesperada" },
+      { question: "¿Cuál es el conector adecuado para una consecuencia formal en un informe técnico?", options: ["Pero, como conector más simple", "En consecuencia, como conector más formal", "Y además, para agregar información", "O sea, para reformular"], answer: "En consecuencia, como conector más formal" },
+      { question: "¿Los conectores mejoran solo la comunicación escrita?", options: ["Sí, exclusivamente para textos escritos", "No, también mejoran la claridad del discurso oral en reuniones y presentaciones", "Solo son útiles para correos electrónicos formales", "Solo son útiles en informes de auditoría"], answer: "No, también mejoran la claridad del discurso oral en reuniones y presentaciones" },
+      { question: "¿Qué transmite quien organiza su discurso con conectores explícitos?", options: ["Que conoce muchas palabras en español técnico", "Mayor claridad de pensamiento y más confianza en el interlocutor", "Que estudió gramática avanzada", "Que habla más lento de lo necesario"], answer: "Mayor claridad de pensamiento y más confianza en el interlocutor" },
+    ],
+    dictation: "El control presentó una desviación; sin embargo, el equipo actuó rápidamente y, por lo tanto, no fue necesario rechazar la corrida analítica.",
+  },
+  {
+    id: "presente-indicativo", title: "Presente de indicativo", level: "Básico", category: "Gramática", emoji: "✏️",
+    description: "Conjugación y uso del presente en contextos técnicos del laboratorio.",
+    readingTitle: "Lo que hacemos todos los días",
+    reading: ["El presente de indicativo es el tiempo verbal más utilizado en las comunicaciones técnicas del laboratorio. Se usa para describir acciones habituales y rutinarias, para expresar hechos o verdades generales, y para dar instrucciones o procedimientos.", "La conjugación de los verbos regulares en presente sigue patrones predecibles. Los verbos terminados en -ar forman el presente con las terminaciones -o, -as, -a, -amos, -áis, -an. Por ejemplo: analizar → analizo, analizas, analiza, analizamos, analizáis, analizan.", "Sin embargo, muchos de los verbos más frecuentes en el lenguaje técnico del laboratorio son irregulares y deben memorizarse. El verbo ser se conjuga: soy, eres, es, somos, sois, son. El verbo estar: estoy, estás, está, estamos, estáis, están. El verbo tener: tengo, tienes, tiene, tenemos, tenéis, tienen.", "Una diferencia importante entre el español y el portugués en el uso del presente es que en español es natural decir 'el equipo procesa las muestras' para referirse a una acción que está ocurriendo ahora mismo, mientras que en portugués sería más frecuente usar el gerundio.", "En los procedimientos operativos estándar del laboratorio, el presente de indicativo es el tiempo dominante porque describe acciones que se repiten igual en cada ejecución del procedimiento."],
+    vocab: [{ es: "verificar", pt: "verificar" }, { es: "registrar", pt: "registrar" }, { es: "procesar", pt: "processar" }, { es: "analizar", pt: "analisar" }, { es: "comunicar", pt: "comunicar" }, { es: "liberar resultados", pt: "liberar resultados" }],
+    quiz: [
+      { question: "¿Para qué se usa el presente de indicativo en contextos técnicos?", options: ["Solo para hablar del futuro inmediato", "Acciones habituales, hechos generales, situaciones actuales e instrucciones de procedimientos", "Solo para el pasado reciente", "Solo para preguntas formales"], answer: "Acciones habituales, hechos generales, situaciones actuales e instrucciones de procedimientos" },
+      { question: "¿Cómo se conjuga 'analizar' en primera persona del singular?", options: ["analiza", "analizamos", "analizo", "analizas"], answer: "analizo" },
+      { question: "¿Cuáles son las terminaciones del presente para verbos terminados en -er?", options: ["-o, -as, -a, -amos, -áis, -an", "-o, -es, -e, -emos, -éis, -en", "-o, -is, -e, -imos, -ís, -en", "-o, -as, -e, -amos, -éis, -an"], answer: "-o, -es, -e, -emos, -éis, -en" },
+      { question: "¿Cómo se conjuga 'hacer' en primera persona del singular?", options: ["hace", "hacemos", "hago", "haces"], answer: "hago" },
+      { question: "¿Cómo se conjuga 'tener' en tercera persona del singular?", options: ["teno", "tiene", "tenemos", "tenés"], answer: "tiene" },
+      { question: "¿Cuál es la diferencia de uso del presente entre español y portugués?", options: ["No hay ninguna diferencia de uso", "En español se usa el presente simple donde el portugués prefiere 'estar + gerundio'", "En español el presente solo se usa para el pasado", "En portugués el presente se usa más frecuentemente"], answer: "En español se usa el presente simple donde el portugués prefiere 'estar + gerundio'" },
+      { question: "¿Cuál de estos verbos es completamente irregular en presente?", options: ["trabajar", "leer", "escribir", "ser"], answer: "ser" },
+      { question: "¿Para qué se usa el presente en los procedimientos operativos estándar?", options: ["Solo como título del documento", "Para describir acciones que se repiten igual en cada ejecución del procedimiento", "Para indicar las fechas de vencimiento de reactivos", "Para señalar los responsables del proceso"], answer: "Para describir acciones que se repiten igual en cada ejecución del procedimiento" },
+    ],
+    dictation: "El analista verifica los controles, registra los resultados y comunica cualquier desviación al área responsable antes de liberar los informes.",
+  },
+  {
+    id: "vocabulario-general", title: "Vocabulario del trabajo", level: "Básico", category: "Gramática", emoji: "📖",
+    description: "Vocabulario esencial para el entorno profesional y los falsos cognados más frecuentes.",
+    readingTitle: "Las palabras que parecen iguales pero no lo son",
+    reading: ["Aprender el vocabulario del español técnico del laboratorio no significa solo memorizar los términos científicos. También implica dominar el vocabulario del entorno laboral cotidiano y conocer los falsos cognados o 'falsos amigos': palabras que se parecen en la forma escrita o sonora, pero tienen significados diferentes en cada idioma.", "Algunos ejemplos muy frecuentes: 'embarazada' en español significa 'grávida'; 'constipado' en español significa 'resfriado'; 'exquisito' en español significa algo de calidad extraordinaria, mientras que en portugués 'esquisito' significa 'extraño' o 'raro'.", "En el contexto técnico del laboratorio, también existen falsos cognados. 'Comprometido' en español puede significar 'afectado' o 'involucrado'. 'Polvo' en español significa 'polvillo' o 'partícula fina', pero tiene un significado completamente diferente en portugués.", "Más allá de los falsos cognados, el vocabulario del entorno laboral en español incluye muchas expresiones y frases hechas: 'estar al tanto' significa estar informado; 'ponerse al día' significa actualizarse; 'dar el visto bueno' significa dar la aprobación final.", "La mejor estrategia para ampliar el vocabulario es practicar activamente en situaciones concretas: leer los procedimientos en español, participar en las reuniones de equipo y usar conscientemente las palabras nuevas en conversaciones reales."],
+    vocab: [{ es: "reunión", pt: "reunião" }, { es: "correo electrónico", pt: "e-mail" }, { es: "embarazada (= grávida)", pt: "grávida (embaraçada = avergonzada)" }, { es: "constipado (= resfriado)", pt: "resfriado (constipado = estreñimiento)" }, { es: "dar el visto bueno", pt: "dar o sinal verde / aprovar" }, { es: "estar al tanto", pt: "estar a par / estar informado" }],
+    quiz: [
+      { question: "¿Qué son los falsos cognados o falsos amigos?", options: ["Palabras idénticas en español y portugués", "Palabras que se parecen en forma pero tienen significados diferentes en cada idioma", "Sinónimos técnicos entre los dos idiomas", "Palabras que solo existen en un idioma pero no en el otro"], answer: "Palabras que se parecen en forma pero tienen significados diferentes en cada idioma" },
+      { question: "¿Qué significa 'embarazada' en español?", options: ["Avergonzada por algo", "Con náuseas", "Grávida, con un bebé en el vientre", "Muy cansada"], answer: "Grávida, con un bebé en el vientre" },
+      { question: "¿Qué significa 'constipado' en español?", options: ["Con estreñimiento o problema intestinal", "Resfriado, con síntomas de gripe común", "Muy cansado y sin energía", "Con dolor de cabeza intenso"], answer: "Resfriado, con síntomas de gripe común" },
+      { question: "¿Qué significa 'exquisito' en español?", options: ["Extraño o raro, poco común", "De calidad extraordinaria o muy refinado y elegante", "Difícil de entender", "Demasiado elaborado para ser práctico"], answer: "De calidad extraordinaria o muy refinado y elegante" },
+      { question: "¿Qué significa la expresión 'dar el visto bueno'?", options: ["Ver algo por primera vez con agrado", "Dar la aprobación final a algo", "Mirar con buenos ojos a una persona", "Confirmar que algo fue recibido"], answer: "Dar la aprobación final a algo" },
+      { question: "¿Qué significa 'estar al tanto' en el contexto laboral?", options: ["Estar esperando hace mucho tiempo", "Estar informado de algo relevante", "Estar de acuerdo con alguna decisión", "Estar muy atento durante la reunión"], answer: "Estar informado de algo relevante" },
+      { question: "¿Qué significa 'ponerse al día' en el contexto laboral?", options: ["Trabajar durante todo el día sin descanso", "Actualizarse sobre lo que ha ocurrido en el trabajo", "Llegar temprano al laboratorio siempre", "Completar todas las tareas pendientes"], answer: "Actualizarse sobre lo que ha ocurrido en el trabajo" },
+      { question: "¿Cuál es la mejor estrategia para consolidar el vocabulario activo en español técnico?", options: ["Memorizar listas de palabras en abstracto", "Practicar activamente en situaciones laborales reales y usar conscientemente las palabras nuevas", "Solo leer libros de gramática española", "Ver películas en español sin subtítulos"], answer: "Practicar activamente en situaciones laborales reales y usar conscientemente las palabras nuevas" },
+    ],
+    dictation: "Los falsos cognados son palabras parecidas en español y portugués con significados diferentes, y son una fuente frecuente de malentendidos profesionales.",
+  },
+  // ══ CONTROLLAB ══
+  {
     id: "controllab-historia", title: "Historia de Controllab", level: "Básico", category: "Controllab", emoji: "🏛️",
     description: "Origen, crecimiento y misión de Controllab en el ecosistema de calidad analítica.",
     readingTitle: "De Rio de Janeiro al mundo",
-    reading: [
-      "Controllab nació en Rio de Janeiro, Brasil, con una visión clara: ayudar a los laboratorios a medir mejor. Desde sus primeros años, la empresa se especializó en el diseño y distribución de programas de control de calidad externo para laboratorios clínicos.",
-      "A lo largo de los años, Controllab fue expandiendo su oferta de servicios: incorporó la producción de materiales de referencia, el desarrollo de programas de ensayos de aptitud y la organización de actividades educativas como cursos técnicos, workshops y congresos.",
-      "La expansión geográfica de Controllab fue gradual pero sostenida. Partiendo de una base de clientes principalmente brasileños, la empresa fue construyendo presencia en los países hispanohablantes de Latinoamérica, incluyendo Argentina, Chile, Colombia y México.",
-      "El foco de Controllab siempre estuvo en la ciencia y en la mejora práctica del laboratorio. Sus programas de ensayos de aptitud están diseñados no solo para evaluar el desempeño de los laboratorios participantes, sino también para educarlos.",
-      "Hoy Controllab atiende a miles de laboratorios en toda Latinoamérica, en sectores que van desde la clínica hasta la industria alimentaria, farmacéutica, ambiental y universitaria.",
-    ],
-    vocab: [
-      { es: "ensayo de aptitud", pt: "ensaio de aptidão / proficiência" },
-      { es: "control externo de calidad", pt: "controle externo de qualidade" },
-      { es: "material de referencia", pt: "material de referência" },
-      { es: "metrología", pt: "metrologia" },
-      { es: "laboratorio participante", pt: "laboratório participante" },
-      { es: "expansión regional", pt: "expansão regional" },
-    ],
+    reading: ["Controllab nació en Rio de Janeiro, Brasil, con una visión clara: ayudar a los laboratorios a medir mejor. Desde sus primeros años, la empresa se especializó en el diseño y distribución de programas de control de calidad externo para laboratorios clínicos.", "A lo largo de los años, Controllab fue expandiendo su oferta de servicios: incorporó la producción de materiales de referencia, el desarrollo de programas de ensayos de aptitud y la organización de actividades educativas como cursos técnicos, workshops y congresos.", "La expansión geográfica de Controllab fue gradual pero sostenida. Partiendo de una base de clientes principalmente brasileños, la empresa fue construyendo presencia en los países hispanohablantes de Latinoamérica, incluyendo Argentina, Chile, Colombia y México.", "El foco de Controllab siempre estuvo en la ciencia y en la mejora práctica del laboratorio. Sus programas de ensayos de aptitud están diseñados no solo para evaluar el desempeño de los laboratorios participantes, sino también para educarlos.", "Hoy Controllab atiende a miles de laboratorios en toda Latinoamérica, en sectores que van desde la clínica hasta la industria alimentaria, farmacéutica, ambiental y universitaria."],
+    vocab: [{ es: "ensayo de aptitud", pt: "ensaio de aptidão / proficiência" }, { es: "control externo de calidad", pt: "controle externo de qualidade" }, { es: "material de referencia", pt: "material de referência" }, { es: "metrología", pt: "metrologia" }, { es: "laboratorio participante", pt: "laboratório participante" }, { es: "expansión regional", pt: "expansão regional" }],
     quiz: [
       { question: "¿Dónde nació Controllab?", options: ["São Paulo, Brasil", "Rio de Janeiro, Brasil", "Buenos Aires, Argentina", "Bogotá, Colombia"], answer: "Rio de Janeiro, Brasil" },
       { question: "¿Cuál fue el primer foco de especialización de Controllab?", options: ["Producción de materiales de referencia", "Programas de control de calidad externo para laboratorios clínicos", "Consultoría en sistemas de gestión", "Organización de congresos científicos"], answer: "Programas de control de calidad externo para laboratorios clínicos" },
@@ -383,21 +527,8 @@ const MODULES: ModuleType[] = [
     id: "controllab-ensayos", title: "Ensayos de aptitud (PT)", level: "Intermedio", category: "Controllab", emoji: "🔬",
     description: "Cómo funcionan los programas de proficiency testing de Controllab.",
     readingTitle: "¿Cómo sabe un laboratorio si sus resultados son correctos?",
-    reading: [
-      "Un laboratorio enfrenta una pregunta fundamental: ¿cómo sé que mis resultados son correctos? El control interno le dice si el método es reproducible dentro de su propio sistema, pero no le dice si sus valores están alineados con los que obtendrían otros laboratorios procesando la misma muestra. Esa pregunta es la que responde el ensayo de aptitud.",
-      "Un ensayo de aptitud consiste en que un organismo coordinador, como Controllab, distribuye muestras idénticas a múltiples laboratorios participantes. Cada laboratorio analiza la muestra con sus propios métodos y reporta sus resultados al coordinador.",
-      "El indicador central del desempeño es el z-score. Se calcula dividiendo la diferencia entre el resultado del laboratorio y el valor de referencia del programa por la desviación estándar del grupo. Un z-score entre -2 y +2 indica desempeño satisfactorio.",
-      "Cuando un laboratorio obtiene un resultado insatisfactorio, la respuesta correcta es la investigación sistemática: ¿el problema está en la calibración, en el lote de reactivo, en el procedimiento o en la ejecución?",
-      "Los ensayos de aptitud de Controllab cubren bioquímica clínica, hematología, coagulación, microbiología, uroanálisis, inmunología, toxicología, alimentos, agua, suelos y más.",
-    ],
-    vocab: [
-      { es: "ensayo de aptitud / proficiency testing", pt: "ensaio de aptidão / proficiência" },
-      { es: "z-score / puntaje z", pt: "z-score / escore z" },
-      { es: "organismo coordinador", pt: "organismo coordenador" },
-      { es: "valor de referencia", pt: "valor de referência" },
-      { es: "desempeño satisfactorio / insatisfactorio", pt: "desempenho satisfatório / insatisfatório" },
-      { es: "muestra de aptitud", pt: "amostra de proficiência" },
-    ],
+    reading: ["Un laboratorio enfrenta una pregunta fundamental: ¿cómo sé que mis resultados son correctos? El control interno le dice si el método es reproducible dentro de su propio sistema, pero no le dice si sus valores están alineados con los que obtendrían otros laboratorios procesando la misma muestra. Esa pregunta es la que responde el ensayo de aptitud.", "Un ensayo de aptitud consiste en que un organismo coordinador, como Controllab, distribuye muestras idénticas a múltiples laboratorios participantes. Cada laboratorio analiza la muestra con sus propios métodos y reporta sus resultados al coordinador, quien compila todos los resultados y emite un informe de desempeño.", "El indicador central del desempeño es el z-score. Se calcula dividiendo la diferencia entre el resultado del laboratorio y el valor de referencia del programa por la desviación estándar del grupo. Un z-score entre -2 y +2 indica desempeño satisfactorio. Un z-score mayor a 3 en valor absoluto indica desempeño insatisfactorio.", "Cuando un laboratorio obtiene un resultado insatisfactorio, la respuesta correcta es la investigación sistemática: ¿el problema está en la calibración, en el lote de reactivo, en el procedimiento o en la ejecución?", "Los ensayos de aptitud de Controllab cubren bioquímica clínica, hematología, coagulación, microbiología, uroanálisis, inmunología, toxicología, alimentos, agua, suelos y más."],
+    vocab: [{ es: "ensayo de aptitud / proficiency testing", pt: "ensaio de aptidão / proficiência" }, { es: "z-score / puntaje z", pt: "z-score / escore z" }, { es: "organismo coordinador", pt: "organismo coordenador" }, { es: "valor de referencia", pt: "valor de referência" }, { es: "desempeño satisfactorio / insatisfactorio", pt: "desempenho satisfatório / insatisfatório" }, { es: "muestra de aptitud", pt: "amostra de proficiência" }],
     quiz: [
       { question: "¿Qué pregunta responde un ensayo de aptitud?", options: ["¿El equipo está calibrado correctamente?", "¿Los resultados del laboratorio están alineados con los de otros laboratorios que miden lo mismo?", "¿El personal está capacitado adecuadamente?", "¿El control interno está dentro de los límites?"], answer: "¿Los resultados del laboratorio están alineados con los de otros laboratorios que miden lo mismo?" },
       { question: "¿Qué hace el organismo coordinador en un ensayo de aptitud?", options: ["Distribuye reactivos a los laboratorios", "Distribuye muestras idénticas, compila resultados, analiza estadísticamente y emite informes", "Realiza el análisis de las muestras por cada laboratorio", "Solo emite el certificado de participación"], answer: "Distribuye muestras idénticas, compila resultados, analiza estadísticamente y emite informes" },
@@ -410,50 +541,96 @@ const MODULES: ModuleType[] = [
     ],
     dictation: "El z-score es el indicador central del ensayo de aptitud: valores entre menos dos y más dos indican desempeño satisfactorio del laboratorio.",
   },
+  {
+    id: "controllab-sigma", title: "Métricas Sigma en el laboratorio", level: "Avanzado", category: "Controllab", emoji: "📊",
+    description: "Cómo aplicar el Six Sigma al desempeño analítico con las herramientas de Controllab.",
+    readingTitle: "El sigma que evalúa la excelencia",
+    reading: ["El concepto de Six Sigma proviene de la industria manufacturera y fue adaptado por el Dr. James Westgard para evaluar el desempeño de los métodos analíticos. La métrica sigma del laboratorio combina información de precisión y exactitud del método con los requisitos de calidad del analito.", "La fórmula de la métrica sigma es: Sigma = (TEa - |sesgo|) / CV, donde TEa es el error total admisible para ese analito, el sesgo es el error sistemático del método, y el CV es el coeficiente de variación que representa la imprecisión del método.", "La interpretación tiene valores de referencia bien establecidos. Un sigma mayor a 6 indica un método de desempeño excelente. Un sigma entre 4 y 6 es bueno: requiere reglas de Westgard estándar. Un sigma entre 3 y 4 es marginal. Un sigma menor a 3 indica desempeño inaceptable.", "Controllab integra el cálculo de métricas sigma en sus programas de ensayos de aptitud. A partir de los resultados de sesgo obtenidos en el PT y combinándolos con los datos de CV del propio laboratorio, los informes de desempeño permiten calcular la métrica sigma de cada analito.", "El diagrama de Método de Decisión OPSpecs permite visualizar la relación entre el desempeño analítico y las reglas de control recomendadas. Es una herramienta gráfica que simplifica la toma de decisiones sobre qué reglas de Westgard aplicar."],
+    vocab: [{ es: "métrica sigma", pt: "métrica sigma" }, { es: "error total admisible (TEa)", pt: "erro total admissível (ETa)" }, { es: "sesgo / imprecisión", pt: "viés / imprecisão" }, { es: "coeficiente de variación (CV)", pt: "coeficiente de variação (CV)" }, { es: "Six Sigma", pt: "Seis Sigma" }, { es: "diagrama OPSpecs", pt: "diagrama OPSpecs" }],
+    quiz: [
+      { question: "¿De dónde proviene el concepto de Six Sigma aplicado al laboratorio?", options: ["De la norma ISO 15189 específicamente", "De la industria manufacturera, adaptado al laboratorio clínico por el Dr. Westgard", "Del sistema sanitario europeo", "Del programa de acreditación de la OMS"], answer: "De la industria manufacturera, adaptado al laboratorio clínico por el Dr. Westgard" },
+      { question: "¿Cuál es la fórmula de la métrica sigma del laboratorio?", options: ["Sigma = sesgo / CV", "Sigma = (TEa - |sesgo|) / CV", "Sigma = CV / TEa", "Sigma = TEa × CV"], answer: "Sigma = (TEa - |sesgo|) / CV" },
+      { question: "¿Qué representa el TEa en la fórmula de sigma?", options: ["El coeficiente de variación del método", "El error total admisible: el máximo error sin afectar la decisión clínica", "El sesgo medido en el ensayo de aptitud", "La desviación estándar del grupo de laboratorios"], answer: "El error total admisible: el máximo error sin afectar la decisión clínica" },
+      { question: "¿Qué indica un sigma mayor a 6?", options: ["Desempeño inaceptable que requiere mejora urgente", "Desempeño marginal que necesita reglas estrictas", "Desempeño excelente con reglas simples y baja frecuencia de controles", "Desempeño bueno con reglas estándar de Westgard"], answer: "Desempeño excelente con reglas simples y baja frecuencia de controles" },
+      { question: "¿Qué indica un sigma menor a 3?", options: ["Desempeño excelente que no requiere controles", "Desempeño inaceptable que requiere mejora del método analítico", "Desempeño bueno con reglas simples", "Señal de alerta que puede ignorarse si el PT es satisfactorio"], answer: "Desempeño inaceptable que requiere mejora del método analítico" },
+      { question: "¿Cómo integra Controllab el sigma en sus programas?", options: ["Solo lo menciona en sus materiales educativos", "Combina el sesgo del PT con el CV del laboratorio para calcular sigma en los informes de desempeño", "El sigma lo calcula el laboratorio de forma independiente", "Solo aplica a laboratorios con acreditación ISO 17025"], answer: "Combina el sesgo del PT con el CV del laboratorio para calcular sigma en los informes de desempeño" },
+      { question: "¿Para qué sirve el diagrama OPSpecs?", options: ["Para calcular el z-score de cada ensayo de aptitud", "Para visualizar la relación entre desempeño y reglas de control recomendadas de forma gráfica", "Para determinar el valor de referencia del programa", "Para registrar los resultados de control interno"], answer: "Para visualizar la relación entre desempeño y reglas de control recomendadas de forma gráfica" },
+      { question: "¿Qué valor práctico tiene la métrica sigma para el responsable de calidad?", options: ["Solo cumple con un requisito formal de la norma", "Orienta de forma objetiva las prioridades de mejora del laboratorio", "Solo sirve para comunicar resultados al directorio", "Es solo un indicador académico sin aplicación práctica"], answer: "Orienta de forma objetiva las prioridades de mejora del laboratorio" },
+    ],
+    dictation: "La métrica sigma combina el error total admisible, el sesgo del ensayo de aptitud y el coeficiente de variación para evaluar el desempeño analítico.",
+  },
+  {
+    id: "controllab-materiales", title: "Materiales de referencia", level: "Intermedio", category: "Controllab", emoji: "🧪",
+    description: "Qué son, para qué sirven y cómo se usan los materiales de referencia de Controllab.",
+    readingTitle: "El patrón que todo laboratorio necesita",
+    reading: ["Un material de referencia es una sustancia o mezcla con propiedades suficientemente homogéneas y estables para ser usada en la calibración de equipos, la validación de métodos o el control de calidad del proceso analítico.", "Controllab produce y distribuye materiales de referencia certificados (MRC) que tienen un certificado especificando los valores de las propiedades junto con su incertidumbre de medición, determinados mediante procedimientos metrológicamente trazables.", "En el laboratorio clínico, los materiales de referencia se usan para tres propósitos principales: la calibración de los equipos analíticos, la validación de métodos y el control interno de calidad.", "La trazabilidad metrológica es el concepto que conecta el resultado de una medición con un patrón de referencia internacional a través de una cadena ininterrumpida de calibraciones. Cuando un laboratorio usa un material de referencia certificado trazable al SI, sus resultados son comparables con los de cualquier otro laboratorio del mundo.", "Los materiales de referencia de Controllab cubren matrices diversas: suero, plasma, orina, agua, alimentos, suelos y otros. La estabilidad del material durante el período de uso declarado en el certificado es un parámetro crítico que Controllab evalúa y garantiza."],
+    vocab: [{ es: "material de referencia certificado (MRC)", pt: "material de referência certificado (MRC)" }, { es: "trazabilidad metrológica", pt: "rastreabilidade metrológica" }, { es: "incertidumbre de medición", pt: "incerteza de medição" }, { es: "calibración trazable", pt: "calibração rastreável" }, { es: "comparabilidad de resultados", pt: "comparabilidade de resultados" }, { es: "matriz del material", pt: "matriz do material" }],
+    quiz: [
+      { question: "¿Qué es un material de referencia?", options: ["Un reactivo comercial de alta calidad", "Una sustancia con propiedades determinadas con alta precisión para calibración, validación o control de calidad", "Un estándar solo usado en investigación académica", "Un control de calidad interno sin certificación"], answer: "Una sustancia con propiedades determinadas con alta precisión para calibración, validación o control de calidad" },
+      { question: "¿Qué diferencia a un MRC de un material de referencia sin certificar?", options: ["Solo el precio más alto del MRC", "El MRC tiene certificado con valores e incertidumbre determinados por procedimientos metrológicamente trazables", "El MRC es producido por organismos gubernamentales únicamente", "El MRC no requiere condiciones especiales de almacenamiento"], answer: "El MRC tiene certificado con valores e incertidumbre determinados por procedimientos metrológicamente trazables" },
+      { question: "¿Cuáles son los tres usos principales de los materiales de referencia?", options: ["Calibración, diagnóstico clínico y facturación", "Calibración de equipos, validación de métodos y control interno de calidad", "Solo calibración y validación de métodos", "Control interno, ensayos de aptitud y certificación"], answer: "Calibración de equipos, validación de métodos y control interno de calidad" },
+      { question: "¿Qué es la trazabilidad metrológica?", options: ["El registro histórico de todas las calibraciones del equipo", "La cadena ininterrumpida que conecta una medición con un patrón de referencia internacional", "El proceso de verificar que el material no está vencido", "El conjunto de normas que regulan el uso de materiales de referencia"], answer: "La cadena ininterrumpida que conecta una medición con un patrón de referencia internacional" },
+      { question: "¿Por qué la trazabilidad es esencial para la comparabilidad de resultados?", options: ["Por exigencia burocrática de la norma únicamente", "Porque permite que los resultados de diferentes laboratorios sean comparables entre sí en todo el mundo", "Solo porque lo requieren los organismos acreditadores", "Porque reduce los costos de producción de los materiales"], answer: "Porque permite que los resultados de diferentes laboratorios sean comparables entre sí en todo el mundo" },
+      { question: "¿Qué matrices cubren los materiales de referencia de Controllab?", options: ["Solo suero y plasma para laboratorio clínico", "Suero, plasma, orina, agua, alimentos, suelos y otras matrices", "Solo matrices de laboratorio clínico", "Solo matrices industriales sin aplicación clínica"], answer: "Suero, plasma, orina, agua, alimentos, suelos y otras matrices" },
+      { question: "¿Qué parámetro crítico garantiza Controllab respecto a sus materiales?", options: ["La velocidad de entrega al laboratorio", "La estabilidad del material durante el período de uso declarado en el certificado", "El precio más bajo del mercado", "La cantidad mínima de viales por pedido"], answer: "La estabilidad del material durante el período de uso declarado en el certificado" },
+      { question: "¿Qué normas requieren el uso de materiales de referencia trazables?", options: ["Solo la ISO 9001 de gestión general", "ISO 17025 e ISO 15189 entre otras normas de acreditación de laboratorios", "Solo la legislación sanitaria de cada país", "No hay normas específicas que lo requieran"], answer: "ISO 17025 e ISO 15189 entre otras normas de acreditación de laboratorios" },
+    ],
+    dictation: "Los materiales de referencia certificados tienen trazabilidad metrológica y se usan para calibración, validación de métodos y control interno de calidad.",
+  },
+  {
+    id: "controllab-comunicacion", title: "Comunicar con clientes de Controllab", level: "Intermedio", category: "Controllab", emoji: "📞",
+    description: "Vocabulario y situaciones reales de comunicación con laboratorios clientes en español.",
+    readingTitle: "La llamada desde Buenos Aires",
+    reading: ["Una mañana de lunes, una analista del equipo de Controllab recibió una llamada de un laboratorio clínico en Buenos Aires. El responsable de calidad del laboratorio estaba preocupado: acababa de recibir el informe del último ciclo del programa de bioquímica y su resultado de glucosa aparecía con un z-score de 2.8, lo que lo colocaba en zona de alerta.", "La analista escuchó el planteo completo antes de responder. Luego revisó el informe en el sistema y confirmó que el z-score era efectivamente de 2.8, lo que colocaba al laboratorio en la zona de señal de alerta, aunque todavía fuera del límite de rechazo.", "La conversación fue un ejercicio práctico de comunicación técnica en español. La analista tuvo que explicar conceptos como z-score, sesgo, valor de referencia del programa y comparación por método, usando un lenguaje claro y accesible pero sin perder precisión técnica.", "La analista sugirió al laboratorio revisar tres aspectos: primero, el lote de calibrador vigente durante el ciclo del PT; segundo, los resultados del control interno del mismo período; tercero, si otros laboratorios que usaban el mismo método habían tenido resultados similares.", "Ese tipo de interacción es el núcleo de la relación entre Controllab y sus clientes hispanohablantes. Acompañar al laboratorio en la interpretación de sus resultados y en la mejora de su desempeño requiere un dominio sólido del español técnico del laboratorio."],
+    vocab: [{ es: "zona de alerta / señal de alerta", pt: "zona de alerta / sinal de alerta" }, { es: "responsable de calidad del laboratorio", pt: "responsável pela qualidade do laboratório" }, { es: "lote de calibrador", pt: "lote de calibrador" }, { es: "plan de acción concreto", pt: "plano de ação concreto" }, { es: "documentar la consulta", pt: "documentar a consulta" }, { es: "soporte técnico", pt: "suporte técnico" }],
+    quiz: [
+      { question: "¿Por qué llamó el responsable de calidad del laboratorio de Buenos Aires?", options: ["Para cancelar su participación en el programa de PT", "Porque su z-score de glucosa estaba en 2.8, en zona de alerta, y quería orientación", "Porque no recibió el informe del ciclo en tiempo y forma", "Para solicitar un nuevo ciclo de análisis gratuito"], answer: "Porque su z-score de glucosa estaba en 2.8, en zona de alerta, y quería orientación" },
+      { question: "¿Qué hizo la analista antes de responder al cliente?", options: ["Le envió directamente el protocolo de investigación por correo", "Escuchó el planteo completo y revisó el informe en el sistema antes de responder", "Le pidió que enviara los datos por correo electrónico", "Le indicó que el resultado era inaceptable sin revisar el contexto"], answer: "Escuchó el planteo completo y revisó el informe en el sistema antes de responder" },
+      { question: "¿Un z-score de 2.8 requiere activar automáticamente una investigación como si fuera un rechazo?", options: ["Sí, cualquier valor mayor a 2 es equivalente a un rechazo", "No, es zona de alerta que justifica revisión pero no es automáticamente un rechazo", "Solo si el mismo analito falló en el control interno también", "Sí, siempre debe suspenderse la liberación de resultados"], answer: "No, es zona de alerta que justifica revisión pero no es automáticamente un rechazo" },
+      { question: "¿Qué tres aspectos sugirió revisar la analista al laboratorio?", options: ["El equipo, el reactivo y el personal", "El lote de calibrador, los controles internos del período y la comparación por método del informe", "Solo los resultados de los controles internos", "Solo la calibración del equipo analítico"], answer: "El lote de calibrador, los controles internos del período y la comparación por método del informe" },
+      { question: "¿Qué desafío comunicacional enfrentó la analista durante la llamada?", options: ["Explicar por qué el resultado era completamente inaceptable", "Manejar la ansiedad del cliente sin minimizar el hallazgo, transmitiendo calma y un plan concreto", "Convencer al cliente de cambiar de programa de PT", "Explicar el procedimiento de facturación del programa"], answer: "Manejar la ansiedad del cliente sin minimizar el hallazgo, transmitiendo calma y un plan concreto" },
+      { question: "¿Qué refleja ese tipo de interacción sobre la relación de Controllab con sus clientes?", options: ["Que Controllab solo distribuye materiales y espera resultados", "Que Controllab acompaña al laboratorio en la interpretación de resultados y en la mejora del desempeño", "Que el soporte técnico es solo por correo electrónico", "Que la relación es exclusivamente comercial sin soporte técnico"], answer: "Que Controllab acompaña al laboratorio en la interpretación de resultados y en la mejora del desempeño" },
+      { question: "¿Qué requiere el soporte técnico a clientes hispanohablantes del equipo Controllab?", options: ["Solo conocer el sistema informático de gestión de clientes", "Dominio sólido del español técnico del laboratorio: vocabulario específico y habilidades comunicativas", "Solo hablar español a nivel básico conversacional", "Solo conocer los productos del catálogo de Controllab"], answer: "Dominio sólido del español técnico del laboratorio: vocabulario específico y habilidades comunicativas" },
+      { question: "¿Qué hizo la analista al finalizar la llamada?", options: ["Solo cerró la llamada sin registro adicional", "Documentó la consulta en el sistema con el plan de acción acordado", "Envió un correo de seguimiento al directorio del laboratorio", "Solicitó al laboratorio que repitiera el análisis"], answer: "Documentó la consulta en el sistema con el plan de acción acordado" },
+    ],
+    dictation: "El soporte técnico a clientes hispanohablantes de Controllab requiere explicar conceptos como z-score y sesgo con claridad, calma y un plan de acción concreto.",
+  },
+  {
+    id: "controllab-vocabulario", title: "Vocabulario específico de Controllab", level: "Básico", category: "Controllab", emoji: "📖",
+    description: "Los términos técnicos propios de Controllab que todo profesional del equipo debe dominar.",
+    readingTitle: "El idioma de la calidad analítica",
+    reading: ["Trabajar en Controllab significa operar en un entorno donde el vocabulario técnico es muy específico. Dominar ese vocabulario no es solo una cuestión de comunicación interna: es fundamental para comunicarse con credibilidad y precisión con los clientes y con la comunidad científica de la región.", "El término 'ensayo de aptitud' es la traducción al español del inglés 'proficiency testing' (PT) y del portugués 'ensaio de aptidão'. En el contexto de Controllab, este término siempre se refiere al programa en el que el coordinador distribuye muestras y evalúa el desempeño de los laboratorios participantes.", "El 'valor asignado' o 'valor de referencia' es el valor que el programa establece como el mejor estimado del valor verdadero de la propiedad en la muestra de aptitud. La forma en que se determina el valor asignado es crítica porque afecta el cálculo de todos los z-scores del ciclo.", "La 'desviación estándar del programa' es la referencia que el coordinador establece para el programa. Puede ser calculada a partir de los datos del ciclo o fijada a priori como un porcentaje del valor asignado basado en los requisitos de calidad del analito.", "El 'ciclo' en el contexto de los programas de Controllab es una ronda completa: distribución de muestras, análisis por los participantes, reporte de resultados, procesamiento estadístico y emisión del informe."],
+    vocab: [{ es: "ensayo de aptitud / proficiency testing", pt: "ensaio de aptidão / proficiência" }, { es: "valor asignado / valor de referencia", pt: "valor atribuído / valor de referência" }, { es: "desviación estándar del programa", pt: "desvio padrão do programa" }, { es: "ciclo del programa", pt: "rodada do programa" }, { es: "laboratorio participante / coordinador", pt: "laboratório participante / coordenador" }, { es: "resultado no conforme", pt: "resultado não conforme" }],
+    quiz: [
+      { question: "¿Cuál es la traducción al español de 'proficiency testing'?", options: ["Control interno de calidad", "Ensayo de aptitud", "Validación del método analítico", "Control externo de desempeño"], answer: "Ensayo de aptitud" },
+      { question: "¿Qué es el valor asignado en un programa de PT?", options: ["El resultado que obtuvo el mejor laboratorio del ciclo", "El mejor estimado del valor verdadero de la propiedad en la muestra de aptitud, establecido por el coordinador", "El promedio de todos los resultados del ciclo sin exclusiones", "El valor que el laboratorio declara como resultado"], answer: "El mejor estimado del valor verdadero de la propiedad en la muestra de aptitud, establecido por el coordinador" },
+      { question: "¿Por qué es crítica la forma en que se determina el valor asignado?", options: ["Solo afecta la imagen del coordinador del programa", "Porque afecta el cálculo de todos los z-scores del ciclo", "Solo importa cuando hay resultados insatisfactorios", "Porque determina el precio del programa para los participantes"], answer: "Porque afecta el cálculo de todos los z-scores del ciclo" },
+      { question: "¿Qué es la desviación estándar del programa (σp)?", options: ["La desviación estándar del control interno del laboratorio", "La referencia que establece el coordinador para calcular los z-scores del ciclo", "El coeficiente de variación del método analítico del laboratorio", "El rango de aceptación definido por las reglas de Westgard"], answer: "La referencia que establece el coordinador para calcular los z-scores del ciclo" },
+      { question: "¿Qué es un 'ciclo' en los programas de Controllab?", options: ["El período anual de renovación del contrato con el laboratorio", "Una ronda completa: distribución, análisis, reporte, procesamiento estadístico e informe", "Solo la distribución de las muestras de aptitud", "El período entre dos calibraciones del equipo analítico"], answer: "Una ronda completa: distribución, análisis, reporte, procesamiento estadístico e informe" },
+      { question: "¿Por qué es importante conocer la frecuencia de ciclos de un programa?", options: ["Solo para calcular el costo anual del programa", "Para planificar el calendario de calidad del laboratorio y asegurar la participación en cada ciclo", "Solo para saber cuándo renovar los reactivos", "Por requisito formal de la norma ISO 17043"], answer: "Para planificar el calendario de calidad del laboratorio y asegurar la participación en cada ciclo" },
+      { question: "¿Cómo se diferencia el ensayo de aptitud de la validación del método?", options: ["Son términos intercambiables en el laboratorio moderno", "El PT evalúa el desempeño del laboratorio comparándolo con otros; la validación demuestra que el método cumple sus requisitos", "La validación del método siempre la hace el coordinador externo", "El PT solo aplica a laboratorios clínicos y la validación a todos los sectores"], answer: "El PT evalúa el desempeño del laboratorio comparándolo con otros; la validación demuestra que el método cumple sus requisitos" },
+      { question: "¿A quiénes va dirigido el dominio del vocabulario específico de Controllab?", options: ["Solo al personal de ventas y marketing", "A todo el equipo que interactúa con clientes y con la comunidad científica de la región", "Solo al equipo técnico que diseña los programas de PT", "Solo a los directivos de la empresa"], answer: "A todo el equipo que interactúa con clientes y con la comunidad científica de la región" },
+    ],
+    dictation: "En Controllab el ensayo de aptitud evalúa el desempeño de los laboratorios participantes mediante el z-score calculado con el valor asignado y la desviación estándar del programa.",
+  },
 ];
 
-// ─── Students ─────────────────────────────────────────────────────────────────
 const defaultStudents: Student[] = [
-  { id: "marilia",   name: "Marília",   code: "MARILIA"  },
-  { id: "claudio",   name: "Claudio",   code: "CLAUDIO"  },
-  { id: "juliana",   name: "Juliana",   code: "JULIANA"  },
-  { id: "thamiris",  name: "Thamiris",  code: "THAMIRIS" },
-  { id: "livia",     name: "Livia",     code: "LIVIA"    },
-  { id: "adriana",   name: "Adriana",   code: "ADRIANA"  },
-  { id: "rafael",    name: "Rafael",    code: "RAFAEL"   },
-  { id: "jessica",   name: "Jessica",   code: "JESSICA"  },
-  { id: "luiza",     name: "Luiza",     code: "LUIZA"    },
-  { id: "ana-paula", name: "Ana Paula", code: "ANAPAULA" },
-  { id: "lucas",     name: "Lucas",     code: "LUCAS"    },
-  { id: "katia",     name: "Katia",     code: "KATIA"    },
-  { id: "vinicius",  name: "Vinicius",  code: "VINICIUS" },
-  { id: "thiago",    name: "Thiago",    code: "THIAGO"   },
+  { id: "marilia", name: "Marília", code: "MARILIA" }, { id: "claudio", name: "Claudio", code: "CLAUDIO" },
+  { id: "juliana", name: "Juliana", code: "JULIANA" }, { id: "thamiris", name: "Thamiris", code: "THAMIRIS" },
+  { id: "livia", name: "Livia", code: "LIVIA" }, { id: "adriana", name: "Adriana", code: "ADRIANA" },
+  { id: "rafael", name: "Rafael", code: "RAFAEL" }, { id: "jessica", name: "Jessica", code: "JESSICA" },
+  { id: "luiza", name: "Luiza", code: "LUIZA" }, { id: "ana-paula", name: "Ana Paula", code: "ANAPAULA" },
+  { id: "lucas", name: "Lucas", code: "LUCAS" }, { id: "katia", name: "Katia", code: "KATIA" },
+  { id: "vinicius", name: "Vinicius", code: "VINICIUS" }, { id: "thiago", name: "Thiago", code: "THIAGO" },
 ];
 
 const CATEGORIES = ["Todos", "Laboratorio", "Gestión", "Comunicación", "Tecnología", "Gramática", "Controllab"];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function strSeed(s: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; }
-  return h;
-}
-function shuffleOpts(opts: string[], seed: number): string[] {
-  const arr = [...opts];
-  let s = seed || 1;
-  for (let i = arr.length - 1; i > 0; i--) {
-    s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s = s >>> 0;
-    const j = s % (i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-function normalize(value: string): string {
-  return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
-}
-function createInitialState(): AppState {
-  return { students: defaultStudents, currentStudentId: null, progress: {}, dictations: {} };
-}
+function strSeed(s: string): number { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; } return h; }
+function shuffleOpts(opts: string[], seed: number): string[] { const arr = [...opts]; let s = seed || 1; for (let i = arr.length - 1; i > 0; i--) { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s = s >>> 0; const j = s % (i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+function normalize(value: string): string { return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim(); }
+function createInitialState(): AppState { return { students: defaultStudents, currentStudentId: null, progress: {}, dictations: {} }; }
 
 async function loadRemoteState(): Promise<AppState | null> {
   if (!supabase) return null;
@@ -461,43 +638,29 @@ async function loadRemoteState(): Promise<AppState | null> {
   if (error) throw error;
   return (data?.data as AppState) || null;
 }
-
 async function saveRemoteState(state: AppState): Promise<void> {
   if (!supabase) return;
-  const { error } = await supabase.from("aula_controllab_state").upsert(
-    { id: DB_ROW_ID, data: state, updated_at: new Date().toISOString() },
-    { onConflict: "id" }
-  );
+  const { error } = await supabase.from("aula_controllab_state").upsert({ id: DB_ROW_ID, data: state, updated_at: new Date().toISOString() }, { onConflict: "id" });
   if (error) throw error;
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 export default function Home() {
   const [appState, setAppState] = useState<AppState>(createInitialState);
   const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
-  const [loginName, setLoginName] = useState("");
-  const [loginCode, setLoginCode] = useState("");
-  const [loginError, setLoginError] = useState("");
+  const [loginName, setLoginName] = useState(""); const [loginCode, setLoginCode] = useState(""); const [loginError, setLoginError] = useState("");
   const [selectedModuleId, setSelectedModuleId] = useState(MODULES[0].id);
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [showProfessorPanel, setShowProfessorPanel] = useState(false);
-  const [professorUnlocked, setProfessorUnlocked] = useState(false);
-  const [newStudentName, setNewStudentName] = useState("");
-  const [newStudentCode, setNewStudentCode] = useState("");
-  const [dictationText, setDictationText] = useState("");
-  const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
+  const [selectedOption, setSelectedOption] = useState(""); const [submitted, setSubmitted] = useState(false);
+  const [showProfessorPanel, setShowProfessorPanel] = useState(false); const [professorUnlocked, setProfessorUnlocked] = useState(false);
+  const [newStudentName, setNewStudentName] = useState(""); const [newStudentCode, setNewStudentCode] = useState("");
+  const [dictationText, setDictationText] = useState(""); const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
   const [teacherTab, setTeacherTab] = useState<"students" | "progress" | "dictations">("progress");
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [activeSection, setActiveSection] = useState<"reading" | "quiz" | "dictation" | "vocab">("reading");
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordMsg, setPasswordMsg] = useState("");
+  const [newPassword, setNewPassword] = useState(""); const [confirmPassword, setConfirmPassword] = useState(""); const [passwordMsg, setPasswordMsg] = useState("");
 
-  // ── Derived state ──
   const currentStudent = appState.students.find(s => s.id === appState.currentStudentId) ?? null;
   const selectedModule = MODULES.find(m => m.id === selectedModuleId) ?? MODULES[0];
   const studentProgress = currentStudent ? appState.progress[currentStudent.id] || {} : {};
@@ -511,525 +674,214 @@ export default function Home() {
   const totalBestScore = MODULES.reduce((sum, m) => sum + (studentProgress[m.id]?.score || 0), 0);
   const overallPercent = Math.round((completedModules / MODULES.length) * 100);
 
-  // ── Speech ──
-  const speak = (text: string, rate = 0.9) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "es-ES";
-    u.rate = rate;
-    const v = window.speechSynthesis.getVoices().find(x => x.lang.startsWith("es"));
-    if (v) u.voice = v;
-    window.speechSynthesis.speak(u);
-  };
-  const stopSpeak = () => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
-  };
+  const speak = (text: string, rate = 0.9) => { if (typeof window === "undefined" || !("speechSynthesis" in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "es-ES"; u.rate = rate; const v = window.speechSynthesis.getVoices().find(x => x.lang.startsWith("es")); if (v) u.voice = v; window.speechSynthesis.speak(u); };
+  const stopSpeak = () => { if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel(); };
 
-  // ── Bootstrap ──
   useEffect(() => {
     let mounted = true;
     const LSKEY = "aula-controllab-v7";
     (async () => {
-      try {
-        if (supabase) {
-          const remote = await loadRemoteState();
-          if (!mounted) return;
-          if (remote) {
-            setAppState({ students: Array.isArray(remote.students) && remote.students.length ? remote.students : defaultStudents, currentStudentId: null, progress: remote.progress || {}, dictations: remote.dictations || {} });
-            setLoadStatus("ready");
-            return;
-          }
-        }
-      } catch {}
+      try { if (supabase) { const remote = await loadRemoteState(); if (!mounted) return; if (remote) { setAppState({ students: Array.isArray(remote.students) && remote.students.length ? remote.students : defaultStudents, currentStudentId: null, progress: remote.progress || {}, dictations: remote.dictations || {} }); setLoadStatus("ready"); return; } } } catch {}
       if (!mounted) return;
-      try {
-        const saved = localStorage.getItem(LSKEY);
-        if (saved) { const p = JSON.parse(saved); setAppState({ ...createInitialState(), ...p, currentStudentId: null }); }
-        else setAppState(createInitialState());
-      } catch { setAppState(createInitialState()); }
+      try { const saved = localStorage.getItem(LSKEY); if (saved) { const p = JSON.parse(saved); setAppState({ ...createInitialState(), ...p, currentStudentId: null }); } else setAppState(createInitialState()); } catch { setAppState(createInitialState()); }
       setLoadStatus("ready");
     })();
     return () => { mounted = false; };
   }, []);
 
-  // ── Persist ──
   useEffect(() => {
     if (loadStatus !== "ready") return;
     const LSKEY = "aula-controllab-v7";
-    const t = setTimeout(async () => {
-      try { localStorage.setItem(LSKEY, JSON.stringify(appState)); } catch {}
-      if (supabase) { try { await saveRemoteState(appState); } catch {} }
-    }, 500);
+    const t = setTimeout(async () => { try { localStorage.setItem(LSKEY, JSON.stringify(appState)); } catch {} if (supabase) { try { await saveRemoteState(appState); } catch {} } }, 500);
     return () => clearTimeout(t);
   }, [appState, loadStatus]);
 
-  // ── Reset on module change ──
-  useEffect(() => {
-    stopSpeak();
-    setCurrentQuestionIndex(0);
-    setSelectedOption("");
-    setSubmitted(false);
-    setDictationText("");
-    setDictationResult(null);
-    setQuizAnswers({});
-    setActiveSection("reading");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedModuleId, appState.currentStudentId]);
+  useEffect(() => { stopSpeak(); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setDictationText(""); setDictationResult(null); setQuizAnswers({}); setActiveSection("reading"); }, [selectedModuleId, appState.currentStudentId]); // eslint-disable-line
 
-  // ── Actions ──
-  const logout = () => {
-    stopSpeak();
-    setAppState(prev => ({ ...prev, currentStudentId: null }));
-    setSelectedModuleId(MODULES[0].id);
-    setShowProfessorPanel(false);
-    setProfessorUnlocked(false);
-  };
-
-  const login = () => {
-    const found = appState.students.find(s => normalize(s.name) === normalize(loginName) && normalize(s.code) === normalize(loginCode));
-    if (!found) { setLoginError("Usuario o contraseña incorrectos."); return; }
-    setAppState(prev => ({ ...prev, currentStudentId: found.id }));
-    setLoginError(""); setLoginName(""); setLoginCode("");
-  };
-
-  const changePassword = () => {
-    if (!newPassword.trim()) { setPasswordMsg("Escribí una contraseña nueva."); return; }
-    if (newPassword.trim().length < 4) { setPasswordMsg("La contraseña debe tener al menos 4 caracteres."); return; }
-    if (newPassword.trim() !== confirmPassword.trim()) { setPasswordMsg("Las contraseñas no coinciden."); return; }
-    if (!currentStudent) return;
-    setAppState(prev => ({ ...prev, students: prev.students.map(s => s.id === currentStudent.id ? { ...s, code: newPassword.trim().toUpperCase() } : s) }));
-    setPasswordMsg("✓ Contraseña actualizada correctamente.");
-    setNewPassword(""); setConfirmPassword("");
-    setTimeout(() => { setShowChangePassword(false); setPasswordMsg(""); }, 1500);
-  };
-
-  const handleProfessorClick = () => {
-    if (professorUnlocked) { setShowProfessorPanel(v => !v); return; }
-    const pwd = window.prompt("Contraseña del profesor:");
-    if (pwd === PROFESSOR_PASSWORD) { setProfessorUnlocked(true); setShowProfessorPanel(true); }
-    else if (pwd !== null) alert("Contraseña incorrecta.");
-  };
-
-  const saveProgress = (scoreValue: number, totalValue: number) => {
-    if (!currentStudent) return;
-    setAppState(prev => {
-      const prevSP = prev.progress[currentStudent.id] || {};
-      const prevM = prevSP[selectedModuleId] || { completed: false, score: 0, total: totalValue, attempts: 0 };
-      return { ...prev, progress: { ...prev.progress, [currentStudent.id]: { ...prevSP, [selectedModuleId]: { completed: true, score: Math.max(prevM.score || 0, scoreValue), total: totalValue, attempts: (prevM.attempts || 0) + 1 } } } };
-    });
-  };
-
-  const resetCurrentModule = () => {
-    if (!currentStudent) return;
-    if (!window.confirm(`¿Reiniciar el módulo "${selectedModule.title}" para ${currentStudent.name}?`)) return;
-    setAppState(prev => {
-      const newP = { ...(prev.progress[currentStudent.id] || {}) };
-      const newD = { ...(prev.dictations[currentStudent.id] || {}) };
-      delete newP[selectedModuleId]; delete newD[selectedModuleId];
-      return { ...prev, progress: { ...prev.progress, [currentStudent.id]: newP }, dictations: { ...prev.dictations, [currentStudent.id]: newD } };
-    });
-    setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false);
-    setQuizAnswers({}); setDictationText(""); setDictationResult(null); setActiveSection("reading");
-  };
-
-  const resetStudentModule = (studentId: string, moduleId: string) => {
-    setAppState(prev => {
-      const newP = { ...(prev.progress[studentId] || {}) };
-      const newD = { ...(prev.dictations[studentId] || {}) };
-      delete newP[moduleId]; delete newD[moduleId];
-      return { ...prev, progress: { ...prev.progress, [studentId]: newP }, dictations: { ...prev.dictations, [studentId]: newD } };
-    });
-  };
-
-  const resetStudentAll = (studentId: string, studentName: string) => {
-    if (!window.confirm(`¿Reiniciar TODOS los módulos de ${studentName}?`)) return;
-    setAppState(prev => ({ ...prev, progress: { ...prev.progress, [studentId]: {} }, dictations: { ...prev.dictations, [studentId]: {} } }));
-  };
-
-  const resetAllStudents = () => {
-    if (!window.confirm("¿Borrar TODO el progreso de TODOS los alumnos?")) return;
-    setAppState(prev => ({ ...prev, progress: {}, dictations: {} }));
-  };
-
+  const logout = () => { stopSpeak(); setAppState(prev => ({ ...prev, currentStudentId: null })); setSelectedModuleId(MODULES[0].id); setShowProfessorPanel(false); setProfessorUnlocked(false); };
+  const login = () => { const found = appState.students.find(s => normalize(s.name) === normalize(loginName) && normalize(s.code) === normalize(loginCode)); if (!found) { setLoginError("Usuario o contraseña incorrectos."); return; } setAppState(prev => ({ ...prev, currentStudentId: found.id })); setLoginError(""); setLoginName(""); setLoginCode(""); };
+  const changePassword = () => { if (!newPassword.trim()) { setPasswordMsg("Escribí una contraseña nueva."); return; } if (newPassword.trim().length < 4) { setPasswordMsg("La contraseña debe tener al menos 4 caracteres."); return; } if (newPassword.trim() !== confirmPassword.trim()) { setPasswordMsg("Las contraseñas no coinciden."); return; } if (!currentStudent) return; setAppState(prev => ({ ...prev, students: prev.students.map(s => s.id === currentStudent.id ? { ...s, code: newPassword.trim().toUpperCase() } : s) })); setPasswordMsg("✓ Contraseña actualizada correctamente."); setNewPassword(""); setConfirmPassword(""); setTimeout(() => { setShowChangePassword(false); setPasswordMsg(""); }, 1500); };
+  const handleProfessorClick = () => { if (professorUnlocked) { setShowProfessorPanel(v => !v); return; } const pwd = window.prompt("Contraseña del profesor:"); if (pwd === PROFESSOR_PASSWORD) { setProfessorUnlocked(true); setShowProfessorPanel(true); } else if (pwd !== null) alert("Contraseña incorrecta."); };
+  const saveProgress = (scoreValue: number, totalValue: number) => { if (!currentStudent) return; setAppState(prev => { const prevSP = prev.progress[currentStudent.id] || {}; const prevM = prevSP[selectedModuleId] || { completed: false, score: 0, total: totalValue, attempts: 0 }; return { ...prev, progress: { ...prev.progress, [currentStudent.id]: { ...prevSP, [selectedModuleId]: { completed: true, score: Math.max(prevM.score || 0, scoreValue), total: totalValue, attempts: (prevM.attempts || 0) + 1 } } } }; }); };
+  const resetCurrentModule = () => { if (!currentStudent) return; if (!window.confirm(`¿Reiniciar el módulo "${selectedModule.title}" para ${currentStudent.name}?`)) return; setAppState(prev => { const newP = { ...(prev.progress[currentStudent.id] || {}) }; const newD = { ...(prev.dictations[currentStudent.id] || {}) }; delete newP[selectedModuleId]; delete newD[selectedModuleId]; return { ...prev, progress: { ...prev.progress, [currentStudent.id]: newP }, dictations: { ...prev.dictations, [currentStudent.id]: newD } }; }); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setDictationText(""); setDictationResult(null); setActiveSection("reading"); };
+  const resetStudentModule = (studentId: string, moduleId: string) => { setAppState(prev => { const newP = { ...(prev.progress[studentId] || {}) }; const newD = { ...(prev.dictations[studentId] || {}) }; delete newP[moduleId]; delete newD[moduleId]; return { ...prev, progress: { ...prev.progress, [studentId]: newP }, dictations: { ...prev.dictations, [studentId]: newD } }; }); };
+  const resetStudentAll = (studentId: string, studentName: string) => { if (!window.confirm(`¿Reiniciar TODOS los módulos de ${studentName}?`)) return; setAppState(prev => ({ ...prev, progress: { ...prev.progress, [studentId]: {} }, dictations: { ...prev.dictations, [studentId]: {} } })); };
+  const resetAllStudents = () => { if (!window.confirm("¿Borrar TODO el progreso de TODOS los alumnos?")) return; setAppState(prev => ({ ...prev, progress: {}, dictations: {} })); };
   const handleSubmit = () => { if (!selectedOption) return; setSubmitted(true); };
+  const handleNext = () => { if (currentQuestionIndex < selectedModule.quiz.length - 1) { const next = currentQuestionIndex + 1; setCurrentQuestionIndex(next); setSelectedOption(quizAnswers[next] || ""); setSubmitted(false); return; } const correct = selectedModule.quiz.reduce((sum, q, i) => sum + (quizAnswers[i] === q.answer ? 1 : 0), 0); saveProgress(correct, selectedModule.quiz.length); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setActiveSection("reading"); };
+  const setAnswerMemory = (value: string) => { setSelectedOption(value); setQuizAnswers(prev => ({ ...prev, [currentQuestionIndex]: value })); };
+  const addStudent = () => { if (!newStudentName.trim() || !newStudentCode.trim()) return; const exists = appState.students.some(s => normalize(s.name) === normalize(newStudentName) || normalize(s.code) === normalize(newStudentCode)); if (exists) { alert("Ese alumno o código ya existe."); return; } const id = `${normalize(newStudentName)}-${Date.now()}`; setAppState(prev => ({ ...prev, students: [...prev.students, { id, name: newStudentName.trim(), code: newStudentCode.trim().toUpperCase() }] })); setNewStudentName(""); setNewStudentCode(""); };
+  const removeStudent = (studentId: string) => { const student = appState.students.find(s => s.id === studentId); if (!window.confirm(`¿Eliminar a ${student?.name || "este alumno"}?`)) return; setAppState(prev => { const newStudents = prev.students.filter(s => s.id !== studentId); const newP = { ...prev.progress }; const newD = { ...prev.dictations }; delete newP[studentId]; delete newD[studentId]; return { ...prev, students: newStudents, progress: newP, dictations: newD }; }); };
+  const checkDictation = () => { if (!currentStudent) return; const expected = normalize(selectedModule.dictation); const written = normalize(dictationText); const expWords = expected.split(" ").filter(Boolean); const wrtWords = written.split(" ").filter(Boolean); const matches = wrtWords.filter((w, i) => w === expWords[i]).length; const score = expWords.length ? Math.round((matches / expWords.length) * 100) : 0; const result: DictationResult = { exact: expected === written, score, written: dictationText, expected: selectedModule.dictation, updatedAt: new Date().toLocaleString() }; setDictationResult(result); setAppState(prev => ({ ...prev, dictations: { ...prev.dictations, [currentStudent.id]: { ...(prev.dictations[currentStudent.id] || {}), [selectedModuleId]: result } } })); };
 
-  const handleNext = () => {
-    if (currentQuestionIndex < selectedModule.quiz.length - 1) {
-      const next = currentQuestionIndex + 1;
-      setCurrentQuestionIndex(next); setSelectedOption(quizAnswers[next] || ""); setSubmitted(false); return;
-    }
-    const correct = selectedModule.quiz.reduce((sum, q, i) => sum + (quizAnswers[i] === q.answer ? 1 : 0), 0);
-    saveProgress(correct, selectedModule.quiz.length);
-    setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setActiveSection("reading");
-  };
+  const professorRows = useMemo(() => appState.students.map(student => { const progress = appState.progress[student.id] || {}; const dictations = appState.dictations[student.id] || {}; const completedMods = Object.keys(progress).length; const bestScore = MODULES.reduce((sum, m) => sum + (progress[m.id]?.score || 0), 0); const dictScores = MODULES.map(m => dictations[m.id]?.score).filter((v): v is number => typeof v === "number"); const dictAvg = dictScores.length ? Math.round(dictScores.reduce((a, b) => a + b, 0) / dictScores.length) : null; return { ...student, completedMods, bestScore, dictAvg }; }), [appState]);
 
-  const setAnswerMemory = (value: string) => {
-    setSelectedOption(value);
-    setQuizAnswers(prev => ({ ...prev, [currentQuestionIndex]: value }));
-  };
+  if (loadStatus === "loading") return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: BG, fontFamily: FONT }}>
+      <div style={{ textAlign: "center" }}><div style={{ fontSize: 40, marginBottom: 16 }}>⚗️</div><div style={{ color: TEXT_MID, fontSize: 15 }}>Cargando Aula Controllab...</div></div>
+    </div>
+  );
 
-  const addStudent = () => {
-    if (!newStudentName.trim() || !newStudentCode.trim()) return;
-    const exists = appState.students.some(s => normalize(s.name) === normalize(newStudentName) || normalize(s.code) === normalize(newStudentCode));
-    if (exists) { alert("Ese alumno o código ya existe."); return; }
-    const id = `${normalize(newStudentName)}-${Date.now()}`;
-    setAppState(prev => ({ ...prev, students: [...prev.students, { id, name: newStudentName.trim(), code: newStudentCode.trim().toUpperCase() }] }));
-    setNewStudentName(""); setNewStudentCode("");
-  };
-
-  const removeStudent = (studentId: string) => {
-    const student = appState.students.find(s => s.id === studentId);
-    if (!window.confirm(`¿Eliminar a ${student?.name || "este alumno"}?`)) return;
-    setAppState(prev => {
-      const newStudents = prev.students.filter(s => s.id !== studentId);
-      const newP = { ...prev.progress }; const newD = { ...prev.dictations };
-      delete newP[studentId]; delete newD[studentId];
-      return { ...prev, students: newStudents, progress: newP, dictations: newD };
-    });
-  };
-
-  const checkDictation = () => {
-    if (!currentStudent) return;
-    const expected = normalize(selectedModule.dictation);
-    const written = normalize(dictationText);
-    const expWords = expected.split(" ").filter(Boolean);
-    const wrtWords = written.split(" ").filter(Boolean);
-    const matches = wrtWords.filter((w, i) => w === expWords[i]).length;
-    const score = expWords.length ? Math.round((matches / expWords.length) * 100) : 0;
-    const result: DictationResult = { exact: expected === written, score, written: dictationText, expected: selectedModule.dictation, updatedAt: new Date().toLocaleString() };
-    setDictationResult(result);
-    setAppState(prev => ({ ...prev, dictations: { ...prev.dictations, [currentStudent.id]: { ...(prev.dictations[currentStudent.id] || {}), [selectedModuleId]: result } } }));
-  };
-
-  // ── Professor rows ──
-  const professorRows = useMemo(() => appState.students.map(student => {
-    const progress = appState.progress[student.id] || {};
-    const dictations = appState.dictations[student.id] || {};
-    const completedMods = Object.keys(progress).length;
-    const bestScore = MODULES.reduce((sum, m) => sum + (progress[m.id]?.score || 0), 0);
-    const dictScores = MODULES.map(m => dictations[m.id]?.score).filter((v): v is number => typeof v === "number");
-    const dictAvg = dictScores.length ? Math.round(dictScores.reduce((a, b) => a + b, 0) / dictScores.length) : null;
-    return { ...student, completedMods, bestScore, dictAvg };
-  }), [appState]);
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // LOADING SCREEN
-  // ─────────────────────────────────────────────────────────────────────────────
-  if (loadStatus === "loading") {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: BG, fontFamily: FONT }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 16 }}>⚗️</div>
-          <div style={{ color: TEXT_MID, fontSize: 15 }}>Cargando Aula Controllab...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // LOGIN SCREEN
-  // ─────────────────────────────────────────────────────────────────────────────
-  if (!currentStudent) {
-    return (
-      <div style={{ minHeight: "100vh", background: BG, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: FONT }}>
-        <div style={{ width: "100%", maxWidth: 420 }}>
-          {/* Logo */}
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🔬</div>
-            <h1 style={{ fontSize: 28, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: "-0.02em" }}>Aula Controllab</h1>
-            <p style={{ color: TEXT_MID, fontSize: 14, marginTop: 8 }}>Español técnico para profesionales del laboratorio</p>
-          </div>
-
-          {/* Login card */}
-          <div style={{ ...glass, borderRadius: 24, padding: 32 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: TEXT, marginBottom: 24, margin: "0 0 24px" }}>Iniciar sesión</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <input value={loginName} onChange={e => setLoginName(e.target.value)} placeholder="Tu nombre" style={input} onKeyDown={e => e.key === "Enter" && login()} />
-              <input value={loginCode} onChange={e => setLoginCode(e.target.value)} placeholder="Contraseña" type="password" style={input} onKeyDown={e => e.key === "Enter" && login()} />
-              {loginError && <div style={{ color: "#fb7185", fontSize: 13 }}>{loginError}</div>}
-              <button onClick={login} style={{ ...btnAccent, width: "100%", textAlign: "center" }}>Entrar →</button>
-            </div>
-          </div>
-
-          {/* Professor button */}
-          <button onClick={handleProfessorClick} style={{ marginTop: 16, width: "100%", background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "10px 16px", color: TEXT_DIM, fontSize: 13, cursor: "pointer", fontFamily: FONT }}>
-            👨‍🏫 Panel del profesor
+  const ProfessorPanel = () => (
+    <div style={{ ...GLASS, borderRadius: 20, padding: 24, marginTop: 16 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" as const }}>
+        {(["progress", "students", "dictations"] as const).map(t => (
+          <button key={t} onClick={() => setTeacherTab(t)} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: teacherTab === t ? TEAL : "rgba(255,255,255,0.06)", color: teacherTab === t ? "#042f2e" : TEXT_MID, fontFamily: FONT }}>
+            {t === "progress" ? "📊 Progreso" : t === "students" ? "👥 Alumnos" : "🎙 Dictados"}
           </button>
-
-          {/* Professor panel */}
-          {showProfessorPanel && professorUnlocked && (
-            <div style={{ ...glass, borderRadius: 24, padding: 24, marginTop: 16 }}>
-              <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-                {(["progress", "students", "dictations"] as const).map(t => (
-                  <button key={t} onClick={() => setTeacherTab(t)} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: teacherTab === t ? TEAL : "rgba(255,255,255,0.06)", color: teacherTab === t ? "#042f2e" : TEXT_MID, fontFamily: FONT }}>
-                    {t === "progress" ? "📊 Progreso" : t === "students" ? "👥 Alumnos" : "🎙 Dictados"}
-                  </button>
-                ))}
-                <button onClick={resetAllStudents} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: "rgba(251,113,133,0.15)", color: "#fb7185", fontFamily: FONT, marginLeft: "auto" }}>
-                  🗑 Borrar todo
-                </button>
-              </div>
-
-              {teacherTab === "progress" && (
-                <div style={{ maxHeight: 400, overflowY: "auto" }}>
-                  {professorRows.map(row => (
-                    <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-                      <div style={{ flex: 1, minWidth: 120 }}>
-                        <div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT }}>{row.name}</div>
-                        <div style={{ fontSize: 11, color: TEXT_DIM, fontFamily: MONO }}>{row.completedMods}/{MODULES.length} módulos</div>
-                      </div>
-                      <div style={{ fontFamily: MONO, fontSize: 14, fontWeight: 700, color: TEAL }}>{row.bestScore}pts</div>
-                      <button onClick={() => resetStudentAll(row.id, row.name)} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>Reset</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {teacherTab === "dictations" && (
-                <div style={{ maxHeight: 400, overflowY: "auto" }}>
-                  {professorRows.map(row => (
-                    <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8 }}>
-                      <div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT, marginBottom: 6 }}>{row.name}</div>
-                      {MODULES.filter(m => appState.dictations[row.id]?.[m.id]).map(m => {
-                        const d = appState.dictations[row.id][m.id];
-                        return (
-                          <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 4 }}>
-                            <span style={{ fontSize: 12, color: TEXT_MID, fontFamily: FONT, flex: 1 }}>{m.emoji} {m.title}</span>
-                            <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: d.score >= 80 ? "#34d399" : d.score >= 50 ? "#fbbf24" : "#fb7185" }}>{d.score}%</span>
-                            <button onClick={() => resetStudentModule(row.id, m.id)} style={{ background: "rgba(251,113,133,0.1)", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 10, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>×</button>
-                          </div>
-                        );
-                      })}
-                      {!MODULES.some(m => appState.dictations[row.id]?.[m.id]) && <div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: FONT }}>Sin dictados aún</div>}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {teacherTab === "students" && (
-                <div>
-                  <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                    <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" style={{ ...input, flex: 2 }} />
-                    <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" style={{ ...input, flex: 1 }} />
-                    <button onClick={addStudent} style={{ ...btnAccent, padding: "0 16px", whiteSpace: "nowrap" }}>+ Agregar</button>
-                  </div>
-                  <div style={{ maxHeight: 300, overflowY: "auto" }}>
-                    {appState.students.map(s => (
-                      <div key={s.id} style={{ ...glassDark, borderRadius: 12, padding: "10px 14px", marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ flex: 1, fontSize: 14, color: TEXT, fontFamily: FONT }}>{s.name}</div>
-                        <div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: MONO }}>{s.code}</div>
-                        <button onClick={() => removeStudent(s.id)} style={{ background: "transparent", border: "none", color: "#fb7185", cursor: "pointer", fontSize: 16 }}>×</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        ))}
+        <button onClick={resetAllStudents} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: "rgba(251,113,133,0.15)", color: "#fb7185", fontFamily: FONT, marginLeft: "auto" }}>🗑 Borrar todo</button>
       </div>
-    );
-  }
+      {teacherTab === "progress" && (
+        <div style={{ maxHeight: 380, overflowY: "auto" as const }}>
+          {professorRows.map(row => (
+            <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" as const }}>
+              <div style={{ flex: 1, minWidth: 120 }}><div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT }}>{row.name}</div><div style={{ fontSize: 11, color: TEXT_DIM, fontFamily: MONO }}>{row.completedMods}/{MODULES.length} mód · {row.bestScore} pts</div></div>
+              <button onClick={() => resetStudentAll(row.id, row.name)} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>Reset</button>
+            </div>
+          ))}
+        </div>
+      )}
+      {teacherTab === "dictations" && (
+        <div style={{ maxHeight: 380, overflowY: "auto" as const }}>
+          {professorRows.map(row => (
+            <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT, marginBottom: 6 }}>{row.name} {row.dictAvg !== null && <span style={{ fontFamily: MONO, fontSize: 12, color: TEAL }}>avg {row.dictAvg}%</span>}</div>
+              {MODULES.filter(m => appState.dictations[row.id]?.[m.id]).map(m => { const d = appState.dictations[row.id][m.id]; return (<div key={m.id} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 4 }}><span style={{ fontSize: 12, color: TEXT_MID, fontFamily: FONT, flex: 1 }}>{m.emoji} {m.title}</span><span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: d.score >= 80 ? "#34d399" : d.score >= 50 ? "#fbbf24" : "#fb7185" }}>{d.score}%</span><button onClick={() => resetStudentModule(row.id, m.id)} style={{ background: "rgba(251,113,133,0.1)", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 10, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>×</button></div>); })}
+              {!MODULES.some(m => appState.dictations[row.id]?.[m.id]) && <div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: FONT }}>Sin dictados aún</div>}
+            </div>
+          ))}
+        </div>
+      )}
+      {teacherTab === "students" && (
+        <div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" style={{ ...input, flex: 2 }} />
+            <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" style={{ ...input, flex: 1 }} />
+            <button onClick={addStudent} style={{ ...btnAccent, padding: "0 16px", whiteSpace: "nowrap" as const }}>+ Agregar</button>
+          </div>
+          <div style={{ maxHeight: 280, overflowY: "auto" as const }}>
+            {appState.students.map(s => (<div key={s.id} style={{ ...glassDark, borderRadius: 12, padding: "10px 14px", marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}><div style={{ flex: 1, fontSize: 14, color: TEXT, fontFamily: FONT }}>{s.name}</div><div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: MONO }}>{s.code}</div><button onClick={() => removeStudent(s.id)} style={{ background: "transparent", border: "none", color: "#fb7185", cursor: "pointer", fontSize: 16 }}>×</button></div>))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // MAIN APP
-  // ─────────────────────────────────────────────────────────────────────────────
+  if (!currentStudent) return (
+    <div style={{ minHeight: "100vh", background: BG, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: FONT }}>
+      <div style={{ width: "100%", maxWidth: 420 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🔬</div>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: "-0.02em" }}>Aula Controllab</h1>
+          <p style={{ color: TEXT_MID, fontSize: 14, marginTop: 8 }}>Español técnico para profesionales del laboratorio</p>
+        </div>
+        <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "0 0 24px" }}>Iniciar sesión</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <input value={loginName} onChange={e => setLoginName(e.target.value)} placeholder="Tu nombre" style={input} onKeyDown={e => e.key === "Enter" && login()} />
+            <input value={loginCode} onChange={e => setLoginCode(e.target.value)} placeholder="Contraseña" type="password" style={input} onKeyDown={e => e.key === "Enter" && login()} />
+            {loginError && <div style={{ color: "#fb7185", fontSize: 13 }}>{loginError}</div>}
+            <button onClick={login} style={{ ...btnAccent, width: "100%", textAlign: "center" as const }}>Entrar →</button>
+          </div>
+        </div>
+        <button onClick={handleProfessorClick} style={{ marginTop: 16, width: "100%", background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "10px 16px", color: TEXT_DIM, fontSize: 13, cursor: "pointer", fontFamily: FONT }}>
+          👨‍🏫 Panel del profesor
+        </button>
+        {showProfessorPanel && professorUnlocked && <ProfessorPanel />}
+      </div>
+    </div>
+  );
+
   return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: FONT }}>
-
-      {/* Header */}
-      <header style={{ ...glass, borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, zIndex: 100 }}>
+      <header style={{ ...GLASS, borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, zIndex: 100 }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", gap: 16 }}>
           <span style={{ fontSize: 20 }}>🔬</span>
           <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: "-0.01em" }}>Aula Controllab</span>
           <div style={{ flex: 1 }} />
-
-          {/* Category filter */}
-          <div style={{ display: "flex", gap: 6, overflowX: "auto" }}>
+          <div style={{ display: "flex", gap: 6, overflowX: "auto" as const }}>
             {CATEGORIES.map(cat => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ borderRadius: 20, padding: "5px 12px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: activeCategory === cat ? TEAL : "rgba(255,255,255,0.06)", color: activeCategory === cat ? "#042f2e" : TEXT_MID, fontFamily: FONT, whiteSpace: "nowrap" }}>
+              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ borderRadius: 20, padding: "5px 12px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: activeCategory === cat ? TEAL : "rgba(255,255,255,0.06)", color: activeCategory === cat ? "#042f2e" : TEXT_MID, fontFamily: FONT, whiteSpace: "nowrap" as const }}>
                 {cat}
               </button>
             ))}
           </div>
-
-          {/* User area */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button onClick={() => { setShowChangePassword(v => !v); setShowProfessorPanel(false); }} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>
-              🔑 Clave
-            </button>
-            <button onClick={handleProfessorClick} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>
-              👨‍🏫
-            </button>
-            <div style={{ ...glassDark, borderRadius: 10, padding: "6px 12px", fontSize: 13, fontWeight: 600 }}>
-              {currentStudent.name}
-            </div>
-            <button onClick={logout} style={{ background: "rgba(251,113,133,0.15)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 10, padding: "6px 12px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>
-              Salir
-            </button>
+            <button onClick={() => { setShowChangePassword(v => !v); setShowProfessorPanel(false); }} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔑</button>
+            <button onClick={handleProfessorClick} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>👨‍🏫</button>
+            <div style={{ ...glassDark, borderRadius: 10, padding: "6px 12px", fontSize: 13, fontWeight: 600 }}>{currentStudent.name}</div>
+            <button onClick={logout} style={{ background: "rgba(251,113,133,0.15)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 10, padding: "6px 12px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>Salir</button>
           </div>
         </div>
       </header>
 
-      {/* Change password panel */}
-      {showChangePassword && (
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 24px 0" }}>
-          <div style={{ ...glass, borderRadius: 20, padding: 24, maxWidth: 420 }}>
-            <h3 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 700 }}>Cambiar contraseña</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Nueva contraseña" style={input} />
-              <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirmar contraseña" style={input} />
-              {passwordMsg && <div style={{ fontSize: 13, color: passwordMsg.startsWith("✓") ? "#34d399" : "#fb7185" }}>{passwordMsg}</div>}
-              <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={changePassword} style={{ ...btnAccent, flex: 1 }}>Guardar</button>
-                <button onClick={() => { setShowChangePassword(false); setPasswordMsg(""); setNewPassword(""); setConfirmPassword(""); }} style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "12px", fontSize: 14, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>Cancelar</button>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px" }}>
+        {showChangePassword && (
+          <div style={{ paddingTop: 16 }}>
+            <div style={{ ...GLASS, borderRadius: 20, padding: 24, maxWidth: 420 }}>
+              <h3 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 700 }}>Cambiar contraseña</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Nueva contraseña" style={input} />
+                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirmar contraseña" style={input} />
+                {passwordMsg && <div style={{ fontSize: 13, color: passwordMsg.startsWith("✓") ? "#34d399" : "#fb7185" }}>{passwordMsg}</div>}
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button onClick={changePassword} style={{ ...btnAccent, flex: 1 }}>Guardar</button>
+                  <button onClick={() => { setShowChangePassword(false); setPasswordMsg(""); setNewPassword(""); setConfirmPassword(""); }} style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "12px", fontSize: 14, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>Cancelar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+        {showProfessorPanel && professorUnlocked && <ProfessorPanel />}
+      </div>
 
-      {/* Professor panel (in-app) */}
-      {showProfessorPanel && professorUnlocked && currentStudent && (
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 24px 0" }}>
-          <div style={{ ...glass, borderRadius: 20, padding: 24 }}>
-            <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-              {(["progress", "students", "dictations"] as const).map(t => (
-                <button key={t} onClick={() => setTeacherTab(t)} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: teacherTab === t ? TEAL : "rgba(255,255,255,0.06)", color: teacherTab === t ? "#042f2e" : TEXT_MID, fontFamily: FONT }}>
-                  {t === "progress" ? "📊 Progreso" : t === "students" ? "👥 Alumnos" : "🎙 Dictados"}
-                </button>
-              ))}
-              <button onClick={resetAllStudents} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: "rgba(251,113,133,0.15)", color: "#fb7185", fontFamily: FONT, marginLeft: "auto" }}>
-                🗑 Borrar todo
-              </button>
-            </div>
-
-            {teacherTab === "progress" && (
-              <div style={{ display: "grid", gap: 8, maxHeight: 360, overflowY: "auto" }}>
-                {professorRows.map(row => (
-                  <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-                    <div style={{ flex: 1, minWidth: 120 }}>
-                      <div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT }}>{row.name}</div>
-                      <div style={{ fontSize: 11, color: TEXT_DIM, fontFamily: MONO }}>{row.completedMods}/{MODULES.length} módulos · {row.bestScore} pts</div>
-                    </div>
-                    <button onClick={() => resetStudentAll(row.id, row.name)} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>Reset todo</button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {teacherTab === "dictations" && (
-              <div style={{ maxHeight: 360, overflowY: "auto" }}>
-                {professorRows.map(row => (
-                  <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8 }}>
-                    <div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT, marginBottom: 6 }}>{row.name} {row.dictAvg !== null && <span style={{ fontFamily: MONO, fontSize: 12, color: TEAL }}>avg {row.dictAvg}%</span>}</div>
-                    {MODULES.filter(m => appState.dictations[row.id]?.[m.id]).map(m => {
-                      const d = appState.dictations[row.id][m.id];
-                      return (
-                        <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 4 }}>
-                          <span style={{ fontSize: 12, color: TEXT_MID, fontFamily: FONT, flex: 1 }}>{m.emoji} {m.title}</span>
-                          <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: d.score >= 80 ? "#34d399" : d.score >= 50 ? "#fbbf24" : "#fb7185" }}>{d.score}%</span>
-                          <button onClick={() => resetStudentModule(row.id, m.id)} style={{ background: "rgba(251,113,133,0.1)", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 10, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>×</button>
-                        </div>
-                      );
-                    })}
-                    {!MODULES.some(m => appState.dictations[row.id]?.[m.id]) && <div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: FONT }}>Sin dictados aún</div>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {teacherTab === "students" && (
-              <div>
-                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                  <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" style={{ ...input, flex: 2 }} />
-                  <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" style={{ ...input, flex: 1 }} />
-                  <button onClick={addStudent} style={{ ...btnAccent, padding: "0 16px", whiteSpace: "nowrap" }}>+ Agregar</button>
-                </div>
-                <div style={{ maxHeight: 280, overflowY: "auto" }}>
-                  {appState.students.map(s => (
-                    <div key={s.id} style={{ ...glassDark, borderRadius: 12, padding: "10px 14px", marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ flex: 1, fontSize: 14, color: TEXT, fontFamily: FONT }}>{s.name}</div>
-                      <div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: MONO }}>{s.code}</div>
-                      <button onClick={() => removeStudent(s.id)} style={{ background: "transparent", border: "none", color: "#fb7185", cursor: "pointer", fontSize: 16 }}>×</button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Main content */}
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 24px" }}>
-
-        {/* Module header */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" as const }}>
             <div style={{ fontSize: 40 }}>{selectedModule.emoji}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" as const, marginBottom: 6 }}>
                 <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>{selectedModule.title}</h2>
                 <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "rgba(255,255,255,0.07)", color: catColor(selectedModule.category), fontFamily: MONO }}>{selectedModule.category}</span>
                 <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: "rgba(255,255,255,0.05)", color: TEXT_DIM, fontFamily: MONO }}>{selectedModule.level}</span>
               </div>
               <p style={{ color: TEXT_MID, fontSize: 14, margin: 0 }}>{selectedModule.description}</p>
             </div>
-            <button onClick={resetCurrentModule} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 12, padding: "8px 14px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>
-              🔄 Reiniciar módulo
-            </button>
+            <button onClick={resetCurrentModule} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 12, padding: "8px 14px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>🔄 Reiniciar</button>
           </div>
-
-          {/* Section tabs */}
-          <div style={{ display: "flex", gap: 6, marginTop: 20, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 6, marginTop: 20, flexWrap: "wrap" as const }}>
             {(["reading", "vocab", "quiz", "dictation"] as const).map(sec => {
               const labels: Record<string, string> = { reading: "📖 Lectura", vocab: "📝 Vocabulario", quiz: "🧠 Quiz", dictation: "🎙 Dictado" };
               const active = activeSection === sec;
-              return (
-                <button key={sec} onClick={() => setActiveSection(sec)} style={{ borderRadius: 12, padding: "9px 18px", fontSize: 13, fontWeight: 600, border: `1px solid ${active ? BORDER_A : BORDER}`, cursor: "pointer", background: active ? "rgba(45,212,191,0.1)" : "rgba(255,255,255,0.04)", color: active ? TEAL : TEXT_MID, fontFamily: FONT, transition: "all 0.15s" }}>
-                  {labels[sec]}
-                </button>
-              );
+              return (<button key={sec} onClick={() => setActiveSection(sec)} style={{ borderRadius: 12, padding: "9px 18px", fontSize: 13, fontWeight: 600, border: `1px solid ${active ? BORDER_A : BORDER}`, cursor: "pointer", background: active ? "rgba(45,212,191,0.1)" : "rgba(255,255,255,0.04)", color: active ? TEAL : TEXT_MID, fontFamily: FONT }}>{labels[sec]}</button>);
             })}
           </div>
         </div>
 
-        {/* Two-column layout */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, alignItems: "start" }}>
-
-          {/* Left column */}
           <div>
-            {/* READING */}
             {activeSection === "reading" && (
-              <div style={{ ...glass, borderRadius: 24, padding: 32 }}>
+              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0, fontFamily: FONT }}>{selectedModule.readingTitle}</h3>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{selectedModule.readingTitle}</h3>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ ...glass, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, border: `1px solid ${BORDER}`, cursor: "pointer", fontFamily: FONT }}>
-                      🔊 Escuchar
-                    </button>
-                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>
-                      ⏹ Stop
-                    </button>
+                    <button onClick={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
+                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                  {selectedModule.reading.map((para, i) => (
-                    <p key={i} style={{ lineHeight: 1.9, color: "#cbd5e1", fontSize: 15, margin: 0, fontFamily: FONT }}>{para}</p>
-                  ))}
+                  {selectedModule.reading.map((para, i) => <p key={i} style={{ lineHeight: 1.9, color: "#cbd5e1", fontSize: 15, margin: 0, fontFamily: FONT }}>{para}</p>)}
                 </div>
                 <button onClick={() => setActiveSection("quiz")} style={{ ...btnAccent, marginTop: 32, display: "inline-block" }}>Ir al quiz →</button>
               </div>
             )}
 
-            {/* QUIZ */}
             {activeSection === "quiz" && (
-              <div style={{ ...glass, borderRadius: 24, padding: 32 }}>
+              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0, fontFamily: FONT }}>Comprensión</h3>
-                  <div style={{ ...glass, borderRadius: 12, padding: "8px 16px", fontFamily: MONO, fontSize: 14, fontWeight: 700, color: TEAL }}>{currentQuestionIndex + 1}/{selectedModule.quiz.length}</div>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Comprensión</h3>
+                  <div style={{ ...glassDark, borderRadius: 12, padding: "8px 16px", fontFamily: MONO, fontSize: 14, fontWeight: 700, color: TEAL }}>{currentQuestionIndex + 1}/{selectedModule.quiz.length}</div>
                 </div>
                 <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 99, marginBottom: 28, overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${((currentQuestionIndex + (submitted ? 1 : 0)) / selectedModule.quiz.length) * 100}%`, background: `linear-gradient(90deg,${TEAL},#67e8f9)`, transition: "width 0.4s ease", borderRadius: 99 }} />
@@ -1037,99 +889,42 @@ export default function Home() {
                 <div style={{ ...glassDark, borderRadius: 20, padding: 24 }}>
                   <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, lineHeight: 1.6, fontFamily: FONT }}>{currentQuestion.question}</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {shuffledOpts.map(option => {
-                      const sel = selectedOption === option;
-                      const correct = submitted && option === currentQuestion.answer;
-                      const wrong = submitted && sel && option !== currentQuestion.answer;
-                      return (
-                        <button key={option} onClick={() => !submitted && setAnswerMemory(option)} disabled={submitted} style={optBtn(sel, correct, wrong)}>
-                          {option}
-                        </button>
-                      );
-                    })}
+                    {shuffledOpts.map(option => { const sel = selectedOption === option; const correct = submitted && option === currentQuestion.answer; const wrong = submitted && sel && option !== currentQuestion.answer; return (<button key={option} onClick={() => !submitted && setAnswerMemory(option)} disabled={submitted} style={optBtn(sel, correct, wrong)}>{option}</button>); })}
                   </div>
                 </div>
                 <div style={{ marginTop: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 16 }}>
                   <div style={{ fontSize: 14, fontFamily: FONT }}>
-                    {submitted
-                      ? isCorrect
-                        ? <span style={{ color: "#34d399", fontWeight: 600 }}>✓ ¡Correcto!</span>
-                        : <span style={{ color: "#fb7185" }}>✗ Respuesta: <strong style={{ color: TEXT }}>{currentQuestion.answer}</strong></span>
-                      : <span style={{ color: TEXT_MID }}>Elegí una opción.</span>
-                    }
+                    {submitted ? isCorrect ? <span style={{ color: "#34d399", fontWeight: 600 }}>✓ ¡Correcto!</span> : <span style={{ color: "#fb7185" }}>✗ Respuesta: <strong style={{ color: TEXT }}>{currentQuestion.answer}</strong></span> : <span style={{ color: TEXT_MID }}>Elegí una opción.</span>}
                   </div>
-                  {!submitted
-                    ? <button onClick={handleSubmit} disabled={!selectedOption} style={{ ...btnAccent, opacity: selectedOption ? 1 : 0.4 }}>Comprobar</button>
-                    : <button onClick={handleNext} style={btnAccent}>{currentQuestionIndex < selectedModule.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>
-                  }
+                  {!submitted ? <button onClick={handleSubmit} disabled={!selectedOption} style={{ ...btnAccent, opacity: selectedOption ? 1 : 0.4 }}>Comprobar</button> : <button onClick={handleNext} style={btnAccent}>{currentQuestionIndex < selectedModule.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>}
                 </div>
               </div>
             )}
 
-            {/* DICTATION */}
             {activeSection === "dictation" && (
-              <div style={{ ...glass, borderRadius: 24, padding: 32 }}>
+              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0, fontFamily: FONT }}>🎙 Dictado</h3>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>🎙 Dictado</h3>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => speak(selectedModule.dictation, 0.75)} style={{ ...glass, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, border: `1px solid ${BORDER}`, cursor: "pointer", fontFamily: FONT }}>
-                      🔊 Reproducir
-                    </button>
-                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>
-                      ⏹ Stop
-                    </button>
+                    <button onClick={() => speak(selectedModule.dictation, 0.75)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Reproducir</button>
+                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
                   </div>
                 </div>
-                <p style={{ color: TEXT_MID, fontSize: 14, marginBottom: 20, lineHeight: 1.6, fontFamily: FONT }}>
-                  Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.
-                </p>
-                <textarea
-                  value={dictationText}
-                  onChange={e => setDictationText(e.target.value)}
-                  rows={4}
-                  placeholder="Escribí lo que escuchaste..."
-                  style={{ ...input, resize: "none" as const, lineHeight: 1.7, borderRadius: 16, padding: "16px 20px" }}
-                />
-                <button onClick={checkDictation} style={{ ...btnAccent, marginTop: 16, display: "inline-block" }}>
-                  Corregir dictado
-                </button>
-                {(dictationResult || currentDictation) && (() => {
-                  const r = dictationResult || currentDictation!;
-                  return (
-                    <div style={{ ...glassDark, borderRadius: 20, padding: 20, marginTop: 20, display: "flex", flexDirection: "column", gap: 12 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div style={{ fontSize: 32, fontWeight: 800, fontFamily: MONO, color: r.score >= 80 ? "#34d399" : r.score >= 50 ? "#fbbf24" : "#fb7185" }}>
-                          {r.score}%
-                        </div>
-                        <div style={{ fontSize: 14, color: TEXT_MID, fontFamily: FONT }}>
-                          {r.score === 100 ? "¡Perfecto! 🎉" : r.score >= 80 ? "¡Muy bien!" : r.score >= 50 ? "Buen intento" : "Seguí practicando"}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: 14, fontFamily: FONT }}>
-                        <span style={{ color: TEXT_MID }}>Frase modelo: </span>
-                        <span style={{ color: "#cbd5e1", fontStyle: "italic" }}>{r.expected}</span>
-                      </div>
-                    </div>
-                  );
-                })()}
+                <p style={{ color: TEXT_MID, fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.</p>
+                <textarea value={dictationText} onChange={e => setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." style={{ ...input, resize: "none" as const, lineHeight: 1.7, borderRadius: 16, padding: "16px 20px" }} />
+                <button onClick={checkDictation} style={{ ...btnAccent, marginTop: 16, display: "inline-block" }}>Corregir dictado</button>
+                {(dictationResult || currentDictation) && (() => { const r = dictationResult || currentDictation!; return (<div style={{ ...glassDark, borderRadius: 20, padding: 20, marginTop: 20, display: "flex", flexDirection: "column", gap: 12 }}><div style={{ display: "flex", alignItems: "center", gap: 12 }}><div style={{ fontSize: 32, fontWeight: 800, fontFamily: MONO, color: r.score >= 80 ? "#34d399" : r.score >= 50 ? "#fbbf24" : "#fb7185" }}>{r.score}%</div><div style={{ fontSize: 14, color: TEXT_MID }}>{r.score === 100 ? "¡Perfecto! 🎉" : r.score >= 80 ? "¡Muy bien!" : r.score >= 50 ? "Buen intento" : "Seguí practicando"}</div></div><div style={{ fontSize: 14 }}><span style={{ color: TEXT_MID }}>Frase modelo: </span><span style={{ color: "#cbd5e1", fontStyle: "italic" }}>{r.expected}</span></div></div>); })()}
               </div>
             )}
 
-            {/* VOCAB */}
             {activeSection === "vocab" && (
-              <div style={{ ...glass, borderRadius: 24, padding: 32 }}>
-                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 24, fontFamily: FONT }}>📝 Vocabulario clave</h3>
+              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 24 }}>📝 Vocabulario clave</h3>
                 <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))" }}>
                   {selectedModule.vocab.map(item => (
                     <div key={item.es} style={{ ...glassDark, borderRadius: 16, padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: 14, fontFamily: FONT }}>{item.es}</div>
-                        <div style={{ fontSize: 11, color: TEXT_DIM, marginTop: 2, fontFamily: FONT }}>Español</div>
-                      </div>
-                      <div style={{ textAlign: "right" as const }}>
-                        <div style={{ fontWeight: 600, fontSize: 14, color: TEAL, fontFamily: FONT }}>{item.pt}</div>
-                        <div style={{ fontSize: 11, color: TEXT_DIM, marginTop: 2, fontFamily: FONT }}>Portugués</div>
-                      </div>
+                      <div><div style={{ fontWeight: 600, fontSize: 14, fontFamily: FONT }}>{item.es}</div><div style={{ fontSize: 11, color: TEXT_DIM, marginTop: 2 }}>Español</div></div>
+                      <div style={{ textAlign: "right" as const }}><div style={{ fontWeight: 600, fontSize: 14, color: TEAL }}>{item.pt}</div><div style={{ fontSize: 11, color: TEXT_DIM, marginTop: 2 }}>Portugués</div></div>
                     </div>
                   ))}
                 </div>
@@ -1137,14 +932,11 @@ export default function Home() {
             )}
           </div>
 
-          {/* Sidebar */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Progress card */}
-            <div style={{ ...glass, borderRadius: 24, padding: 24 }}>
+            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 16, fontFamily: MONO }}>MI PROGRESO</div>
               <div style={{ fontSize: 52, fontWeight: 800, color: TEAL, fontFamily: MONO, lineHeight: 1 }}>{overallPercent}%</div>
-              <div style={{ color: TEXT_MID, fontSize: 13, marginTop: 4, fontFamily: FONT }}>completado</div>
+              <div style={{ color: TEXT_MID, fontSize: 13, marginTop: 4 }}>completado</div>
               <div style={{ marginTop: 16, height: 6, borderRadius: 99, background: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
                 <div style={{ height: "100%", borderRadius: 99, width: `${overallPercent}%`, background: `linear-gradient(90deg,${TEAL},#67e8f9)`, boxShadow: "0 0 12px rgba(45,212,191,0.35)", transition: "width 0.7s ease" }} />
               </div>
@@ -1152,42 +944,33 @@ export default function Home() {
                 {[{ n: completedModules, l: "Módulos" }, { n: totalBestScore, l: "Puntos", c: TEAL }].map(x => (
                   <div key={x.l} style={{ ...glassDark, borderRadius: 14, padding: 14 }}>
                     <div style={{ fontSize: 20, fontWeight: 800, fontFamily: MONO, color: x.c || TEXT }}>{x.n}</div>
-                    <div style={{ fontSize: 12, color: TEXT_DIM, marginTop: 2, fontFamily: FONT }}>{x.l}</div>
+                    <div style={{ fontSize: 12, color: TEXT_DIM, marginTop: 2 }}>{x.l}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Module list */}
-            <div style={{ ...glass, borderRadius: 24, padding: 24 }}>
+            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 16, fontFamily: MONO }}>MÓDULOS</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 480, overflowY: "auto", paddingRight: 4 }}>
-                {filteredModules.map(m => {
-                  const p = studentProgress[m.id];
-                  const isA = m.id === selectedModuleId;
-                  return (
-                    <button key={m.id} onClick={() => setSelectedModuleId(m.id)} style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 12, padding: "10px 12px", background: isA ? "rgba(45,212,191,0.08)" : "transparent", border: `1px solid ${isA ? BORDER_A : "transparent"}`, cursor: "pointer", textAlign: "left" as const, transition: "all 0.15s", width: "100%" }}>
-                      <span style={{ fontSize: 16 }}>{m.emoji}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: isA ? 700 : 500, color: isA ? TEXT : "#94a3b8", fontFamily: FONT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{m.title}</div>
-                        <div style={{ fontSize: 11, color: catColor(m.category), marginTop: 1, fontFamily: MONO }}>{m.category}</div>
-                      </div>
-                      {p ? <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: TEAL, whiteSpace: "nowrap" as const }}>{p.score}/{p.total}</span> : <span style={{ color: TEXT_DIM, fontSize: 12 }}>—</span>}
-                    </button>
-                  );
-                })}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 480, overflowY: "auto" as const, paddingRight: 4 }}>
+                {filteredModules.map(m => { const p = studentProgress[m.id]; const isA = m.id === selectedModuleId; return (
+                  <button key={m.id} onClick={() => setSelectedModuleId(m.id)} style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 12, padding: "10px 12px", background: isA ? "rgba(45,212,191,0.08)" : "transparent", border: `1px solid ${isA ? BORDER_A : "transparent"}`, cursor: "pointer", textAlign: "left" as const, width: "100%" }}>
+                    <span style={{ fontSize: 16 }}>{m.emoji}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: isA ? 700 : 500, color: isA ? TEXT : "#94a3b8", fontFamily: FONT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{m.title}</div>
+                      <div style={{ fontSize: 11, color: catColor(m.category), marginTop: 1, fontFamily: MONO }}>{m.category}</div>
+                    </div>
+                    {p ? <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: TEAL, whiteSpace: "nowrap" as const }}>{p.score}/{p.total}</span> : <span style={{ color: TEXT_DIM, fontSize: 12 }}>—</span>}
+                  </button>
+                ); })}
               </div>
             </div>
 
-            {/* Tip */}
-            <div style={{ ...glass, borderRadius: 24, padding: 24 }}>
+            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 12, fontFamily: MONO }}>CONSEJO DEL DÍA</div>
-              <p style={{ fontSize: 14, color: "#cbd5e1", lineHeight: 1.7, margin: 0, fontFamily: FONT }}>
-                💡 Cuando uses términos técnicos con un cliente, la <span style={{ color: TEAL, fontWeight: 600 }}>claridad</span> siempre es más importante que la complejidad del vocabulario.
-              </p>
+              <p style={{ fontSize: 14, color: "#cbd5e1", lineHeight: 1.7, margin: 0, fontFamily: FONT }}>💡 Cuando uses términos técnicos con un cliente, la <span style={{ color: TEAL, fontWeight: 600 }}>claridad</span> siempre es más importante que la complejidad del vocabulario.</p>
             </div>
 
-            {/* Spotify */}
             <div style={{ borderRadius: 24, overflow: "hidden", border: "1px solid rgba(30,215,96,0.2)", background: "linear-gradient(135deg,rgba(30,215,96,0.07),rgba(6,11,20,0.95))" }}>
               <div style={{ padding: "16px 20px 8px", display: "flex", alignItems: "center", gap: 8 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg>
@@ -1195,7 +978,6 @@ export default function Home() {
               </div>
               <iframe style={{ borderRadius: "0 0 24px 24px", display: "block" }} src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcOFHFBj89A5?utm_source=generator&theme=0" width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
             </div>
-
           </div>
         </div>
       </div>
