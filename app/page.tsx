@@ -2821,11 +2821,19 @@ const CSS = `
               </div>
             </div>
 
-           {/* READING */}
+{/* READING */}
 {activeSection==="reading"&&(
   <div style={{...glass,borderRadius:24,padding:32}}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:28,flexWrap:"wrap" as const,gap:12}}>
-      
+    <div
+      style={{
+        display:"flex",
+        alignItems:"center",
+        justifyContent:"space-between",
+        marginBottom:28,
+        flexWrap:"wrap" as const,
+        gap:12
+      }}
+    >
       <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>
         {selectedModule.readingTitle}
       </h3>
@@ -2867,12 +2875,14 @@ const CSS = `
           ⏹ Stop
         </button>
       </div>
-
     </div>
 
     <div style={{display:"flex",flexDirection:"column",gap:20}}>
       {selectedModule.reading.map((para,i)=>(
-        <p key={i} style={{lineHeight:1.9,color:"#cbd5e1",fontSize:15,margin:0,fontFamily:FONT}}>
+        <p
+          key={i}
+          style={{lineHeight:1.9,color:"#cbd5e1",fontSize:15,margin:0,fontFamily:FONT}}
+        >
           {para}
         </p>
       ))}
@@ -2959,62 +2969,126 @@ const CSS = `
             )}
 
             {/* DICTATION */}
-            {activeSection==="dictation"&&(
-              <div style={{...glass,borderRadius:24,padding:32}}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap" as const,gap:12}}>
-                  <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>🎙 Dictado</h3>
-                  <div style={{display:"flex",alignItems:"center",gap:10}}>
-  <button
-    onClick={()=>speak(selectedModule.dictation,0.75)}
-    style={{
-      ...glass,
-      borderRadius:12,
-      padding:"9px 16px",
-      fontSize:13,
-      color:TEXT_MID,
-      border:`1px solid ${BORDER}`,
-      cursor:"pointer",
-      fontFamily:FONT,
-      display:"flex",
-      alignItems:"center",
-      gap:8
-    }}
-  >
-    🔊 Reproducir
-  </button>
+{activeSection==="dictation"&&(
+  <div style={{...glass,borderRadius:24,padding:32}}>
+    <div
+      style={{
+        display:"flex",
+        alignItems:"center",
+        justifyContent:"space-between",
+        marginBottom:24,
+        flexWrap:"wrap" as const,
+        gap:12
+      }}
+    >
+      <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>
+        🎙 Dictado
+      </h3>
 
-  <button
-    onClick={stopSpeak}
-    style={{
-      borderRadius:12,
-      padding:"9px 16px",
-      fontSize:13,
-      fontWeight:600,
-      background:"rgba(244,63,94,0.15)",
-      color:"#fda4af",
-      border:"1px solid rgba(244,63,94,0.3)",
-      cursor:"pointer",
-      fontFamily:FONT
-    }}
-  >
-    ⏹ Stop
-  </button>
-</div>
-                </div>
-                <p style={{color:TEXT_MID,fontSize:14,marginBottom:20,lineHeight:1.6,fontFamily:FONT}}>Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.</p>
-                <textarea value={dictationText} onChange={e=>setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." style={{...input,resize:"none" as const,lineHeight:1.7,borderRadius:16,padding:"16px 20px"}}/>
-                <button onClick={checkDictation} style={{...btnAccent,marginTop:16,display:"inline-block"}}>Corregir dictado</button>
-                {(dictationResult||currentDictation)&&(()=>{const r=dictationResult||currentDictation!;return(
-                  <div style={{...glassDark,borderRadius:20,padding:20,marginTop:20,display:"flex",flexDirection:"column",gap:12}}>
-                    <div style={{display:"flex",alignItems:"center",gap:12}}>
-                      <div style={{fontSize:32,fontWeight:800,fontFamily:MONO,color:r.score>=80?"#34d399":r.score>=50?"#fbbf24":"#fb7185"}}>{r.score}%</div>
-                      <div style={{fontSize:14,color:TEXT_MID,fontFamily:FONT}}>{r.score===100?"¡Perfecto! 🎉":r.score>=80?"¡Muy bien!":r.score>=50?"Buen intento":"Seguí practicando"}</div>
-                    </div>
-                    <div style={{fontSize:14,fontFamily:FONT}}><span style={{color:TEXT_MID}}>Frase modelo: </span><span style={{color:"#cbd5e1",fontStyle:"italic"}}>{r.expected}</span></div>
-                  </div>
-                );})()}
-              </div>
-            )}
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <button
+          onClick={()=>speak(selectedModule.dictation,0.75)}
+          style={{
+            ...glass,
+            borderRadius:12,
+            padding:"9px 16px",
+            fontSize:13,
+            color:TEXT_MID,
+            border:`1px solid ${BORDER}`,
+            cursor:"pointer",
+            fontFamily:FONT,
+            display:"flex",
+            alignItems:"center",
+            gap:8
+          }}
+        >
+          🔊 Reproducir
+        </button>
+
+        <button
+          onClick={stopSpeak}
+          style={{
+            borderRadius:12,
+            padding:"9px 16px",
+            fontSize:13,
+            fontWeight:600,
+            background:"rgba(244,63,94,0.15)",
+            color:"#fda4af",
+            border:"1px solid rgba(244,63,94,0.3)",
+            cursor:"pointer",
+            fontFamily:FONT
+          }}
+        >
+          ⏹ Stop
+        </button>
+      </div>
+    </div>
+
+    <p style={{color:TEXT_MID,fontSize:14,marginBottom:20,lineHeight:1.6,fontFamily:FONT}}>
+      Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.
+    </p>
+
+    <textarea
+      value={dictationText}
+      onChange={e=>setDictationText(e.target.value)}
+      rows={4}
+      placeholder="Escribí lo que escuchaste..."
+      style={{...input,resize:"none" as const,lineHeight:1.7,borderRadius:16,padding:"16px 20px"}}
+    />
+
+    <button
+      onClick={checkDictation}
+      style={{...btnAccent,marginTop:16,display:"inline-block"}}
+    >
+      Corregir dictado
+    </button>
+
+    {(dictationResult||currentDictation)&&(()=>{
+      const r=dictationResult||currentDictation!;
+      return(
+        <div
+          style={{
+            ...glassDark,
+            borderRadius:20,
+            padding:20,
+            marginTop:20,
+            display:"flex",
+            flexDirection:"column",
+            gap:12
+          }}
+        >
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div
+              style={{
+                fontSize:32,
+                fontWeight:800,
+                fontFamily:MONO,
+                color:r.score>=80?"#34d399":r.score>=50?"#fbbf24":"#fb7185"
+              }}
+            >
+              {r.score}%
+            </div>
+
+            <div style={{fontSize:14,color:TEXT_MID,fontFamily:FONT}}>
+              {r.score===100
+                ? "¡Perfecto! 🎉"
+                : r.score>=80
+                ? "¡Muy bien!"
+                : r.score>=50
+                ? "Buen intento"
+                : "Seguí practicando"}
+            </div>
+          </div>
+
+          <div style={{fontSize:14,fontFamily:FONT}}>
+            <span style={{color:TEXT_MID}}>Frase modelo: </span>
+            <span style={{color:"#cbd5e1",fontStyle:"italic"}}>{r.expected}</span>
+          </div>
+        </div>
+      );
+    })()}
+  </div>
+)}
 
             {/* VOCAB */}
             {activeSection==="vocab"&&(
