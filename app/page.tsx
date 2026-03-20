@@ -1637,7 +1637,7 @@ export default function Home() {
               </div>
               <p style={{ color: TEXT_MID, fontSize: 14, margin: 0 }}>{selectedModule.description}</p>
             </div>
-            <button onClick={resetCurrentModule} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 12, padding: "8px 14px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>🔄 Reiniciar</button>
+            <const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);={resetCurrentModule} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 12, padding: "8px 14px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>🔄 Reiniciar</button>
           </div>
           <div style={{ display: "flex", gap: 6, marginTop: 20, flexWrap: "wrap" as const }}>
             {(["reading", "vocab", "quiz", "dictation"] as const).map(sec => {
@@ -1655,14 +1655,18 @@ export default function Home() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
                   <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{selectedModule.readingTitle}</h3>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
-                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
+                    <const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);
+  const currentModuleIndex = filteredModules.findIndex(m => m.id === selectedModuleId);
+  const prevModule = currentModuleIndex > 0 ? filteredModules[currentModuleIndex - 1] : null;
+  const nextModule = currentModuleIndex < filteredModules.length - 1 ? filteredModules[currentModuleIndex + 1] : null;={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
+                    <<h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Comprensión</h3>;={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                   {selectedModule.reading.map((para, i) => <p key={i} style={{ lineHeight: 1.9, color: "#cbd5e1", fontSize: 15, margin: 0, fontFamily: FONT }}>{para}</p>)}
                 </div>
-                <button onClick={() => setActiveSection("quiz")} style={{ ...btnAccent, marginTop: 32, display: "inline-block" }}>Ir al quiz →</button>
+                <<button onClick={() => setActiveSection("reading")} style={{background:"transparent",border:"none",color:"#94a3b8",cursor:"pointer",fontSize:13,padding:0,marginBottom:8,display:"block"}}>← Volver a la lectura</button>
+              <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Comprensión</h3>={() => setActiveSection("quiz")} style={{ ...btnAccent, marginTop: 32, display: "inline-block" }}>Ir al quiz →</button>
               </div>
             )}
 
@@ -1685,7 +1689,8 @@ export default function Home() {
                   <div style={{ fontSize: 14, fontFamily: FONT }}>
                     {submitted ? isCorrect ? <span style={{ color: "#34d399", fontWeight: 600 }}>✓ ¡Correcto!</span> : <span style={{ color: "#fb7185" }}>✗ Respuesta: <strong style={{ color: TEXT }}>{currentQuestion.answer}</strong></span> : <span style={{ color: TEXT_MID }}>Elegí una opción.</span>}
                   </div>
-                  {!submitted ? <button onClick={handleSubmit} disabled={!selectedOption} style={{ ...btnAccent, opacity: selectedOption ? 1 : 0.4 }}>Comprobar</button> : <button onClick={handleNext} style={btnAccent}>{currentQuestionIndex < selectedModule.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>}
+                  {!submitted ? <<h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>🎙 Dictado</h3>={handleSubmit} disabled={!selectedOption} style={{ ...btnAccent, opacity: selectedOption ? 1 : 0.4 }}>Comprobar</button> : <<button onClick={() => setActiveSection("reading")} style={{background:"transparent",border:"none",color:"#94a3b8",cursor:"pointer",fontSize:13,padding:0,marginBottom:8,display:"block"}}>← Volver a la lectura</button>
+              <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>🎙 Dictado</h3>={handleNext} style={btnAccent}>{currentQuestionIndex < selectedModule.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>}
                 </div>
               </div>
             )}
