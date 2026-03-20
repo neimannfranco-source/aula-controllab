@@ -2157,6 +2157,33 @@ export default function Home() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMsg, setPasswordMsg] = useState("");
 
+  const currentStudent = appState.students.find((s) => s.id === appState.currentStudentId) ?? null;
+  const selectedModule = MODULES.find((m) => m.id === selectedModuleId) ?? MODULES[0];
+
+  const speak = (text: string, rate: number = 0.9) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+
+    const synth = window.speechSynthesis;
+    synth.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    utterance.rate = rate;
+
+    const voices = synth.getVoices();
+    const spanishVoice = voices.find((v) => v.lang.startsWith("es"));
+    if (spanishVoice) utterance.voice = spanishVoice;
+
+    synth.speak(utterance);
+  };
+
+  const logout = () => {
+  stopSpeak();
+  setAppState((prev) => ({ ...prev, currentStudentId: null }));
+  setSelectedModuleId(MODULES[0].id);
+  setShowProfessorPanel(false);
+};
+
   useEffect(() => {
     let mounted = true;
     const LSKEY = "aula-controllab-v7";
@@ -2212,9 +2239,15 @@ export default function Home() {
   const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);
 
   useEffect(() => {
-    setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false);
-    setDictationText(""); setDictationResult(null); setQuizAnswers({}); setActiveSection("reading");
-  }, [selectedModuleId, appState.currentStudentId]);
+  stopSpeak();
+  setCurrentQuestionIndex(0);
+  setSelectedOption("");
+  setSubmitted(false);
+  setDictationText("");
+  setDictationResult(null);
+  setQuizAnswers({});
+  setActiveSection("reading");
+}, [selectedModuleId, appState.currentStudentId]);
 
   const totalQuestions = useMemo(() => MODULES.reduce((sum, m) => sum + m.quiz.length, 0), []);
   const completedModules = Object.keys(studentProgress).length;
@@ -2336,25 +2369,69 @@ export default function Home() {
     });
   };
 
-  const speak = (text: string, rate: number) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.lang = "es-ES"; u.rate = rate;
-    window.speechSynthesis.speak(u);
+const speak = (text: string, rate: number = 0.9) => {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+
+  const synth = window.speechSynthesis;
+
+  // corta cualquier audio anterior
+  synth.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "es-ES";
+  utterance.rate = rate;
+
+  // opcional: elegir voz en español si existe
+  const voices = synth.getVoices();
+  const spanishVoice = voices.find((v) => v.lang.startsWith("es"));
+  if (spanishVoice) utterance.voice = spanishVoice;
+
+  synth.speak(utterance);
+};
+
+const stopSpeak = () => {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+};
+
+const checkDictation = () => {
+  if (!currentStudent) return;
+
+  const expected = normalize(selectedModule.dictation);
+  const written = normalize(dictationText);
+  const expWords = expected.split(" ").filter(Boolean);
+  const wrtWords = written.split(" ").filter(Boolean);
+  const matches = wrtWords.filter((w, i) => w === expWords[i]).length;
+  const score = expWords.length ? Math.round((matches / expWords.length) * 100) : 0;
+
+  const result: DictationResult = {
+    exact: expected === written,
+    score,
+    written: dictationText,
+    expected: selectedModule.dictation,
+    updatedAt: new Date().toLocaleString(),
   };
 
-  const checkDictation = () => {
-    if (!currentStudent) return;
-    const expected = normalize(selectedModule.dictation);
-    const written = normalize(dictationText);
-    const expWords = expected.split(" ").filter(Boolean);
-    const wrtWords = written.split(" ").filter(Boolean);
-    const matches = wrtWords.filter((w, i) => w === expWords[i]).length;
-    const score = expWords.length ? Math.round((matches / expWords.length) * 100) : 0;
-    const result: DictationResult = { exact: expected === written, score, written: dictationText, expected: selectedModule.dictation, updatedAt: new Date().toLocaleString() };
-    setDictationResult(result);
-    setAppState(prev => ({ ...prev, dictations: { ...prev.dictations, [currentStudent.id]: { ...(prev.dictations[currentStudent.id] || {}), [selectedModuleId]: result } } }));
-  };
+  setDictationResult(result);
+
+  setAppState((prev) => ({
+    ...prev,
+    dictations: {
+      ...prev.dictations,
+      [currentStudent.id]: {
+        ...(prev.dictations[currentStudent.id] || {}),
+        [selectedModuleId]: result,
+      },
+    },
+  }));
+};
+
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+  html, body { background: #060b14 !important; }
+  * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+  .mono { font-family: 'DM Mono', monospace !important; }
+`;
 
   const CSS = `
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
@@ -2749,8 +2826,44 @@ export default function Home() {
               <div style={{...glass,borderRadius:24,padding:32}}>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:28,flexWrap:"wrap" as const,gap:12}}>
                   <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>{selectedModule.readingTitle}</h3>
-                  <button onClick={()=>speak(selectedModule.reading.join(" "),0.9)} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:TEXT_MID,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,display:"flex",alignItems:"center",gap:8}}>🔊 Escuchar</button>
-                </div>
+                  )} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:TEXT_MID,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,display:"flex",alignItems:"center",gap:8}}>🔊 Escuchar</button>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+  <button
+    onClick={()=>speak(selectedModule.reading.join(" "),0.9)}
+    style={{
+      ...glass,
+      borderRadius:12,
+      padding:"9px 16px",
+      fontSize:13,
+      color:TEXT_MID,
+      border:`1px solid ${BORDER}`,
+      cursor:"pointer",
+      fontFamily:FONT,
+      display:"flex",
+      alignItems:"center",
+      gap:8
+    }}
+  >
+    🔊 Escuchar
+  </button>
+
+  <button
+    onClick={stopSpeak}
+    style={{
+      borderRadius:12,
+      padding:"9px 16px",
+      fontSize:13,
+      fontWeight:600,
+      background:"rgba(244,63,94,0.15)",
+      color:"#fda4af",
+      border:"1px solid rgba(244,63,94,0.3)",
+      cursor:"pointer",
+      fontFamily:FONT
+    }}
+  >
+    ⏹ Stop
+  </button>
+</div>
                 <div style={{display:"flex",flexDirection:"column",gap:20}}>
                   {selectedModule.reading.map((para,i)=><p key={i} style={{lineHeight:1.9,color:"#cbd5e1",fontSize:15,margin:0,fontFamily:FONT}}>{para}</p>)}
                 </div>
@@ -2792,7 +2905,43 @@ export default function Home() {
               <div style={{...glass,borderRadius:24,padding:32}}>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap" as const,gap:12}}>
                   <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>🎙 Dictado</h3>
-                  <button onClick={()=>speak(selectedModule.dictation,0.75)} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:TEXT_MID,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,display:"flex",alignItems:"center",gap:8}}>🔊 Reproducir</button>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+  <button
+    onClick={()=>speak(selectedModule.dictation,0.75)}
+    style={{
+      ...glass,
+      borderRadius:12,
+      padding:"9px 16px",
+      fontSize:13,
+      color:TEXT_MID,
+      border:`1px solid ${BORDER}`,
+      cursor:"pointer",
+      fontFamily:FONT,
+      display:"flex",
+      alignItems:"center",
+      gap:8
+    }}
+  >
+    🔊 Reproducir
+  </button>
+
+  <button
+    onClick={stopSpeak}
+    style={{
+      borderRadius:12,
+      padding:"9px 16px",
+      fontSize:13,
+      fontWeight:600,
+      background:"rgba(244,63,94,0.15)",
+      color:"#fda4af",
+      border:"1px solid rgba(244,63,94,0.3)",
+      cursor:"pointer",
+      fontFamily:FONT
+    }}
+  >
+    ⏹ Stop
+  </button>
+</div>
                 </div>
                 <p style={{color:TEXT_MID,fontSize:14,marginBottom:20,lineHeight:1.6,fontFamily:FONT}}>Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.</p>
                 <textarea value={dictationText} onChange={e=>setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." style={{...input,resize:"none" as const,lineHeight:1.7,borderRadius:16,padding:"16px 20px"}}/>
