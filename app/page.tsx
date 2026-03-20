@@ -2231,27 +2231,150 @@ export default function Home() {
   const selectedModule = MODULES.find(m => m.id === selectedModuleId) ?? MODULES[0];
   const studentProgress = currentStudent ? appState.progress[currentStudent.id] || {} : {};
   const studentDictations = currentStudent ? appState.dictations[currentStudent.id] || {} : {};
-  const moduleProgress: ModuleProgress = studentProgress[selectedModuleId] || { completed: false, score: 0, total: selectedModule.quiz.length, attempts: 0 };
+  const moduleProgress: ModuleProgress =
+    studentProgress[selectedModuleId] || {
+      completed: false,
+      score: 0,
+      total: selectedModule.quiz.length,
+      attempts: 0,
+    };
   const currentQuestion = selectedModule.quiz[currentQuestionIndex];
-  const shuffledOpts = shuffleOpts(currentQuestion.options, strSeed(selectedModule.id + String(currentQuestionIndex)));
+  const shuffledOpts = shuffleOpts(
+    currentQuestion.options,
+    strSeed(selectedModule.id + String(currentQuestionIndex))
+  );
   const isCorrect = submitted && selectedOption === currentQuestion.answer;
   const currentDictation = studentDictations[selectedModuleId] || null;
-  const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);
+  const filteredModules =
+    activeCategory === "Todos"
+      ? MODULES
+      : MODULES.filter(m => m.category === activeCategory);
+
+  const speak = (text: string, rate: number = 0.9) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+
+    const synth = window.speechSynthesis;
+    synth.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    utterance.rate = rate;
+
+    const voices = synth.getVoices();
+    const spanishVoice = voices.find(v => v.lang.startsWith("es"));
+    if (spanishVoice) utterance.voice = spanishVoice;
+
+    synth.speak(utterance);
+  };
+
+  const stopSpeak = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+  };
+
+  const logout = () => {
+    stopSpeak();
+    setAppState(prev => ({ ...prev, currentStudentId: null }));
+    setSelectedModuleId(MODULES[0].id);
+    setShowProfessorPanel(false);
+    setProfessorUnlocked(false);
+  };
 
   useEffect(() => {
-  stopSpeak();
-  setCurrentQuestionIndex(0);
-  setSelectedOption("");
-  setSubmitted(false);
-  setDictationText("");
-  setDictationResult(null);
-  setQuizAnswers({});
-  setActiveSection("reading");
-}, [selectedModuleId, appState.currentStudentId]);
+    let mounted = true;
+    const LSKEY = "aula-controllab-v7";
 
-  const totalQuestions = useMemo(() => MODULES.reduce((sum, m) => sum + m.quiz.length, 0), []);
+    const bootstrap = async () => {
+      try {
+        if (supabase) {
+          const remote = await loadRemoteState();
+          if (!mounted) return;
+
+          if (remote) {
+            setAppState({
+              students:
+                Array.isArray(remote.students) && remote.students.length
+                  ? remote.students
+                  : defaultStudents,
+              currentStudentId: null,
+              progress: remote.progress || {},
+              dictations: remote.dictations || {},
+            });
+            setLoadStatus("ready");
+            return;
+          }
+        }
+      } catch {
+        // Supabase failed, fall through to localStorage
+      }
+
+      if (!mounted) return;
+
+      try {
+        const saved = localStorage.getItem(LSKEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setAppState({ ...createInitialState(), ...parsed, currentStudentId: null });
+        } else {
+          setAppState(createInitialState());
+        }
+      } catch {
+        setAppState(createInitialState());
+      }
+
+      setLoadStatus("ready");
+    };
+
+    bootstrap();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loadStatus !== "ready") return;
+
+    const LSKEY = "aula-controllab-v7";
+
+    const timeout = setTimeout(async () => {
+      try {
+        localStorage.setItem(LSKEY, JSON.stringify(appState));
+      } catch {}
+
+      if (supabase) {
+        try {
+          await saveRemoteState(appState);
+          setSaveError("");
+        } catch {
+          // localStorage is backup
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [appState, loadStatus]);
+
+  useEffect(() => {
+    stopSpeak();
+    setCurrentQuestionIndex(0);
+    setSelectedOption("");
+    setSubmitted(false);
+    setDictationText("");
+    setDictationResult(null);
+    setQuizAnswers({});
+    setActiveSection("reading");
+  }, [selectedModuleId, appState.currentStudentId]);
+
+  const totalQuestions = useMemo(
+    () => MODULES.reduce((sum, m) => sum + m.quiz.length, 0),
+    []
+  );
+
   const completedModules = Object.keys(studentProgress).length;
-  const totalBestScore = MODULES.reduce((sum, m) => sum + (studentProgress[m.id]?.score || 0), 0);
+  const totalBestScore = MODULES.reduce(
+    (sum, m) => sum + (studentProgress[m.id]?.score || 0),
+    0
+  );
   const overallPercent = Math.round((completedModules / MODULES.length) * 100);
 
   const professorRows = appState.students.map(student => {
@@ -2259,75 +2382,166 @@ export default function Home() {
     const dictations = appState.dictations[student.id] || {};
     const completedMods = Object.keys(progress).length;
     const bestScore = MODULES.reduce((sum, m) => sum + (progress[m.id]?.score || 0), 0);
-    const dictScores = MODULES.map(m => dictations[m.id]?.score).filter((v): v is number => typeof v === "number");
-    const dictAvg = dictScores.length ? Math.round(dictScores.reduce((a, b) => a + b, 0) / dictScores.length) : null;
+    const dictScores = MODULES.map(m => dictations[m.id]?.score).filter(
+      (v): v is number => typeof v === "number"
+    );
+    const dictAvg = dictScores.length
+      ? Math.round(dictScores.reduce((a, b) => a + b, 0) / dictScores.length)
+      : null;
+
     return { ...student, completedMods, bestScore, dictAvg };
   });
 
   const login = () => {
-    const found = appState.students.find(s => normalize(s.name) === normalize(loginName) && normalize(s.code) === normalize(loginCode));
-    if (!found) { setLoginError("Usuario o contraseña incorrectos."); return; }
+    const found = appState.students.find(
+      s =>
+        normalize(s.name) === normalize(loginName) &&
+        normalize(s.code) === normalize(loginCode)
+    );
+
+    if (!found) {
+      setLoginError("Usuario o contraseña incorrectos.");
+      return;
+    }
+
     setAppState(prev => ({ ...prev, currentStudentId: found.id }));
-    setLoginError(""); setLoginName(""); setLoginCode("");
+    setLoginError("");
+    setLoginName("");
+    setLoginCode("");
   };
 
-  const logout = () => { setAppState(prev => ({ ...prev, currentStudentId: null })); setSelectedModuleId(MODULES[0].id); setShowProfessorPanel(false); setProfessorUnlocked(false); };
-
   const changePassword = () => {
-    if (!newPassword.trim()) { setPasswordMsg("Escribí una contraseña nueva."); return; }
-    if (newPassword.trim().length < 4) { setPasswordMsg("La contraseña debe tener al menos 4 caracteres."); return; }
-    if (newPassword.trim() !== confirmPassword.trim()) { setPasswordMsg("Las contraseñas no coinciden."); return; }
+    if (!newPassword.trim()) {
+      setPasswordMsg("Escribí una contraseña nueva.");
+      return;
+    }
+    if (newPassword.trim().length < 4) {
+      setPasswordMsg("La contraseña debe tener al menos 4 caracteres.");
+      return;
+    }
+    if (newPassword.trim() !== confirmPassword.trim()) {
+      setPasswordMsg("Las contraseñas no coinciden.");
+      return;
+    }
     if (!currentStudent) return;
+
     setAppState(prev => ({
       ...prev,
-      students: prev.students.map(s => s.id === currentStudent.id ? { ...s, code: newPassword.trim().toUpperCase() } : s)
+      students: prev.students.map(s =>
+        s.id === currentStudent.id
+          ? { ...s, code: newPassword.trim().toUpperCase() }
+          : s
+      ),
     }));
+
     setPasswordMsg("✓ Contraseña actualizada correctamente.");
-    setNewPassword(""); setConfirmPassword("");
-    setTimeout(() => { setShowChangePassword(false); setPasswordMsg(""); }, 1500);
+    setNewPassword("");
+    setConfirmPassword("");
+
+    setTimeout(() => {
+      setShowChangePassword(false);
+      setPasswordMsg("");
+    }, 1500);
   };
 
   const handleProfessorClick = () => {
-    if (professorUnlocked) { setShowProfessorPanel(v => !v); return; }
+    if (professorUnlocked) {
+      setShowProfessorPanel(v => !v);
+      return;
+    }
+
     const pwd = window.prompt("Contraseña del profesor:");
-    if (pwd === PROFESSOR_PASSWORD) { setProfessorUnlocked(true); setShowProfessorPanel(true); }
-    else if (pwd !== null) { alert("Contraseña incorrecta."); }
+    if (pwd === PROFESSOR_PASSWORD) {
+      setProfessorUnlocked(true);
+      setShowProfessorPanel(true);
+    } else if (pwd !== null) {
+      alert("Contraseña incorrecta.");
+    }
   };
 
   const saveProgress = (scoreValue: number, totalValue: number) => {
     if (!currentStudent) return;
+
     setAppState(prev => {
       const prevSP = prev.progress[currentStudent.id] || {};
-      const prevM = prevSP[selectedModuleId] || { completed: false, score: 0, total: totalValue, attempts: 0 };
-      return { ...prev, progress: { ...prev.progress, [currentStudent.id]: { ...prevSP, [selectedModuleId]: { completed: true, score: Math.max(prevM.score || 0, scoreValue), total: totalValue, attempts: (prevM.attempts || 0) + 1 } } } };
+      const prevM = prevSP[selectedModuleId] || {
+        completed: false,
+        score: 0,
+        total: totalValue,
+        attempts: 0,
+      };
+
+      return {
+        ...prev,
+        progress: {
+          ...prev.progress,
+          [currentStudent.id]: {
+            ...prevSP,
+            [selectedModuleId]: {
+              completed: true,
+              score: Math.max(prevM.score || 0, scoreValue),
+              total: totalValue,
+              attempts: (prevM.attempts || 0) + 1,
+            },
+          },
+        },
+      };
     });
   };
 
   const resetCurrentModule = () => {
     if (!currentStudent) return;
-    const ok = window.confirm(`¿Reiniciar el módulo "${selectedModule.title}" para ${currentStudent.name}?`);
+
+    const ok = window.confirm(
+      `¿Reiniciar el módulo "${selectedModule.title}" para ${currentStudent.name}?`
+    );
     if (!ok) return;
+
     setAppState(prev => {
       const newP = { ...(prev.progress[currentStudent.id] || {}) };
       const newD = { ...(prev.dictations[currentStudent.id] || {}) };
-      delete newP[selectedModuleId]; delete newD[selectedModuleId];
-      return { ...prev, progress: { ...prev.progress, [currentStudent.id]: newP }, dictations: { ...prev.dictations, [currentStudent.id]: newD } };
+      delete newP[selectedModuleId];
+      delete newD[selectedModuleId];
+
+      return {
+        ...prev,
+        progress: { ...prev.progress, [currentStudent.id]: newP },
+        dictations: { ...prev.dictations, [currentStudent.id]: newD },
+      };
     });
-    setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setDictationText(""); setDictationResult(null); setActiveSection("reading");
+
+    setCurrentQuestionIndex(0);
+    setSelectedOption("");
+    setSubmitted(false);
+    setQuizAnswers({});
+    setDictationText("");
+    setDictationResult(null);
+    setActiveSection("reading");
   };
 
   const resetStudentModule = (studentId: string, moduleId: string) => {
     setAppState(prev => {
       const newP = { ...(prev.progress[studentId] || {}) };
       const newD = { ...(prev.dictations[studentId] || {}) };
-      delete newP[moduleId]; delete newD[moduleId];
-      return { ...prev, progress: { ...prev.progress, [studentId]: newP }, dictations: { ...prev.dictations, [studentId]: newD } };
+      delete newP[moduleId];
+      delete newD[moduleId];
+
+      return {
+        ...prev,
+        progress: { ...prev.progress, [studentId]: newP },
+        dictations: { ...prev.dictations, [studentId]: newD },
+      };
     });
   };
 
   const resetStudentAll = (studentId: string, studentName: string) => {
     if (!window.confirm(`¿Reiniciar TODOS los módulos de ${studentName}?`)) return;
-    setAppState(prev => ({ ...prev, progress: { ...prev.progress, [studentId]: {} }, dictations: { ...prev.dictations, [studentId]: {} } }));
+
+    setAppState(prev => ({
+      ...prev,
+      progress: { ...prev.progress, [studentId]: {} },
+      dictations: { ...prev.dictations, [studentId]: {} },
+    }));
   };
 
   const resetAllStudents = () => {
@@ -2335,197 +2549,124 @@ export default function Home() {
     setAppState(prev => ({ ...prev, progress: {}, dictations: {} }));
   };
 
-  const handleSubmit = () => { if (!selectedOption) return; setSubmitted(true); };
+  const handleSubmit = () => {
+    if (!selectedOption) return;
+    setSubmitted(true);
+  };
 
   const handleNext = () => {
     if (currentQuestionIndex < selectedModule.quiz.length - 1) {
       const next = currentQuestionIndex + 1;
-      setCurrentQuestionIndex(next); setSelectedOption(quizAnswers[next] || ""); setSubmitted(false); return;
+      setCurrentQuestionIndex(next);
+      setSelectedOption(quizAnswers[next] || "");
+      setSubmitted(false);
+      return;
     }
-    const correct = selectedModule.quiz.reduce((sum, q, i) => sum + (quizAnswers[i] === q.answer ? 1 : 0), 0);
+
+    const correct = selectedModule.quiz.reduce(
+      (sum, q, i) => sum + (quizAnswers[i] === q.answer ? 1 : 0),
+      0
+    );
+
     saveProgress(correct, selectedModule.quiz.length);
-    setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setActiveSection("reading");
+    setCurrentQuestionIndex(0);
+    setSelectedOption("");
+    setSubmitted(false);
+    setQuizAnswers({});
+    setActiveSection("reading");
   };
 
-  const setAnswerMemory = (value: string) => { setSelectedOption(value); setQuizAnswers(prev => ({ ...prev, [currentQuestionIndex]: value })); };
+  const setAnswerMemory = (value: string) => {
+    setSelectedOption(value);
+    setQuizAnswers(prev => ({ ...prev, [currentQuestionIndex]: value }));
+  };
 
   const addStudent = () => {
     if (!newStudentName.trim() || !newStudentCode.trim()) return;
-    const exists = appState.students.some(s => normalize(s.name) === normalize(newStudentName) || normalize(s.code) === normalize(newStudentCode));
-    if (exists) { alert("Ese alumno o código ya existe."); return; }
+
+    const exists = appState.students.some(
+      s =>
+        normalize(s.name) === normalize(newStudentName) ||
+        normalize(s.code) === normalize(newStudentCode)
+    );
+
+    if (exists) {
+      alert("Ese alumno o código ya existe.");
+      return;
+    }
+
     const id = `${normalize(newStudentName)}-${Date.now()}`;
-    setAppState(prev => ({ ...prev, students: [...prev.students, { id, name: newStudentName.trim(), code: newStudentCode.trim().toUpperCase() }] }));
-    setNewStudentName(""); setNewStudentCode("");
+
+    setAppState(prev => ({
+      ...prev,
+      students: [
+        ...prev.students,
+        {
+          id,
+          name: newStudentName.trim(),
+          code: newStudentCode.trim().toUpperCase(),
+        },
+      ],
+    }));
+
+    setNewStudentName("");
+    setNewStudentCode("");
   };
 
   const removeStudent = (studentId: string) => {
     const student = appState.students.find(s => s.id === studentId);
     if (!window.confirm(`¿Eliminar a ${student?.name || "este alumno"}?`)) return;
+
     setAppState(prev => {
       const newStudents = prev.students.filter(s => s.id !== studentId);
-      const newP = { ...prev.progress }; const newD = { ...prev.dictations };
-      delete newP[studentId]; delete newD[studentId];
-      return { ...prev, students: newStudents, progress: newP, dictations: newD };
+      const newP = { ...prev.progress };
+      const newD = { ...prev.dictations };
+
+      delete newP[studentId];
+      delete newD[studentId];
+
+      return {
+        ...prev,
+        students: newStudents,
+        progress: newP,
+        dictations: newD,
+      };
     });
   };
 
-const speak = (text: string, rate: number = 0.9) => {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  const checkDictation = () => {
+    if (!currentStudent) return;
 
-  const synth = window.speechSynthesis;
+    const expected = normalize(selectedModule.dictation);
+    const written = normalize(dictationText);
+    const expWords = expected.split(" ").filter(Boolean);
+    const wrtWords = written.split(" ").filter(Boolean);
+    const matches = wrtWords.filter((w, i) => w === expWords[i]).length;
+    const score = expWords.length
+      ? Math.round((matches / expWords.length) * 100)
+      : 0;
 
-  // corta cualquier audio anterior
-  synth.cancel();
+    const result: DictationResult = {
+      exact: expected === written,
+      score,
+      written: dictationText,
+      expected: selectedModule.dictation,
+      updatedAt: new Date().toLocaleString(),
+    };
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "es-ES";
-  utterance.rate = rate;
+    setDictationResult(result);
 
-  // opcional: elegir voz en español si existe
-  const voices = synth.getVoices();
-  const spanishVoice = voices.find((v) => v.lang.startsWith("es"));
-  if (spanishVoice) utterance.voice = spanishVoice;
-
-  synth.speak(utterance);
-};
-
-const stopSpeak = () => {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-};
-
-const checkDictation = () => {
-  if (!currentStudent) return;
-
-  const expected = normalize(selectedModule.dictation);
-  const written = normalize(dictationText);
-  const expWords = expected.split(" ").filter(Boolean);
-  const wrtWords = written.split(" ").filter(Boolean);
-  const matches = wrtWords.filter((w, i) => w === expWords[i]).length;
-  const score = expWords.length ? Math.round((matches / expWords.length) * 100) : 0;
-
-  const result: DictationResult = {
-    exact: expected === written,
-    score,
-    written: dictationText,
-    expected: selectedModule.dictation,
-    updatedAt: new Date().toLocaleString(),
-  };
-
-  setDictationResult(result);
-
-  setAppState((prev) => ({
-    ...prev,
-    dictations: {
-      ...prev.dictations,
-      [currentStudent.id]: {
-        ...(prev.dictations[currentStudent.id] || {}),
-        [selectedModuleId]: result,
+    setAppState(prev => ({
+      ...prev,
+      dictations: {
+        ...prev.dictations,
+        [currentStudent.id]: {
+          ...(prev.dictations[currentStudent.id] || {}),
+          [selectedModuleId]: result,
+        },
       },
-    },
-  }));
-};
-
-const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
-  html, body { background: #060b14 !important; }
-  * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
-  .mono { font-family: 'DM Mono', monospace !important; }
-`;
-
-  const CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
-    html, body { background: #060b14 !important; }
-    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
-    .mono { font-family: 'DM Mono', monospace !important; }
-
-    /* GLASS */
-    .glass { background: rgba(14,22,40,0.7) !important; border: 1px solid rgba(255,255,255,0.08) !important; backdrop-filter: blur(24px) !important; -webkit-backdrop-filter: blur(24px) !important; }
-    .glass-dark { background: rgba(5,10,20,0.8) !important; border: 1px solid rgba(255,255,255,0.05) !important; backdrop-filter: blur(20px) !important; }
-
-    /* ACCENT */
-    .accent { color: #2DD4BF !important; }
-
-    /* BUTTON */
-    .btn-accent { background: linear-gradient(135deg, #2DD4BF, #0ea5a0) !important; color: #021010 !important; font-weight: 700 !important; border-radius: 14px !important; transition: all 0.2s cubic-bezier(.4,0,.2,1) !important; box-shadow: 0 4px 20px rgba(45,212,191,0.2) !important; letter-spacing: 0.01em !important; border: none !important; }
-    .btn-accent:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 30px rgba(45,212,191,0.35) !important; opacity: 1 !important; }
-
-    /* INPUTS */
-    input, textarea { outline: none !important; transition: all 0.2s !important; }
-    input:focus, textarea:focus { border-color: #2DD4BF !important; box-shadow: 0 0 0 3px rgba(45,212,191,0.12) !important; }
-
-    /* MODULE CARDS */
-    .module-card { transition: all 0.22s cubic-bezier(.4,0,.2,1) !important; }
-    .module-card:hover { border-color: rgba(45,212,191,0.45) !important; transform: translateY(-3px) !important; box-shadow: 0 16px 40px rgba(0,0,0,0.5) !important; }
-    .module-card.active { background: linear-gradient(135deg, rgba(45,212,191,0.13), rgba(14,165,160,0.05)) !important; border-color: #2DD4BF !important; box-shadow: 0 0 0 1px rgba(45,212,191,0.15), 0 0 32px rgba(45,212,191,0.18) !important; }
-
-    /* PROGRESS */
-    .progress-bar { height: 3px !important; border-radius: 0 !important; background: rgba(255,255,255,0.06) !important; overflow: hidden !important; }
-    .progress-fill { height: 100% !important; border-radius: 99px !important; background: linear-gradient(90deg, #2DD4BF, #67e8f9) !important; transition: width 0.7s cubic-bezier(.4,0,.2,1) !important; box-shadow: 0 0 10px rgba(45,212,191,0.4) !important; }
-    .progress-bar-card { height: 4px !important; border-radius: 99px !important; background: rgba(255,255,255,0.07) !important; overflow: hidden !important; margin-top: 10px !important; }
-    .progress-fill-card { height: 100% !important; border-radius: 99px !important; background: linear-gradient(90deg, #2DD4BF, #67e8f9) !important; transition: width 0.7s ease !important; }
-
-    /* TABS */
-    .section-tab { transition: all 0.18s !important; cursor: pointer !important; border-radius: 10px !important; padding: 7px 15px !important; font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0.01em !important; white-space: nowrap !important; }
-    .section-tab.active { background: #2DD4BF !important; color: #021010 !important; box-shadow: 0 4px 14px rgba(45,212,191,0.3) !important; }
-    .section-tab:not(.active) { color: #94a3b8 !important; }
-    .section-tab:not(.active):hover { color: #fff !important; background: rgba(255,255,255,0.08) !important; }
-
-    /* QUIZ OPTIONS */
-    .option-btn { transition: all 0.15s !important; border: 1.5px solid rgba(255,255,255,0.09) !important; border-radius: 14px !important; padding: 14px 18px !important; text-align: left !important; width: 100% !important; background: rgba(255,255,255,0.03) !important; color: #e2e8f0 !important; cursor: pointer !important; font-size: 14px !important; line-height: 1.55 !important; }
-    .option-btn:hover:not(:disabled) { border-color: rgba(45,212,191,0.45) !important; background: rgba(45,212,191,0.08) !important; }
-    .option-btn.selected { border-color: #2DD4BF !important; background: rgba(45,212,191,0.1) !important; }
-    .option-btn.correct { border-color: #2DD4BF !important; background: rgba(45,212,191,0.15) !important; color: #2DD4BF !important; font-weight: 600 !important; }
-    .option-btn.wrong { border-color: #fb7185 !important; background: rgba(251,113,133,0.1) !important; color: #fb7185 !important; }
-
-    /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 4px !important; }
-    ::-webkit-scrollbar-track { background: transparent !important; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08) !important; border-radius: 99px !important; }
-
-    /* READING */
-    .reading-p { line-height: 1.9 !important; color: #cbd5e1 !important; font-size: 15px !important; }
-
-    /* LEVEL BADGES */
-    .lvl-basico { background: rgba(52,211,153,0.12) !important; color: #34d399 !important; border-radius: 99px !important; padding: 3px 10px !important; font-size: 11px !important; font-weight: 700 !important; }
-    .lvl-intermedio { background: rgba(251,191,36,0.12) !important; color: #fbbf24 !important; border-radius: 99px !important; padding: 3px 10px !important; font-size: 11px !important; font-weight: 700 !important; }
-    .lvl-avanzado { background: rgba(251,113,133,0.12) !important; color: #fb7185 !important; border-radius: 99px !important; padding: 3px 10px !important; font-size: 11px !important; font-weight: 700 !important; }
-
-    /* CATEGORY COLORS */
-    .cat-lab { color: #2DD4BF !important; } .cat-ges { color: #fbbf24 !important; } .cat-com { color: #a78bfa !important; } .cat-tec { color: #60a5fa !important; } .cat-gra { color: #fb7185 !important; }
-
-    /* ANIMATIONS */
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .ani { animation: fadeUp 0.28s ease both; }
-  `;
-
-
-  // ─── STYLE TOKENS ───────────────────────────────────────────────────────────
-  const BG = "#060b14";
-  const TEAL = "#2DD4BF";
-  const TEAL_DIM = "rgba(45,212,191,0.1)";
-  const SURFACE = "rgba(14,22,40,0.75)";
-  const SURFACE_D = "rgba(5,10,20,0.85)";
-  const BORDER = "rgba(255,255,255,0.08)";
-  const BORDER_A = "rgba(45,212,191,0.35)";
-  const TEXT = "#E2E8F0";
-  const TEXT_MID = "#94A3B8";
-  const TEXT_DIM = "#475569";
-  const FONT = "'Plus Jakarta Sans',system-ui,sans-serif";
-  const MONO = "'DM Mono',monospace";
-
-  const glass = { background: SURFACE, border: `1px solid ${BORDER}`, backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" };
-  const glassDark = { background: SURFACE_D, border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)" };
-  const card = (active: boolean) => ({ ...glass, borderRadius: 16, padding: 16, textAlign: "left" as const, cursor: "pointer", transition: "all 0.2s ease", border: `1px solid ${active ? TEAL : BORDER}`, background: active ? "linear-gradient(135deg,rgba(45,212,191,0.13),rgba(14,165,160,0.04))" : SURFACE, boxShadow: active ? `0 0 0 1px rgba(45,212,191,0.15), 0 0 28px rgba(45,212,191,0.15)` : "none", width: "100%" });
-  const btnAccent = { background: `linear-gradient(135deg,${TEAL},#0ea5a0)`, color: "#021010", fontWeight: 700, borderRadius: 14, border: "none", cursor: "pointer", padding: "11px 22px", fontSize: 14, fontFamily: FONT, letterSpacing: "0.01em", boxShadow: "0 4px 20px rgba(45,212,191,0.2)", transition: "all 0.2s ease" };
-  const tab = (active: boolean) => ({ borderRadius: 10, padding: "7px 15px", fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", transition: "all 0.18s", fontFamily: FONT, background: active ? TEAL : "rgba(255,255,255,0.06)", color: active ? "#021010" : TEXT_MID, boxShadow: active ? "0 4px 14px rgba(45,212,191,0.28)" : "none", whiteSpace: "nowrap" as const });
-  const input = { background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, borderRadius: 12, color: TEXT, padding: "12px 16px", width: "100%", fontSize: 14, fontFamily: FONT, outline: "none" };
-  const inputStyle = input;
-  const levelBadge = (l: string) => ({ borderRadius: 99, padding: "3px 10px", fontSize: 11, fontWeight: 700, fontFamily: FONT, background: l==="Básico"?"rgba(52,211,153,0.12)":l==="Intermedio"?"rgba(251,191,36,0.12)":"rgba(251,113,133,0.12)", color: l==="Básico"?"#34d399":l==="Intermedio"?"#fbbf24":"#fb7185" });
-  const catColor = (c: string) => c==="Laboratorio"?TEAL:c==="Gestión"?"#fbbf24":c==="Comunicación"?"#a78bfa":c==="Tecnología"?"#60a5fa":c==="Controllab"?"#f97316":"#fb7185";
-  const optBtn = (sel: boolean, correct: boolean, wrong: boolean) => ({ transition: "all 0.15s", border: `1.5px solid ${correct?TEAL:wrong?"#fb7185":sel?TEAL:BORDER}`, borderRadius: 14, padding: "14px 18px", textAlign: "left" as const, width: "100%", background: correct?"rgba(45,212,191,0.15)":wrong?"rgba(251,113,133,0.1)":sel?TEAL_DIM:"rgba(255,255,255,0.03)", color: correct?TEAL:wrong?"#fb7185":TEXT, cursor: "pointer", fontSize: 14, lineHeight: 1.55, fontFamily: FONT, fontWeight: correct?700:400 });
-
-  const mainBg = { background: `radial-gradient(ellipse 80% 50% at 50% -5%, rgba(45,212,191,0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 85% 85%, rgba(96,165,250,0.04) 0%, transparent 50%), ${BG}`, minHeight: "100vh", color: TEXT, fontFamily: FONT };
+    }));
+  };
 
   if (loadStatus === "loading") return (
     <div style={{...mainBg, display:"flex", alignItems:"center", justifyContent:"center"}}>
