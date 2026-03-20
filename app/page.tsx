@@ -1655,10 +1655,7 @@ export default function Home() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
                   <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{selectedModule.readingTitle}</h3>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);
-  const currentModuleIndex = filteredModules.findIndex(m => m.id === selectedModuleId);
-  const prevModule = currentModuleIndex > 0 ? filteredModules[currentModuleIndex - 1] : null;
-  const nextModule = currentModuleIndex < filteredModules.length - 1 ? filteredModules[currentModuleIndex + 1] : null;={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
+                    <const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);>={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
                     <<h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Comprensión</h3>;={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
                   </div>
                 </div>
