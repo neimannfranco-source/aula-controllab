@@ -1380,6 +1380,10 @@ export default function Home() {
   const [teacherTab, setTeacherTab] = useState<"students" | "progress" | "dictations">("progress");
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [activeSection, setActiveSection] = useState<"reading" | "quiz" | "dictation" | "vocab">("reading");
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMsg, setPasswordMsg] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -1463,6 +1467,20 @@ export default function Home() {
   };
 
   const logout = () => { setAppState(prev => ({ ...prev, currentStudentId: null })); setSelectedModuleId(MODULES[0].id); setShowProfessorPanel(false); setProfessorUnlocked(false); };
+
+  const changePassword = () => {
+    if (!newPassword.trim()) { setPasswordMsg("Escribí una contraseña nueva."); return; }
+    if (newPassword.trim().length < 4) { setPasswordMsg("La contraseña debe tener al menos 4 caracteres."); return; }
+    if (newPassword.trim() !== confirmPassword.trim()) { setPasswordMsg("Las contraseñas no coinciden."); return; }
+    if (!currentStudent) return;
+    setAppState(prev => ({
+      ...prev,
+      students: prev.students.map(s => s.id === currentStudent.id ? { ...s, code: newPassword.trim().toUpperCase() } : s)
+    }));
+    setPasswordMsg("✓ Contraseña actualizada correctamente.");
+    setNewPassword(""); setConfirmPassword("");
+    setTimeout(() => { setShowChangePassword(false); setPasswordMsg(""); }, 1500);
+  };
 
   const handleProfessorClick = () => {
     if (professorUnlocked) { setShowProfessorPanel(v => !v); return; }
@@ -1653,6 +1671,7 @@ export default function Home() {
   const btnAccent = { background: `linear-gradient(135deg,${TEAL},#0ea5a0)`, color: "#021010", fontWeight: 700, borderRadius: 14, border: "none", cursor: "pointer", padding: "11px 22px", fontSize: 14, fontFamily: FONT, letterSpacing: "0.01em", boxShadow: "0 4px 20px rgba(45,212,191,0.2)", transition: "all 0.2s ease" };
   const tab = (active: boolean) => ({ borderRadius: 10, padding: "7px 15px", fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", transition: "all 0.18s", fontFamily: FONT, background: active ? TEAL : "rgba(255,255,255,0.06)", color: active ? "#021010" : TEXT_MID, boxShadow: active ? "0 4px 14px rgba(45,212,191,0.28)" : "none", whiteSpace: "nowrap" as const });
   const input = { background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, borderRadius: 12, color: TEXT, padding: "12px 16px", width: "100%", fontSize: 14, fontFamily: FONT, outline: "none" };
+  const inputStyle = input;
   const levelBadge = (l: string) => ({ borderRadius: 99, padding: "3px 10px", fontSize: 11, fontWeight: 700, fontFamily: FONT, background: l==="Básico"?"rgba(52,211,153,0.12)":l==="Intermedio"?"rgba(251,191,36,0.12)":"rgba(251,113,133,0.12)", color: l==="Básico"?"#34d399":l==="Intermedio"?"#fbbf24":"#fb7185" });
   const catColor = (c: string) => c==="Laboratorio"?TEAL:c==="Gestión"?"#fbbf24":c==="Comunicación"?"#a78bfa":c==="Tecnología"?"#60a5fa":"#fb7185";
   const optBtn = (sel: boolean, correct: boolean, wrong: boolean) => ({ transition: "all 0.15s", border: `1.5px solid ${correct?TEAL:wrong?"#fb7185":sel?TEAL:BORDER}`, borderRadius: 14, padding: "14px 18px", textAlign: "left" as const, width: "100%", background: correct?"rgba(45,212,191,0.15)":wrong?"rgba(251,113,133,0.1)":sel?TEAL_DIM:"rgba(255,255,255,0.03)", color: correct?TEAL:wrong?"#fb7185":TEXT, cursor: "pointer", fontSize: 14, lineHeight: 1.55, fontFamily: FONT, fontWeight: correct?700:400 });
@@ -1759,7 +1778,7 @@ export default function Home() {
             </div>
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap" as const}}>
-            {[{l:showProfessorPanel?"✕ Panel":"📊 Panel profe",fn:handleProfessorClick,c:TEXT_MID},{l:"Salir →",fn:logout,c:TEXT_MID}].map(b=>(
+            {[{l:"🔑 Mi contraseña",fn:()=>setShowChangePassword(v=>!v),c:"#a78bfa"},{l:showProfessorPanel?"✕ Panel":"📊 Panel profe",fn:handleProfessorClick,c:TEXT_MID},{l:"Salir →",fn:logout,c:TEXT_MID}].map(b=>(
               <button key={b.l} onClick={b.fn} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:b.c,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,fontWeight:600}}>{b.l}</button>
             ))}
           </div>
@@ -1772,6 +1791,31 @@ export default function Home() {
 
       <div style={{maxWidth:1600,margin:"0 auto",padding:"32px 24px"}}>
         {saveError&&<div style={{marginBottom:16,borderRadius:16,border:"1px solid rgba(251,191,36,0.3)",background:"rgba(251,191,36,0.08)",color:"#fbbf24",padding:"12px 16px",fontSize:13,fontFamily:FONT}}>{saveError}</div>}
+
+        {/* CAMBIAR CONTRASEÑA */}
+        {showChangePassword&&(
+          <div style={{...glass,borderRadius:24,padding:24,marginBottom:24}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+              <div>
+                <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",color:TEXT_DIM,marginBottom:4,fontFamily:MONO}}>MI CUENTA</div>
+                <h3 style={{fontSize:18,fontWeight:700,margin:0,fontFamily:FONT}}>🔑 Cambiar contraseña</h3>
+              </div>
+              <button onClick={()=>{setShowChangePassword(false);setPasswordMsg("");setNewPassword("");setConfirmPassword("");}} style={{background:"none",border:"none",color:TEXT_MID,cursor:"pointer",fontSize:20,fontFamily:FONT}}>✕</button>
+            </div>
+            <div style={{display:"grid",gap:12,gridTemplateColumns:"1fr 1fr 1fr",alignItems:"end"}}>
+              <div>
+                <label style={{display:"block",fontSize:13,color:"#cbd5e1",marginBottom:6,fontFamily:FONT}}>Nueva contraseña</label>
+                <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&changePassword()} placeholder="Mínimo 4 caracteres" style={{...inputStyle,width:"100%"}}/>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:13,color:"#cbd5e1",marginBottom:6,fontFamily:FONT}}>Confirmar contraseña</label>
+                <input type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&changePassword()} placeholder="Repetí la contraseña" style={{...inputStyle,width:"100%"}}/>
+              </div>
+              <button onClick={changePassword} style={{...btnAccent,padding:"12px 20px",textAlign:"center" as const}}>Guardar cambio</button>
+            </div>
+            {passwordMsg&&<div style={{marginTop:12,fontSize:13,fontFamily:FONT,color:passwordMsg.startsWith("✓")?"#34d399":"#fb7185"}}>{passwordMsg}</div>}
+          </div>
+        )}
 
         {/* PROFESSOR PANEL */}
         {showProfessorPanel&&professorUnlocked&&(
