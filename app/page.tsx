@@ -2821,13 +2821,71 @@ const CSS = `
               </div>
             </div>
 
-            {/* READING */}
-            {activeSection==="reading"&&(
-              <div style={{...glass,borderRadius:24,padding:32}}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:28,flexWrap:"wrap" as const,gap:12}}>
-                  <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>{selectedModule.readingTitle}</h3>
-                  )} style={{...glass,borderRadius:12,padding:"9px 16px",fontSize:13,color:TEXT_MID,border:`1px solid ${BORDER}`,cursor:"pointer",fontFamily:FONT,display:"flex",alignItems:"center",gap:8}}>🔊 Escuchar</button>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
+           {/* READING */}
+{activeSection==="reading"&&(
+  <div style={{...glass,borderRadius:24,padding:32}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:28,flexWrap:"wrap" as const,gap:12}}>
+      
+      <h3 style={{fontSize:20,fontWeight:700,margin:0,fontFamily:FONT}}>
+        {selectedModule.readingTitle}
+      </h3>
+
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <button
+          onClick={()=>speak(selectedModule.reading.join(" "),0.9)}
+          style={{
+            ...glass,
+            borderRadius:12,
+            padding:"9px 16px",
+            fontSize:13,
+            color:TEXT_MID,
+            border:`1px solid ${BORDER}`,
+            cursor:"pointer",
+            fontFamily:FONT,
+            display:"flex",
+            alignItems:"center",
+            gap:8
+          }}
+        >
+          🔊 Escuchar
+        </button>
+
+        <button
+          onClick={stopSpeak}
+          style={{
+            borderRadius:12,
+            padding:"9px 16px",
+            fontSize:13,
+            fontWeight:600,
+            background:"rgba(244,63,94,0.15)",
+            color:"#fda4af",
+            border:"1px solid rgba(244,63,94,0.3)",
+            cursor:"pointer",
+            fontFamily:FONT
+          }}
+        >
+          ⏹ Stop
+        </button>
+      </div>
+
+    </div>
+
+    <div style={{display:"flex",flexDirection:"column",gap:20}}>
+      {selectedModule.reading.map((para,i)=>(
+        <p key={i} style={{lineHeight:1.9,color:"#cbd5e1",fontSize:15,margin:0,fontFamily:FONT}}>
+          {para}
+        </p>
+      ))}
+    </div>
+
+    <button
+      onClick={()=>setActiveSection("quiz")}
+      style={{...btnAccent,marginTop:32,display:"inline-block"}}
+    >
+      Ir al quiz →
+    </button>
+  </div>
+)}
   <button
     onClick={()=>speak(selectedModule.reading.join(" "),0.9)}
     style={{
