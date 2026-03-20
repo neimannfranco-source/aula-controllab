@@ -1,1298 +1,1043 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://bjufnjnijkzypnktdxql.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdWZuam5pamt6eXBua3RkeHFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzUyMjgsImV4cCI6MjA4OTUxMTIyOH0.VWEtmhvSB8Crtjf2vcoFMJaIiDQ5ejkaQB1B2zEBnbw";
-const supabase: SupabaseClient | null = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
-const DB_ROW_ID = "global-app-state";
-const PROFESSOR_PASSWORD = "controllab2025";
-
+/* ─────────────────────────────────────────────
+   TYPES
+───────────────────────────────────────────── */
 type VocabItem = { es: string; pt: string };
 type QuizQuestion = { question: string; options: string[]; answer: string };
 type ModuleType = {
-  id: string; title: string; level: string; category: string; emoji: string;
-  description: string; readingTitle: string; reading: string[];
-  vocab: VocabItem[]; quiz: QuizQuestion[]; dictation: string;
+  id: string;
+  title: string;
+  level: string;
+  category: string;
+  emoji: string;
+  description: string;
+  readingTitle: string;
+  reading: string[];
+  vocab: VocabItem[];
+  quiz: QuizQuestion[];
+  dictation: string;
 };
 type Student = { id: string; name: string; code: string };
 type ModuleProgress = { completed: boolean; score: number; total: number; attempts: number };
 type DictationResult = { exact: boolean; score: number; written: string; expected: string; updatedAt: string };
 type AppState = {
-  students: Student[]; currentStudentId: string | null;
+  students: Student[];
+  currentStudentId: string | null;
   progress: Record<string, Record<string, ModuleProgress>>;
   dictations: Record<string, Record<string, DictationResult>>;
 };
-type LoadStatus = "loading" | "ready" | "error";
 
-const BG = "#060b14";
-const GLASS: React.CSSProperties = { background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" };
-const glassDark: React.CSSProperties = { background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.08)" };
-const TEAL = "#2dd4bf";
-const TEXT = "#f1f5f9";
-const TEXT_MID = "#94a3b8";
-const TEXT_DIM = "#475569";
-const BORDER = "rgba(255,255,255,0.08)";
-const BORDER_A = "rgba(45,212,191,0.35)";
-const MONO = "'JetBrains Mono','Fira Code',monospace";
-const FONT = "'DM Sans','Inter',sans-serif";
-
-const input: React.CSSProperties = { width: "100%", background: "rgba(0,0,0,0.3)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "12px 16px", color: TEXT, fontSize: 14, fontFamily: FONT, outline: "none", boxSizing: "border-box" };
-const btnAccent: React.CSSProperties = { background: `linear-gradient(135deg,${TEAL},#0d9488)`, color: "#042f2e", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT };
-const optBtn = (sel: boolean, correct: boolean, wrong: boolean): React.CSSProperties => ({ textAlign: "left", padding: "14px 18px", borderRadius: 14, border: `1px solid ${correct ? "rgba(52,211,153,0.5)" : wrong ? "rgba(251,113,133,0.5)" : sel ? BORDER_A : BORDER}`, background: correct ? "rgba(52,211,153,0.12)" : wrong ? "rgba(251,113,133,0.12)" : sel ? "rgba(45,212,191,0.08)" : "rgba(0,0,0,0.2)", color: correct ? "#34d399" : wrong ? "#fb7185" : sel ? TEAL : TEXT_MID, cursor: "pointer", fontFamily: FONT, fontSize: 14, width: "100%" });
-
-function catColor(cat: string): string {
-  const m: Record<string, string> = { Laboratorio: "#60a5fa", Gestión: "#f472b6", Comunicación: "#fb923c", Tecnología: "#a78bfa", Gramática: "#facc15", Controllab: TEAL };
-  return m[cat] || TEXT_MID;
-}
-
+/* ─────────────────────────────────────────────
+   MODULES — LAB + IT + COMUNICACIÓN
+───────────────────────────────────────────── */
 const MODULES: ModuleType[] = [
-// ══ LABORATORIO ══
-{
-  id: "control-interno", title: "Control interno", level: "Intermedio", category: "Laboratorio", emoji: "🔬",
-  description: "Monitoreo analítico, tendencias y decisiones preventivas.",
-  readingTitle: "Una desviación que parecía pequeña",
-  reading: [
-    "Durante una revisión de rutina en el laboratorio de bioquímica, el equipo técnico detectó una desviación en los controles internos de uno de los analitos más procesados de la semana. A primera vista, la diferencia parecía mínima: apenas unos pocos puntos por encima del límite de advertencia establecido en el gráfico de Levey-Jennings. Sin embargo, al comparar los datos actuales con los registros históricos del mes anterior, la imagen fue mucho más preocupante: la tendencia se repetía desde hacía cinco días consecutivos, siempre en la misma dirección.",
-    "La supervisora del turno decidió pausar la emisión de resultados y reunir al equipo para hacer una revisión sistemática. Examinaron con detalle los materiales de control utilizados, incluyendo los viales abiertos y los lotes en stock. Revisaron las curvas de calibración recientes y también inspeccionaron los lotes de reactivos en uso.",
-    "Después de analizar toda esa información, concluyeron que la causa más probable era una combinación entre una variación dentro del lote del reactivo principal y una calibración que ya no representaba con suficiente precisión el desempeño real del método. Esta es una situación más difícil de detectar que una falla obvia, pero también más frecuente en la práctica diaria.",
-    "Como medida preventiva inmediata, suspendieron la liberación de los resultados de ese analito correspondientes a las últimas doce horas. Repitieron las corridas con material de control fresco proveniente de un vial diferente y realizaron una recalibración completa del equipo.",
-    "El caso fue documentado como un incidente de calidad y se presentó en la reunión mensual como ejemplo de buena práctica. Se decidió actualizar el procedimiento para incluir una alerta automática cuando tres puntos consecutivos superen el límite de advertencia en la misma dirección.",
-  ],
-  vocab: [
-    { es: "control interno", pt: "controle interno" },
-    { es: "desviación", pt: "desvio" },
-    { es: "liberación de resultados", pt: "liberação de resultados" },
-    { es: "reactivo", pt: "reagente" },
-    { es: "tendencia", pt: "tendência" },
-    { es: "corrida analítica", pt: "corrida analítica" },
-  ],
-  quiz: [
-    { question: "¿Qué detectó el equipo técnico durante la revisión de rutina?", options: ["Un error en la facturación", "Una desviación en los controles internos", "Una falla en el refrigerador", "Un vial de control vacío"], answer: "Una desviación en los controles internos" },
-    { question: "¿Cuántos días llevaba repitiéndose la tendencia?", options: ["Un día", "Dos días", "Cinco días consecutivos", "Todo el mes"], answer: "Cinco días consecutivos" },
-    { question: "¿Qué elementos revisó el equipo en la investigación?", options: ["Solo los reactivos", "Reactivos, calibración, controles y almacenamiento", "Solo el equipo analítico", "Solo los registros del mes anterior"], answer: "Reactivos, calibración, controles y almacenamiento" },
-    { question: "¿Cuál fue la causa identificada?", options: ["Falla total del equipo", "Variación del reactivo y calibración desactualizada combinadas", "Error del operador", "Muestra contaminada"], answer: "Variación del reactivo y calibración desactualizada combinadas" },
-    { question: "¿Qué hicieron como medida preventiva inmediata?", options: ["Cambiaron al personal", "Suspendieron la liberación de algunos resultados y repitieron corridas", "Descartaron el equipamiento", "Cerraron el laboratorio"], answer: "Suspendieron la liberación de algunos resultados y repitieron corridas" },
-    { question: "¿Qué mejora preventiva se implementó en el procedimiento?", options: ["Eliminar los controles internos", "Alerta cuando tres puntos consecutivos superen el límite en la misma dirección", "Reducir la frecuencia de los controles", "Cambiar de proveedor de reactivos"], answer: "Alerta cuando tres puntos consecutivos superen el límite en la misma dirección" },
-    { question: "¿Por qué es importante identificar tendencias antes del límite de rechazo?", options: ["Para reducir reuniones", "Para evitar errores mayores antes de que ocurran y proteger la calidad", "Para eliminar controles", "Para justificar más personal"], answer: "Para evitar errores mayores antes de que ocurran y proteger la calidad" },
-    { question: "¿Qué diferencia hay entre un límite de advertencia y un límite de rechazo?", options: ["Son lo mismo pero con nombres distintos", "El de advertencia es una señal temprana de alerta; el de rechazo obliga a detener la corrida", "Solo existe el límite de rechazo en la práctica", "El de advertencia aplica solo al control de nivel bajo"], answer: "El de advertencia es una señal temprana de alerta; el de rechazo obliga a detener la corrida" },
-    { question: "¿Por qué una variación dentro del lote de reactivo es difícil de detectar?", options: ["Porque no existe esa variación en la práctica real", "Porque el lote parece correcto pero tiene inconsistencia interna, que el control puede tardar en mostrar", "Porque el equipo analítico la oculta automáticamente", "Porque solo afecta resultados de pacientes pediátricos"], answer: "Porque el lote parece correcto pero tiene inconsistencia interna, que el control puede tardar en mostrar" },
-    { question: "¿Qué se entiende por 'corrida analítica' en el contexto del control interno?", options: ["El turno completo de trabajo del laboratorio", "El conjunto de muestras y controles procesados bajo las mismas condiciones analíticas en un período definido", "Solo los controles de calidad sin incluir muestras de pacientes", "El proceso de calibración del equipo"], answer: "El conjunto de muestras y controles procesados bajo las mismas condiciones analíticas en un período definido" },
-    { question: "¿Qué información debe incluir la documentación del incidente de calidad?", options: ["Solo el resultado fuera de rango", "Descripción del hallazgo, causa identificada, acciones tomadas y resultados afectados", "Solo el nombre del analista responsable", "Solo la fecha y hora del incidente"], answer: "Descripción del hallazgo, causa identificada, acciones tomadas y resultados afectados" },
-    { question: "¿Cuándo debe repetirse un control interno con material de un vial diferente?", options: ["Siempre, en cada corrida analítica", "Cuando se sospecha que el vial actual puede ser el origen del problema", "Solo cuando el resultado está fuera del límite de rechazo", "Solo al inicio de cada turno de trabajo"], answer: "Cuando se sospecha que el vial actual puede ser el origen del problema" },
-    { question: "¿Por qué el control interno complementa pero no reemplaza al ensayo de aptitud externo?", options: ["Son exactamente lo mismo y solo difieren en el nombre", "El control interno evalúa reproducibilidad interna; el externo compara el resultado con otros laboratorios", "El ensayo externo es más preciso y reemplaza al control interno", "El control interno ya incluye la comparación con otros laboratorios"], answer: "El control interno evalúa reproducibilidad interna; el externo compara el resultado con otros laboratorios" },
-  ],
-  dictation: "El equipo detectó una desviación en los controles internos y suspendió la liberación de resultados para proteger la calidad del proceso.",
-},
-{
-  id: "westgard", title: "Reglas de Westgard", level: "Intermedio", category: "Laboratorio", emoji: "📊",
-  description: "Análisis de reglas y toma de decisiones estadísticas en el laboratorio.",
-  readingTitle: "Una alerta en el turno de la mañana",
-  reading: [
-    "Un lunes a las siete de la mañana, durante la revisión inicial de los controles internos del turno, una analista notó que los valores del control de nivel medio, al mirar la secuencia de los últimos seis puntos en el gráfico de Levey-Jennings, todos caían por debajo de la media. Ese patrón, conocido como regla 6x, indica que algo está cambiando de forma sistemática en el proceso analítico.",
-    "Las reglas de Westgard son un conjunto de criterios estadísticos desarrollados por el Dr. James Westgard en los años setenta para ayudar a los laboratorios a distinguir entre variación aleatoria, que es inherente a todo proceso de medición, y variación sistemática, que indica un problema real.",
-    "Entre las reglas más utilizadas se encuentran la 1₃ₛ, que es una regla de advertencia cuando un control supera tres desviaciones estándar; la 2₂ₛ, que rechaza la corrida cuando dos controles consecutivos superan dos desviaciones en la misma dirección; la R₄ₛ, que detecta errores aleatorios grandes; y la 4₁ₛ, que señala errores sistemáticos.",
-    "En el caso del turno de la mañana, la analista aplicó correctamente la regla 6x y decidió investigar. Repitió los controles con material de un vial diferente y verificó si la temperatura del equipo había fluctuado durante la noche, encontrando una leve variación.",
-    "Comprender las reglas de Westgard es una herramienta de razonamiento analítico que permite actuar con criterio. Un laboratorio que las aplica correctamente demuestra madurez técnica y capacidad para justificar sus decisiones frente a auditorías.",
-  ],
-  vocab: [
-    { es: "regla de advertencia", pt: "regra de alerta" },
-    { es: "media", pt: "média" },
-    { es: "precisión", pt: "precisão" },
-    { es: "rechazar la corrida", pt: "rejeitar a corrida" },
-    { es: "error sistemático", pt: "erro sistemático" },
-    { es: "variación aleatoria", pt: "variação aleatória" },
-  ],
-  quiz: [
-    { question: "¿Qué patrón observó la analista en el gráfico de Levey-Jennings?", options: ["Valores fuera del límite de rechazo", "Seis puntos consecutivos por debajo de la media", "Dos valores muy elevados", "Un valor imposiblemente alto"], answer: "Seis puntos consecutivos por debajo de la media" },
-    { question: "¿Qué indica la regla 6x?", options: ["Que hay un error aleatorio grande", "Que algo está cambiando sistemáticamente aunque no sea urgente aún", "Que la corrida debe rechazarse inmediatamente", "Que el reactivo está vencido"], answer: "Que algo está cambiando sistemáticamente aunque no sea urgente aún" },
-    { question: "¿Para qué sirven las reglas de Westgard?", options: ["Para eliminar los controles", "Para distinguir entre variación aleatoria y errores sistemáticos", "Para acelerar el procesamiento", "Para reducir costos"], answer: "Para distinguir entre variación aleatoria y errores sistemáticos" },
-    { question: "¿Qué indica la regla 2₂ₛ?", options: ["Un control supera 3 desviaciones estándar", "Dos controles consecutivos superan 2 desviaciones en la misma dirección", "Cuatro puntos del mismo lado de la media", "La diferencia entre dos controles supera 4 desviaciones"], answer: "Dos controles consecutivos superan 2 desviaciones en la misma dirección" },
-    { question: "¿Qué tipo de error detecta la regla R₄ₛ?", options: ["Error sistemático", "Error aleatorio grande", "Tendencia sostenida", "Error de calibración"], answer: "Error aleatorio grande" },
-    { question: "¿Qué hizo la analista antes de decidir sobre la corrida?", options: ["La rechazó inmediatamente sin investigar", "Investigó repitiendo con vial diferente y verificando temperatura", "Llamó al proveedor del reactivo", "Esperó al día siguiente"], answer: "Investigó repitiendo con vial diferente y verificando temperatura" },
-    { question: "¿Qué encontraron al investigar la causa del patrón?", options: ["El reactivo estaba vencido", "Una fluctuación de temperatura durante la noche", "Un error del operador", "Una calibración incorrecta"], answer: "Una fluctuación de temperatura durante la noche" },
-    { question: "¿Qué valor aporta aplicar correctamente las reglas de Westgard?", options: ["Permite trabajar sin controles", "Demuestra madurez técnica y permite justificar decisiones ante auditorías", "Reduce el tiempo de procesamiento", "Elimina la necesidad de calibrar"], answer: "Demuestra madurez técnica y permite justificar decisiones ante auditorías" },
-    { question: "¿Cuándo fue desarrollado el sistema de reglas de Westgard?", options: ["En la década de 1950", "En los años setenta por el Dr. James Westgard", "En la década de 1990", "En el año 2000 como parte de la norma ISO"], answer: "En los años setenta por el Dr. James Westgard" },
-    { question: "¿Qué diferencia a un error sistemático de uno aleatorio?", options: ["Son idénticos en su efecto sobre los resultados", "El sistemático afecta todos los resultados en la misma dirección; el aleatorio es impredecible y variable", "El aleatorio es siempre mayor que el sistemático", "El sistemático solo ocurre con equipos viejos"], answer: "El sistemático afecta todos los resultados en la misma dirección; el aleatorio es impredecible y variable" },
-    { question: "¿Qué regla se usa como señal de advertencia antes de rechazar la corrida?", options: ["2₂ₛ directamente", "1₃ₛ como regla de advertencia que activa la búsqueda de otros patrones", "R₄ₛ como primera señal", "6x como única regla válida"], answer: "1₃ₛ como regla de advertencia que activa la búsqueda de otros patrones" },
-    { question: "¿Por qué es importante documentar la decisión tomada ante un patrón de Westgard?", options: ["Solo por exigencia burocrática", "Para justificar técnicamente la acción ante auditorías internas y externas", "Para calcular el costo del reactivo utilizado", "Solo si la corrida fue rechazada"], answer: "Para justificar técnicamente la acción ante auditorías internas y externas" },
-    { question: "¿Qué relación tienen las reglas de Westgard con la métrica sigma?", options: ["No tienen ninguna relación", "A mayor sigma del método, se pueden usar reglas más simples con menor frecuencia de controles", "A mayor sigma, se necesitan más reglas de control simultáneas", "Solo se usan en laboratorios con acreditación ISO"], answer: "A mayor sigma del método, se pueden usar reglas más simples con menor frecuencia de controles" },
-  ],
-  dictation: "Comprender las reglas de Westgard ayuda a tomar decisiones más seguras y a justificar técnicamente cada acción del laboratorio.",
-},
-{
-  id: "hemograma", title: "Hemograma completo", level: "Intermedio", category: "Laboratorio", emoji: "🩸",
-  description: "Interpretación clínica y comunicación de resultados hematológicos.",
-  readingTitle: "Los números que cuentan la historia",
-  reading: [
-    "El hemograma completo es uno de los análisis más solicitados en cualquier laboratorio clínico. Proporciona datos sobre tres grandes líneas celulares: los eritrocitos, cuya función principal es transportar oxígeno; los leucocitos, que son los principales actores del sistema inmune; y las plaquetas, responsables de la hemostasia primaria.",
-    "Cuando el analista revisa un hemograma, no solo verifica si los valores individuales están dentro del rango de referencia. También evalúa la coherencia interna del informe: ¿son consistentes entre sí el hematocrito, la hemoglobina y el recuento de glóbulos rojos?",
-    "Un aspecto crítico es la detección de valores de pánico o resultados críticos. Un recuento de glóbulos blancos extremadamente elevado con morfología anormal puede orientar hacia una leucemia aguda y requiere comunicación urgente al médico.",
-    "Los factores preanalíticos son otra fuente importante de variación. La hemólisis puede elevar falsamente la hemoglobina libre. Una muestra con microcoágulos puede dar un recuento de plaquetas falsamente bajo.",
-    "Comunicar un hemograma de forma útil al médico implica identificar cuáles hallazgos son clínicamente relevantes, cuáles son urgentes y cuáles pueden incluirse como observación en el informe escrito.",
-  ],
-  vocab: [
-    { es: "hemograma", pt: "hemograma" },
-    { es: "glóbulo rojo / eritrocito", pt: "glóbulo vermelho / eritrócito" },
-    { es: "glóbulo blanco / leucocito", pt: "glóbulo branco / leucócito" },
-    { es: "plaqueta", pt: "plaqueta" },
-    { es: "valor crítico / pánico", pt: "valor crítico / pânico" },
-    { es: "frotis de sangre", pt: "esfregaço de sangue" },
-  ],
-  quiz: [
-    { question: "¿Qué tres líneas celulares evalúa el hemograma completo?", options: ["Glucosa, colesterol y triglicéridos", "Eritrocitos, leucocitos y plaquetas", "Sodio, potasio y cloro", "TGO, TGP y bilirrubina"], answer: "Eritrocitos, leucocitos y plaquetas" },
-    { question: "¿Cuál es la función principal de los eritrocitos?", options: ["Defender contra infecciones", "Transportar oxígeno a los tejidos", "Controlar la coagulación", "Producir anticuerpos"], answer: "Transportar oxígeno a los tejidos" },
-    { question: "¿Qué evalúa el analista además de los valores individuales?", options: ["Solo si están dentro del rango", "La coherencia interna y la consistencia con el cuadro clínico", "Solo el recuento total de células", "Solo el resultado más urgente"], answer: "La coherencia interna y la consistencia con el cuadro clínico" },
-    { question: "¿Qué puede indicar un recuento de leucocitos muy elevado con morfología anormal?", options: ["Una infección bacteriana común", "Una posible leucemia aguda que requiere comunicación urgente", "Un valor normal por la edad del paciente", "Una hemólisis de la muestra"], answer: "Una posible leucemia aguda que requiere comunicación urgente" },
-    { question: "¿Qué puede causar microcoágulos invisibles en la muestra?", options: ["Aumentar la hemoglobina medida", "Un recuento de plaquetas falsamente bajo", "Elevar los glóbulos blancos", "No tienen ningún efecto conocido"], answer: "Un recuento de plaquetas falsamente bajo" },
-    { question: "¿Qué efecto tiene la lipemia sobre la medición del hemograma?", options: ["Aumenta falsamente las plaquetas", "Interfiere con la medición fotométrica de la hemoglobina", "Reduce el recuento de glóbulos rojos", "No tiene efectos conocidos"], answer: "Interfiere con la medición fotométrica de la hemoglobina" },
-    { question: "¿Cuándo debe comunicarse un resultado crítico al médico?", options: ["Al día siguiente por correo electrónico", "Antes de liberar el informe formal, por teléfono", "Solo si el médico lo solicita expresamente", "Al finalizar el turno de trabajo"], answer: "Antes de liberar el informe formal, por teléfono" },
-    { question: "¿Qué distingue a un analista que agrega valor al hemograma?", options: ["Que procesa más muestras por hora", "Que identifica hallazgos relevantes y colabora en el proceso diagnóstico", "Que usa el equipo más moderno disponible", "Que entrega el informe más rápido"], answer: "Que identifica hallazgos relevantes y colabora en el proceso diagnóstico" },
-    { question: "¿Para qué sirve el frotis de sangre periférica en el contexto del hemograma?", options: ["Para medir la hemoglobina directamente", "Para evaluar morfología celular que los contadores automáticos no pueden determinar", "Para reemplazar el recuento automático", "Solo para pacientes pediátricos"], answer: "Para evaluar morfología celular que los contadores automáticos no pueden determinar" },
-    { question: "¿Qué índices eritrocitarios se calculan a partir del hemograma?", options: ["Solo la hemoglobina y el hematocrito", "VCM, HCM y CHCM que orientan el tipo de anemia", "Solo el recuento de eritrocitos", "TGO y TGP"], answer: "VCM, HCM y CHCM que orientan el tipo de anemia" },
-    { question: "¿Qué diferencia a una trombocitopenia real de una pseudotrombocitopenia?", options: ["No existe esa diferencia", "La pseudotrombocitopenia es un artefacto por agregación plaquetaria in vitro, no una condición real del paciente", "La pseudotrombocitopenia es siempre más grave", "Solo puede determinarse con un segundo análisis en tres días"], answer: "La pseudotrombocitopenia es un artefacto por agregación plaquetaria in vitro, no una condición real del paciente" },
-    { question: "¿Cuándo debe el analista realizar un frotis aunque el equipo no lo haya marcado como alarma?", options: ["Nunca, confiar siempre en el equipo automático", "Cuando el contexto clínico sugiere una patología que el equipo puede no detectar", "Solo cuando el médico lo solicita explícitamente", "Solo en pacientes oncológicos"], answer: "Cuando el contexto clínico sugiere una patología que el equipo puede no detectar" },
-    { question: "¿Por qué los rangos de referencia del hemograma varían según edad y sexo?", options: ["Solo por convención estadística sin base fisiológica", "Porque la producción de células sanguíneas y los niveles normales de hemoglobina difieren según edad, sexo y estado fisiológico", "Porque los equipos se calibran diferente para cada grupo", "Solo varían en pacientes pediátricos"], answer: "Porque la producción de células sanguíneas y los niveles normales de hemoglobina difieren según edad, sexo y estado fisiológico" },
-  ],
-  dictation: "El analista debe identificar los resultados críticos del hemograma y comunicarlos al médico antes de liberar el informe formal.",
-},
-{
-  id: "bioquimica", title: "Bioquímica clínica", level: "Intermedio", category: "Laboratorio", emoji: "⚗️",
-  description: "Glucosa, perfil lipídico, función renal y hepática en contexto clínico.",
-  readingTitle: "El perfil que habla por el paciente",
-  reading: [
-    "La bioquímica clínica abarca una gran variedad de análisis: la glucosa y la hemoglobina glicosilada para el metabolismo de los hidratos de carbono; el colesterol total, HDL, LDL y triglicéridos para el perfil lipídico; la creatinina, urea y tasa de filtración glomerular para la función renal; las transaminasas TGO y TGP, la bilirrubina, fosfatasa alcalina y GGT para la función hepática.",
-    "Cuando el médico solicita un perfil metabólico completo, el analista debe garantizar no solo que cada valor individual sea correcto, sino también que el conjunto sea coherente. Un aumento de creatinina acompañado de disminución de la filtración glomerular y aumento de urea refuerza la sospecha de compromiso renal.",
-    "La interpretación clínica requiere conocer el contexto del paciente. Una glucosa de 180 mg/dL tiene un significado completamente diferente en un paciente diabético conocido que en una persona sin antecedentes que no había ayunado.",
-    "Si un control falla durante la corrida, el analista debe determinar qué muestras se vieron afectadas, retener esos resultados, investigar la causa y repetir tanto los controles como las muestras comprometidas.",
-    "En la comunicación con el médico, el lenguaje técnico accesible es una habilidad clave. Un laboratorio que sabe comunicar bien sus resultados genera confianza y fidelidad en sus clientes.",
-  ],
-  vocab: [
-    { es: "glucosa", pt: "glicose" },
-    { es: "creatinina", pt: "creatinina" },
-    { es: "perfil lipídico", pt: "perfil lipídico" },
-    { es: "función hepática", pt: "função hepática" },
-    { es: "filtración glomerular", pt: "filtração glomerular" },
-    { es: "transaminasas", pt: "transaminases" },
-  ],
-  quiz: [
-    { question: "¿Qué marcadores evalúan la función hepática?", options: ["Glucosa y creatinina", "TGO, TGP, bilirrubina, fosfatasa alcalina y GGT", "Colesterol y triglicéridos", "Hemoglobina y hematocrito"], answer: "TGO, TGP, bilirrubina, fosfatasa alcalina y GGT" },
-    { question: "¿Qué marcadores evalúan la función renal?", options: ["TGO y TGP", "Creatinina, urea y filtración glomerular estimada", "Glucosa y hemoglobina glicosilada", "Colesterol HDL y LDL"], answer: "Creatinina, urea y filtración glomerular estimada" },
-    { question: "¿Qué combinación refuerza la sospecha de compromiso renal?", options: ["Creatinina alta sola", "Creatinina alta más filtración glomerular baja más urea elevada", "Solo filtración glomerular baja", "TGO y TGP elevadas"], answer: "Creatinina alta más filtración glomerular baja más urea elevada" },
-    { question: "¿Por qué importa el contexto clínico del paciente en bioquímica?", options: ["No importa, los valores son absolutos", "El mismo valor puede tener significados muy distintos según el paciente", "Solo importa para la facturación", "Solo para pacientes diabéticos"], answer: "El mismo valor puede tener significados muy distintos según el paciente" },
-    { question: "¿Qué hace el analista si un control falla durante la corrida?", options: ["Libera todos los resultados igual", "Retiene resultados afectados, investiga y repite muestras comprometidas", "Solo repite el control fallido", "Avisa al médico y sigue procesando"], answer: "Retiene resultados afectados, investiga y repite muestras comprometidas" },
-    { question: "¿Por qué la bilirrubina en una muestra hemolizada puede ser engañosa?", options: ["Porque siempre indica daño hepático real", "Porque la hemólisis libera contenido intracelular que no refleja el nivel real del paciente", "Porque la bilirrubina no se ve afectada por hemólisis", "Porque es un valor técnicamente imposible"], answer: "Porque la hemólisis libera contenido intracelular que no refleja el nivel real del paciente" },
-    { question: "¿Por qué la creatinina puede interpretarse diferente en dos pacientes con el mismo valor?", options: ["Porque los equipos dan resultados distintos", "Porque la masa muscular, el sexo y la edad influyen en la interpretación", "Porque los rangos de referencia son incorrectos", "Porque depende del método analítico"], answer: "Porque la masa muscular, el sexo y la edad influyen en la interpretación" },
-    { question: "¿Qué genera confianza y fidelidad en los clientes del laboratorio?", options: ["Tener los equipos más modernos", "Saber comunicar bien los resultados con claridad y contexto clínico", "Tener los precios más bajos", "Procesar más muestras por día"], answer: "Saber comunicar bien los resultados con claridad y contexto clínico" },
-    { question: "¿Cuál es la diferencia entre LDL calculado y LDL directo?", options: ["Son idénticos en cualquier condición", "El LDL calculado puede ser inexacto con triglicéridos muy elevados; el directo es más confiable en esos casos", "El LDL directo es siempre inferior al calculado", "Solo el LDL calculado es aceptado por las normas de calidad"], answer: "El LDL calculado puede ser inexacto con triglicéridos muy elevados; el directo es más confiable en esos casos" },
-    { question: "¿Qué indica una relación AST/ALT mayor a 2 en el contexto hepático?", options: ["Daño hepático de cualquier origen", "Sugiere enfermedad hepática alcohólica como causa probable del daño", "Es un valor completamente normal en adultos", "Solo ocurre en hepatitis virales"], answer: "Sugiere enfermedad hepática alcohólica como causa probable del daño" },
-    { question: "¿Para qué sirve la hemoglobina glicosilada (HbA1c) en el seguimiento del paciente diabético?", options: ["Para medir la glucosa en un punto del tiempo", "Para reflejar el promedio de glucemia de los últimos dos a tres meses", "Para reemplazar la glucosa en ayunas en el diagnóstico", "Solo para pacientes con diabetes tipo 1"], answer: "Para reflejar el promedio de glucemia de los últimos dos a tres meses" },
-    { question: "¿Por qué la lipemia puede interferir en múltiples analitos de bioquímica?", options: ["Solo afecta al perfil lipídico", "Porque la turbidez del suero interfiere con la espectrofotometría, afectando múltiples mediciones", "Porque aumenta la viscosidad y el equipo no puede procesar la muestra", "Solo interfiere con la glucosa"], answer: "Porque la turbidez del suero interfiere con la espectrofotometría, afectando múltiples mediciones" },
-    { question: "¿Cuál es la acción correcta cuando se detecta que un resultado de bioquímica fue liberado con un error?", options: ["No hacer nada para no alarmar al paciente", "Contactar al médico de inmediato, corregir el informe y documentar el incidente", "Esperar que el médico llame a preguntar", "Solo corregir el informe sin avisar al médico"], answer: "Contactar al médico de inmediato, corregir el informe y documentar el incidente" },
-  ],
-  dictation: "La bioquímica clínica evalúa el funcionamiento de órganos a través de marcadores como glucosa, creatinina y perfil lipídico, siempre en contexto clínico.",
-},
-{
-  id: "preanalítica", title: "Fase preanalítica", level: "Básico", category: "Laboratorio", emoji: "🩺",
-  description: "El origen de la mayoría de los errores: todo lo que ocurre antes del análisis.",
-  readingTitle: "El error que ocurrió antes de llegar al laboratorio",
-  reading: [
-    "Estudios realizados en diferentes países coinciden en un dato sorprendente: entre el sesenta y el setenta por ciento de todos los errores en el laboratorio clínico ocurren durante la fase preanalítica, antes de que la muestra llegue al analizador.",
-    "La fase preanalítica comienza en el momento en que el médico decide solicitar un análisis. Incluye la solicitud médica, la preparación del paciente, la extracción de la muestra, el transporte y la recepción en el laboratorio.",
-    "Uno de los errores preanalíticos más frecuentes es la hemólisis, la ruptura de los glóbulos rojos durante o después de la extracción. La hemólisis libera el contenido intracelular al plasma, elevando falsamente marcadores como la potasemia, la LDH y la hemoglobina libre.",
-    "El orden de llenado de los tubos es otro aspecto crítico. Si se llena primero un tubo con anticoagulante antes de uno sin anticoagulante, puede producirse contaminación cruzada que afecta los estudios de coagulación.",
-    "La gestión de la fase preanalítica requiere una visión sistémica que incluye la formación continua del personal, el diseño de formularios y la instalación de sistemas de trazabilidad como el código de barras.",
-  ],
-  vocab: [
-    { es: "fase preanalítica", pt: "fase pré-analítica" },
-    { es: "hemólisis", pt: "hemólise" },
-    { es: "anticoagulante", pt: "anticoagulante" },
-    { es: "centrifugado", pt: "centrifugação" },
-    { es: "orden de llenado", pt: "ordem de coleta" },
-    { es: "solicitud médica", pt: "pedido médico" },
-  ],
-  quiz: [
-    { question: "¿Qué porcentaje de los errores del laboratorio ocurren en la fase preanalítica?", options: ["10 a 20%", "60 a 70%", "Menos del 5%", "Exactamente el 50%"], answer: "60 a 70%" },
-    { question: "¿Cuándo comienza realmente la fase preanalítica?", options: ["Cuando la muestra llega al laboratorio", "Cuando el médico decide solicitar el análisis", "Cuando se centrifuga la muestra", "Cuando el analista recibe el tubo"], answer: "Cuando el médico decide solicitar el análisis" },
-    { question: "¿Qué es la hemólisis?", options: ["Una infección bacteriana de la muestra", "La ruptura de glóbulos rojos durante o después de la extracción", "Un reactivo analítico vencido", "Una temperatura muy baja durante el transporte"], answer: "La ruptura de glóbulos rojos durante o después de la extracción" },
-    { question: "¿Qué marcadores se ven elevados falsamente por hemólisis?", options: ["Glucosa y colesterol", "Potasemia, LDH y hemoglobina libre", "Creatinina y urea exclusivamente", "TGO y bilirrubina directa solamente"], answer: "Potasemia, LDH y hemoglobina libre" },
-    { question: "¿Por qué es crítico el orden de llenado de los tubos?", options: ["Solo por razones estéticas", "Para evitar contaminación cruzada entre anticoagulantes que afecta los estudios de coagulación", "Porque lo exige la norma sin razón científica", "Solo es importante en los tubos de coagulación"], answer: "Para evitar contaminación cruzada entre anticoagulantes que afecta los estudios de coagulación" },
-    { question: "¿Qué aspectos incluye la fase preanalítica?", options: ["Solo la extracción de sangre", "Solicitud médica, preparación del paciente, extracción, transporte y recepción", "Solo el transporte de las muestras", "Solo la recepción en el laboratorio"], answer: "Solicitud médica, preparación del paciente, extracción, transporte y recepción" },
-    { question: "¿Qué herramienta de trazabilidad se menciona?", options: ["Solo los formularios de papel", "Sistemas de código de barras desde el momento de la extracción", "Solo la supervisión visual del proceso", "Solo la capacitación periódica"], answer: "Sistemas de código de barras desde el momento de la extracción" },
-    { question: "¿Qué implica gestionar bien la fase preanalítica?", options: ["Contratar más analistas", "Reducir el mayor porcentaje de errores mediante trabajo colaborativo y trazabilidad", "Comprar equipos más costosos", "Aumentar la velocidad de procesamiento"], answer: "Reducir el mayor porcentaje de errores mediante trabajo colaborativo y trazabilidad" },
-    { question: "¿Cuánto tiempo máximo se recomienda como tiempo de isquemia al extraer sangre?", options: ["5 minutos", "1 minuto, ya que la prolongación afecta la concentración de varios analitos", "10 minutos sin efecto alguno", "Solo importa en pacientes oncológicos"], answer: "1 minuto, ya que la prolongación afecta la concentración de varios analitos" },
-    { question: "¿Qué efecto tiene el ayuno insuficiente en la muestra de sangre?", options: ["Ningún efecto conocido", "Puede elevar triglicéridos y glucosa, invalidando el perfil lipídico y glucémico", "Solo afecta la bilirrubina directa", "Solo afecta marcadores cardíacos"], answer: "Puede elevar triglicéridos y glucosa, invalidando el perfil lipídico y glucémico" },
-    { question: "¿Por qué es importante el tiempo entre extracción y centrifugado?", options: ["No importa mientras sea el mismo día", "La demora puede causar cambios metabólicos en las células que alteran el resultado", "Solo importa para la muestra de orina", "Solo afecta los estudios microbiológicos"], answer: "La demora puede causar cambios metabólicos en las células que alteran el resultado" },
-    { question: "¿Qué debe hacer el laboratorio cuando recibe una muestra hemolizada para potasio?", options: ["Liberarla con una nota al pie del informe", "Rechazarla y solicitar nueva extracción porque la hemólisis invalida el resultado", "Reportarla con un factor de corrección matemático", "Procesarla y no informar al médico"], answer: "Rechazarla y solicitar nueva extracción porque la hemólisis invalida el resultado" },
-    { question: "¿Qué información debe comunicarse al punto de extracción para reducir errores preanalíticos?", options: ["Solo el listado de precios actualizado", "Instrucciones claras sobre preparación del paciente, tipo de tubo, volumen y condiciones de transporte", "Solo el nombre del analista de turno", "Solo las fechas de cierre del laboratorio"], answer: "Instrucciones claras sobre preparación del paciente, tipo de tubo, volumen y condiciones de transporte" },
-  ],
-  dictation: "Entre el sesenta y el setenta por ciento de los errores del laboratorio ocurren en la fase preanalítica, antes de que la muestra llegue al analizador.",
-},
-{
-  id: "coagulacion", title: "Coagulación y hemostasia", level: "Avanzado", category: "Laboratorio", emoji: "🩹",
-  description: "TP, KPTT, dímero D y comunicación de resultados críticos de coagulación.",
-  readingTitle: "Cuando la sangre no se detiene",
-  reading: [
-    "La hemostasia es el conjunto de mecanismos que el organismo activa para detener un sangrado cuando se produce una lesión vascular. Este proceso se divide en hemostasia primaria, que involucra a las plaquetas y forma un tapón provisional, y hemostasia secundaria o coagulación, que consolida ese tapón mediante una red de fibrina.",
-    "El laboratorio evalúa este sistema mediante el tiempo de protrombina que evalúa la vía extrínseca, utilizado principalmente para monitorear el tratamiento con anticoagulantes orales como warfarina; y el KPTT que evalúa la vía intrínseca y es fundamental para monitorear la heparina.",
-    "Una particularidad del laboratorio de coagulación es que los resultados son especialmente sensibles a los factores preanalíticos. La proporción correcta entre la sangre y el anticoagulante citrato en el tubo azul es crítica: si el tubo no está completamente llenado, el resultado puede ser falsamente prolongado.",
-    "El dímero D es un producto de degradación de la fibrina que se eleva cuando hay formación y lisis de coágulos. Se utiliza principalmente para descartar tromboembolismo venoso, aunque tiene alta sensibilidad pero baja especificidad.",
-    "El laboratorio debe tener establecidos los valores de pánico para cada prueba de coagulación y el procedimiento para comunicarlos al médico de forma inmediata, documentada y verificada.",
-  ],
-  vocab: [
-    { es: "coagulación", pt: "coagulação" },
-    { es: "hemostasia", pt: "hemostasia" },
-    { es: "tiempo de protrombina / INR", pt: "tempo de protrombina / RNI" },
-    { es: "anticoagulante", pt: "anticoagulante" },
-    { es: "dímero D", pt: "dímero D" },
-    { es: "trombosis", pt: "trombose" },
-  ],
-  quiz: [
-    { question: "¿Qué evalúa el tiempo de protrombina (TP)?", options: ["La vía intrínseca de coagulación", "La vía extrínseca de coagulación", "El número de plaquetas", "La función renal"], answer: "La vía extrínseca de coagulación" },
-    { question: "¿Para qué se usa el INR principalmente?", options: ["Diagnóstico de anemia", "Monitoreo del tratamiento con anticoagulantes orales", "Evaluación de la función plaquetaria", "Diagnóstico de infecciones"], answer: "Monitoreo del tratamiento con anticoagulantes orales" },
-    { question: "¿Qué evalúa el KPTT?", options: ["La vía extrínseca", "La vía intrínseca de la coagulación", "Las plaquetas", "El fibrinógeno únicamente"], answer: "La vía intrínseca de la coagulación" },
-    { question: "¿Por qué es crítica la proporción sangre-citrato en el tubo azul?", options: ["Por razones estéticas", "Una relación alterada puede generar resultados falsamente prolongados", "Para facilitar el centrifugado", "Por exigencia del fabricante únicamente"], answer: "Una relación alterada puede generar resultados falsamente prolongados" },
-    { question: "¿Qué indica el dímero D elevado?", options: ["Deficiencia de vitamina K", "Formación y lisis de coágulos en el organismo", "Anemia grave", "Infección bacteriana"], answer: "Formación y lisis de coágulos en el organismo" },
-    { question: "¿Por qué el dímero D tiene baja especificidad?", options: ["Porque no es confiable", "Porque se eleva en muchas situaciones además de tromboembolismo", "Porque el equipo tiene poca sensibilidad", "Porque varía según la edad del paciente"], answer: "Porque se eleva en muchas situaciones además de tromboembolismo" },
-    { question: "¿Qué factores preanalíticos afectan los resultados de coagulación?", options: ["Solo la temperatura del laboratorio", "Tubo no completamente lleno, hemólisis, coágulos y temperatura inadecuada", "Solo el tiempo de transporte", "Solo el tipo de anticoagulante del tubo"], answer: "Tubo no completamente lleno, hemólisis, coágulos y temperatura inadecuada" },
-    { question: "¿Qué debe hacer el laboratorio ante un valor crítico de coagulación?", options: ["Esperar a que el médico llame", "Comunicarlo inmediatamente de forma documentada y verificada", "Repetir el análisis sin avisar", "Solo anotarlo en el informe"], answer: "Comunicarlo inmediatamente de forma documentada y verificada" },
-    { question: "¿Cuál es la diferencia clínica entre monitorear warfarina con INR y monitorear heparina con KPTT?", options: ["Son intercambiables para cualquier anticoagulante", "El INR estandariza la medición de warfarina entre laboratorios; el KPTT monitorea el efecto de la heparina no fraccionada", "El INR es más preciso para heparina", "Solo el KPTT se usa en pacientes hospitalizados"], answer: "El INR estandariza la medición de warfarina entre laboratorios; el KPTT monitorea el efecto de la heparina no fraccionada" },
-    { question: "¿Qué es el fibrinógeno y cuándo es importante medirlo?", options: ["Una enzima hepática sin relación con la coagulación", "Una proteína esencial para la formación de la red de fibrina, importante en coagulación intravascular diseminada y hemorragias graves", "Un marcador de infección bacteriana", "Solo se mide en pacientes con trombosis arterial"], answer: "Una proteína esencial para la formación de la red de fibrina, importante en coagulación intravascular diseminada y hemorragias graves" },
-    { question: "¿Por qué se debe procesar la muestra de coagulación dentro de las cuatro horas de extracción?", options: ["Por exigencia del proveedor del equipo únicamente", "Porque los factores de coagulación son lábiles y se deterioran con el tiempo, alterando los resultados", "Solo por razones de bioseguridad", "Solo si el paciente tiene anticoagulantes"], answer: "Porque los factores de coagulación son lábiles y se deterioran con el tiempo, alterando los resultados" },
-    { question: "¿Qué situación clínica puede elevar el dímero D sin que haya tromboembolismo?", options: ["Ninguna, el dímero D es completamente específico", "Embarazo, infecciones, inflamación, cirugía reciente o neoplasias", "Solo el ejercicio físico intenso", "Solo pacientes mayores de 70 años"], answer: "Embarazo, infecciones, inflamación, cirugía reciente o neoplasias" },
-    { question: "¿Cómo se expresa el resultado del TP para facilitar la comparación entre laboratorios?", options: ["Solo en segundos", "Como INR, que normaliza el resultado frente al tromboplastina de referencia internacional (ISI)", "Como porcentaje de actividad sin estandarización", "En micromoles por litro"], answer: "Como INR, que normaliza el resultado frente al tromboplastina de referencia internacional (ISI)" },
-  ],
-  dictation: "El tiempo de protrombina evalúa la vía extrínseca de la coagulación y se expresa como INR para monitorear el tratamiento anticoagulante oral.",
-},
-{
-  id: "marcadores-cardiacos", title: "Marcadores cardíacos", level: "Avanzado", category: "Laboratorio", emoji: "❤️",
-  description: "Troponina, CK-MB y BNP en el diagnóstico de eventos cardiovasculares.",
-  readingTitle: "Cuando el corazón deja huella en la sangre",
-  reading: [
-    "Los marcadores cardíacos son proteínas o enzimas que normalmente se encuentran dentro de las células del músculo cardíaco y que se liberan al torrente sanguíneo cuando esas células sufren daño. Su detección en sangre es una señal de lesión miocárdica.",
-    "La troponina cardíaca es actualmente el marcador de elección para el diagnóstico de infarto agudo de miocardio. Las troponinas comienzan a elevarse entre tres y seis horas después del inicio del daño miocárdico, alcanzan su pico entre doce y veinticuatro horas y pueden permanecer elevadas hasta catorce días.",
-    "La CK-MB fue el marcador estándar antes de la troponina. Aunque ha sido desplazada para el diagnóstico de infarto, sigue siendo útil para detectar reinfartos, porque sus niveles vuelven a la normalidad más rápidamente que la troponina.",
-    "El BNP o péptido natriurético cerebral y su precursor NT-proBNP se elevan cuando el corazón trabaja bajo una presión o volumen excesivos, como ocurre en la insuficiencia cardíaca.",
-    "La interpretación de los marcadores cardíacos siempre debe realizarse en contexto clínico y en función del tiempo transcurrido desde el inicio de los síntomas. Una troponina normal en las primeras dos horas no descarta infarto.",
-  ],
-  vocab: [
-    { es: "troponina", pt: "troponina" },
-    { es: "infarto agudo de miocardio", pt: "infarto agudo do miocárdio" },
-    { es: "CK-MB", pt: "CK-MB" },
-    { es: "BNP / NT-proBNP", pt: "BNP / NT-proBNP" },
-    { es: "insuficiencia cardíaca", pt: "insuficiência cardíaca" },
-    { es: "marcador de daño miocárdico", pt: "marcador de dano miocárdico" },
-  ],
-  quiz: [
-    { question: "¿Por qué la troponina cardíaca es el marcador de elección para infarto?", options: ["Porque es más barata", "Por su alta especificidad por tejido cardíaco y su sensibilidad", "Porque se eleva antes que cualquier otro marcador", "Porque no se ve afectada por ejercicio físico"], answer: "Por su alta especificidad por tejido cardíaco y su sensibilidad" },
-    { question: "¿Cuándo comienza a elevarse la troponina tras el daño miocárdico?", options: ["Inmediatamente al inicio del daño", "Entre 3 y 6 horas después del inicio del daño", "Solo después de 24 horas", "A las 48 horas"], answer: "Entre 3 y 6 horas después del inicio del daño" },
-    { question: "¿Por qué la CK-MB sigue siendo útil a pesar de la troponina?", options: ["Es más específica que la troponina", "Vuelve a la normalidad más rápido y sirve para detectar reinfartos", "Tiene mayor sensibilidad diagnóstica", "Es el único marcador cuantificable"], answer: "Vuelve a la normalidad más rápido y sirve para detectar reinfartos" },
-    { question: "¿Qué indica una elevación de BNP o NT-proBNP?", options: ["Infarto agudo de miocardio", "Estrés mecánico ventricular como en insuficiencia cardíaca", "Daño renal agudo", "Infección bacteriana severa"], answer: "Estrés mecánico ventricular como en insuficiencia cardíaca" },
-    { question: "¿Una troponina normal descarta infarto en las primeras 2 horas?", options: ["Sí, siempre descarta infarto", "No, porque el marcador puede no haberse elevado aún", "Sí, con las troponinas de alta sensibilidad siempre", "Solo si se acompaña de ECG normal"], answer: "No, porque el marcador puede no haberse elevado aún" },
-    { question: "¿Qué estrategia diagnóstica es la correcta para marcadores cardíacos?", options: ["Una sola medición es suficiente", "Mediciones seriadas en el tiempo para evaluar la cinética del marcador", "Solo medir al ingreso del paciente", "Medir solo si el ECG es anormal"], answer: "Mediciones seriadas en el tiempo para evaluar la cinética del marcador" },
-    { question: "¿Cuánto tiempo puede permanecer elevada la troponina tras un infarto?", options: ["Solo 24 horas", "Hasta 14 días", "Solo 6 horas", "Exactamente 3 días"], answer: "Hasta 14 días" },
-    { question: "¿Cuál es la responsabilidad del laboratorio ante resultados críticos de troponina?", options: ["Esperar la solicitud del médico", "Comunicarlos de forma inmediata y documentada", "Incluirlos solo en el informe impreso", "Solo si supera 10 veces el valor normal"], answer: "Comunicarlos de forma inmediata y documentada" },
-    { question: "¿Qué ventaja tienen las troponinas de alta sensibilidad sobre las convencionales?", options: ["Son más baratas de producir", "Permiten detectar concentraciones menores y establecer diagnóstico más precoz o descarte más temprano", "Son más específicas para el miocardio", "Solo se usan en unidades de cuidados intensivos"], answer: "Permiten detectar concentraciones menores y establecer diagnóstico más precoz o descarte más temprano" },
-    { question: "¿Por qué se pide NT-proBNP en lugar de BNP en algunos laboratorios?", options: ["Son completamente equivalentes sin ninguna diferencia", "NT-proBNP tiene mayor vida media y es más estable en la muestra, facilitando su medición", "BNP es más costoso de medir", "Solo el BNP es aceptado por las guías clínicas actuales"], answer: "NT-proBNP tiene mayor vida media y es más estable en la muestra, facilitando su medición" },
-    { question: "¿Puede elevarse la troponina en condiciones distintas al infarto?", options: ["No, es completamente específica del infarto", "Sí, en miocarditis, embolia pulmonar, sepsis grave e insuficiencia renal avanzada", "Solo en deportistas de alto rendimiento", "Solo en pacientes con diabetes"], answer: "Sí, en miocarditis, embolia pulmonar, sepsis grave e insuficiencia renal avanzada" },
-    { question: "¿Qué representa la cinética de la troponina en las mediciones seriadas?", options: ["Solo confirma que el primer resultado fue correcto", "El patrón de ascenso y descenso permite distinguir daño agudo de elevación crónica", "Solo importa para calcular el tamaño del infarto", "Es irrelevante si la primera medición fue positiva"], answer: "El patrón de ascenso y descenso permite distinguir daño agudo de elevación crónica" },
-    { question: "¿Qué debe hacer el laboratorio si la muestra para troponina llegó hemolizada?", options: ["Procesarla igual sin nota", "Evaluar el grado de hemólisis; si es significativa, rechazarla y solicitar nueva muestra porque puede interferir", "Solo procesarla con un factor de corrección", "Siempre liberar el resultado con comentario"], answer: "Evaluar el grado de hemólisis; si es significativa, rechazarla y solicitar nueva muestra porque puede interferir" },
-  ],
-  dictation: "La troponina cardíaca es el marcador de elección para el diagnóstico de infarto y debe medirse de forma seriada en el tiempo.",
-},
-// ══ GESTIÓN ══
-{
-  id: "indicadores", title: "Indicadores de calidad", level: "Intermedio", category: "Gestión", emoji: "📈",
-  description: "Interpretar, discutir y gestionar indicadores, metas y desvíos operativos.",
-  readingTitle: "Cuando el indicador no cuenta toda la historia",
-  reading: [
-    "En la reunión mensual de revisión de indicadores, el equipo presentó el informe de desempeño del período. A primera vista, los números parecían buenos: el tiempo medio de respuesta se mantenía dentro del objetivo. Sin embargo, cuando la coordinadora comenzó a hacer preguntas más específicas, la imagen empezó a complicarse.",
-    "Una analista señaló que el tiempo medio de respuesta como número global era engañoso. Si bien el promedio estaba dentro del objetivo, existían dos o tres casos por semana en los que muestras urgentes llegaban con retrasos superiores a cuatro horas.",
-    "La coordinación propuso desagregar los indicadores en al menos tres categorías: muestras de rutina, muestras urgentes de ambulatorio y muestras urgentes de internación.",
-    "Los indicadores de calidad son herramientas de gestión, no fines en sí mismos. Un indicador que siempre está verde puede ser una buena noticia o puede ser señal de que se está midiendo lo incorrecto.",
-    "La reunión terminó con un acuerdo concreto: durante los próximos dos meses, el equipo implementaría los indicadores desagregados, definiría metas específicas y presentaría análisis de causa para los casos que superaran el límite.",
-  ],
-  vocab: [
-    { es: "indicador", pt: "indicador" },
-    { es: "desagregar datos", pt: "desagregar dados" },
-    { es: "no conformidad", pt: "não conformidade" },
-    { es: "promedio / media", pt: "média" },
-    { es: "meta / objetivo", pt: "meta / objetivo" },
-    { es: "mejora continua", pt: "melhoria contínua" },
-  ],
-  quiz: [
-    { question: "¿Por qué era engañoso el tiempo medio de respuesta como indicador global?", options: ["Porque era demasiado alto", "Porque ocultaba retrasos graves en muestras urgentes de pacientes críticos", "Porque no se medía correctamente", "Porque no era el indicador adecuado"], answer: "Porque ocultaba retrasos graves en muestras urgentes de pacientes críticos" },
-    { question: "¿En qué categorías propuso desagregar el indicador la coordinación?", options: ["Por analista responsable y por turno", "Muestras de rutina, urgentes de ambulatorio y urgentes de internación", "Solo por tipo de análisis solicitado", "Por cliente y por mes"], answer: "Muestras de rutina, urgentes de ambulatorio y urgentes de internación" },
-    { question: "¿Por qué un indicador siempre en verde puede ser problemático?", options: ["Nunca es problemático si está en verde", "Puede indicar que se mide lo incorrecto o que el umbral está mal definido", "Indica que el laboratorio funciona perfectamente", "Solo es problema si el cliente se queja"], answer: "Puede indicar que se mide lo incorrecto o que el umbral está mal definido" },
-    { question: "¿Cuál es el verdadero valor de un indicador de calidad?", options: ["Estar siempre dentro del rango aceptable", "Orientar decisiones concretas y detectar problemas antes de que sean crisis", "Cumplir formalmente con los requisitos de la norma", "Mostrar resultados positivos al directorio"], answer: "Orientar decisiones concretas y detectar problemas antes de que sean crisis" },
-    { question: "¿Quiénes deben participar en la selección de indicadores?", options: ["Solo el área de calidad", "Los profesionales que conocen el proceso desde adentro", "Solo la dirección del laboratorio", "Solo los auditores externos"], answer: "Los profesionales que conocen el proceso desde adentro" },
-    { question: "¿Qué estructura de seguimiento se acordó implementar?", options: ["Revisar indicadores solo si hay quejas", "Responsables por indicador, metas específicas, análisis de causa y fechas de revisión", "Solo un informe anual de resultados", "Revisar mensualmente sin asignar responsables"], answer: "Responsables por indicador, metas específicas, análisis de causa y fechas de revisión" },
-    { question: "¿Qué transforma a un indicador en una herramienta real de mejora?", options: ["Publicarlo en la cartelera", "La estructura de seguimiento con responsables, fechas y análisis concretos", "Calcularlo con mayor frecuencia", "Compararlo con indicadores de otros laboratorios"], answer: "La estructura de seguimiento con responsables, fechas y análisis concretos" },
-    { question: "¿Cuántos casos de retraso grave se detectaban por semana?", options: ["Más de veinte", "Dos o tres casos con retrasos mayores a cuatro horas", "Ninguno según el indicador global", "Solo uno al mes"], answer: "Dos o tres casos con retrasos mayores a cuatro horas" },
-    { question: "¿Cuál es la diferencia entre una meta y un límite de alerta en un indicador?", options: ["Son el mismo concepto con distintos nombres", "La meta es el valor óptimo esperado; el límite de alerta es el punto a partir del cual se investiga activamente", "El límite de alerta siempre es más exigente que la meta", "Solo existen límites, no metas en gestión de calidad"], answer: "La meta es el valor óptimo esperado; el límite de alerta es el punto a partir del cual se investiga activamente" },
-    { question: "¿Con qué frecuencia deben revisarse los indicadores de un laboratorio clínico?", options: ["Solo una vez al año en la revisión anual", "Con una frecuencia definida según la criticidad del indicador: mensual para los críticos, trimestral para otros", "Solo cuando hay una auditoría", "Solo cuando un cliente hace una queja formal"], answer: "Con una frecuencia definida según la criticidad del indicador: mensual para los críticos, trimestral para otros" },
-    { question: "¿Qué es un indicador rezagado (lagging) a diferencia de uno adelantado (leading)?", options: ["Son términos sinónimos en gestión de calidad", "El rezagado mide lo que ya ocurrió; el adelantado predice tendencias antes de que el problema ocurra", "El adelantado siempre es más preciso que el rezagado", "Solo se usan indicadores rezagados en laboratorio clínico"], answer: "El rezagado mide lo que ya ocurrió; el adelantado predice tendencias antes de que el problema ocurra" },
-    { question: "¿Cómo se calcula el porcentaje de muestras rechazadas por criterios preanalíticos?", options: ["(Muestras rechazadas / Total de muestras recibidas) × 100", "Solo el número absoluto de rechazos por mes", "Rechazos / Total de análisis realizados", "No se puede calcular con precisión en la práctica"], answer: "(Muestras rechazadas / Total de muestras recibidas) × 100" },
-    { question: "¿Por qué los indicadores de calidad son un requisito de la ISO 15189?", options: ["Solo como formalidad sin impacto real", "Porque permiten demostrar que el laboratorio monitorea su desempeño y actúa sobre él de forma sistemática", "Solo porque lo exige el organismo acreditador", "Para poder emitir el Certificado de Aptitud"], answer: "Porque permiten demostrar que el laboratorio monitorea su desempeño y actúa sobre él de forma sistemática" },
-  ],
-  dictation: "Los indicadores de calidad son útiles solo si se interpretan en contexto, se desagregan correctamente y se usan para tomar decisiones reales de mejora.",
-},
-{
-  id: "no-conformidades", title: "No conformidades y CAPA", level: "Intermedio", category: "Gestión", emoji: "⚠️",
-  description: "Detección, análisis de causa raíz y acciones correctivas y preventivas.",
-  readingTitle: "El mismo error dos veces",
-  reading: [
-    "El área de calidad registró una nueva no conformidad relacionada con un error en el etiquetado de muestras durante el proceso de recepción. Al revisar el historial, el equipo encontró un incidente casi idéntico registrado seis meses antes, cerrado con una nota de 'informado al personal' pero sin ninguna acción correctiva formal.",
-    "La situación planteaba una pregunta necesaria: ¿por qué el mismo error había ocurrido dos veces? Informar verbalmente al personal puede generar conciencia momentánea, pero sin un cambio en el proceso, el sistema sigue siendo igualmente vulnerable.",
-    "Esta vez, el equipo decidió aplicar un análisis formal de causa raíz usando la técnica de los '5 Por qué'. La causa raíz identificada fue que el procedimiento escrito estaba desactualizado y no reflejaba el flujo real del proceso.",
-    "Con la causa raíz identificada, el equipo diseñó una CAPA que incluía la actualización del procedimiento y un control de doble verificación: el operador que etiqueta un tubo debe confirmarlo con otro analista antes de que la muestra avance al siguiente paso.",
-    "A los treinta días de implementadas las acciones, el indicador de no conformidades relacionadas con el proceso de recepción mostró una reducción del ochenta por ciento.",
-  ],
-  vocab: [
-    { es: "no conformidad", pt: "não conformidade" },
-    { es: "acción correctiva", pt: "ação corretiva" },
-    { es: "acción preventiva", pt: "ação preventiva" },
-    { es: "causa raíz", pt: "causa raiz" },
-    { es: "verificación de eficacia", pt: "verificação de eficácia" },
-    { es: "CAPA", pt: "CAPA" },
-  ],
-  quiz: [
-    { question: "¿Cuándo había ocurrido un incidente similar anteriormente?", options: ["Nunca había ocurrido antes", "Seis meses antes, cerrado sin acción correctiva real", "Un año antes con acción correctiva documentada", "La semana anterior"], answer: "Seis meses antes, cerrado sin acción correctiva real" },
-    { question: "¿Por qué informar verbalmente no es suficiente como acción correctiva?", options: ["Porque el personal no escucha", "Sin un cambio en el proceso el sistema sigue siendo igualmente vulnerable", "Porque no queda documentado", "Porque no involucra a la dirección"], answer: "Sin un cambio en el proceso el sistema sigue siendo igualmente vulnerable" },
-    { question: "¿Qué técnica de análisis de causa raíz usó el equipo?", options: ["Diagrama de Ishikawa", "Los 5 Por qué", "Análisis de modo de falla", "Diagrama de Pareto"], answer: "Los 5 Por qué" },
-    { question: "¿Cuál fue la causa raíz identificada?", options: ["Un error puntual del operador", "El procedimiento escrito estaba desactualizado y no reflejaba el flujo real", "El sistema informático tenía un error", "La capacitación inicial había sido insuficiente"], answer: "El procedimiento escrito estaba desactualizado y no reflejaba el flujo real" },
-    { question: "¿Qué resultado mostró la verificación de eficacia a los 30 días?", options: ["No hubo mejora significativa", "Reducción del 80% en no conformidades relacionadas con el proceso de recepción", "El indicador empeoró con las nuevas medidas", "Los resultados no fueron concluyentes"], answer: "Reducción del 80% en no conformidades relacionadas con el proceso de recepción" },
-    { question: "¿Qué uso final se dio al caso dentro del laboratorio?", options: ["Se archivó y nunca se volvió a mencionar", "Se incluyó como ejemplo positivo en el programa de inducción de nuevos analistas", "Se reportó como sanción disciplinaria", "Se usó para justificar una inversión en tecnología"], answer: "Se incluyó como ejemplo positivo en el programa de inducción de nuevos analistas" },
-    { question: "¿Qué acción correctiva se implementó?", options: ["Contratar más personal", "Actualización del procedimiento y control de doble verificación antes de avanzar la muestra", "Cambiar completamente el sistema informático", "Reducir las solicitudes simultáneas aceptadas"], answer: "Actualización del procedimiento y control de doble verificación antes de avanzar la muestra" },
-    { question: "¿Cuál es la diferencia entre una acción correctiva y una acción preventiva?", options: ["Son exactamente lo mismo", "La correctiva responde a un problema ya ocurrido; la preventiva actúa antes de que el problema ocurra", "La preventiva es siempre más costosa de implementar", "Solo la correctiva es exigida por la norma ISO 15189"], answer: "La correctiva responde a un problema ya ocurrido; la preventiva actúa antes de que el problema ocurra" },
-    { question: "¿Qué significa la sigla CAPA?", options: ["Control Analítico de Procedimientos y Acciones", "Corrective Action and Preventive Action (Acción Correctiva y Preventiva)", "Criterio de Aceptación para Procesos Analíticos", "Control Administrativo de Procedimientos Alternativos"], answer: "Corrective Action and Preventive Action (Acción Correctiva y Preventiva)" },
-    { question: "¿Cuándo debe cerrarse formalmente una no conformidad en el sistema de calidad?", options: ["Inmediatamente después de identificarla", "Solo después de verificar que las acciones implementadas fueron eficaces y el problema no se repitió", "Cuando el responsable de calidad lo decide", "Al final del año, en la revisión anual"], answer: "Solo después de verificar que las acciones implementadas fueron eficaces y el problema no se repitió" },
-    { question: "¿Qué es el diagrama de Ishikawa y para qué se usa?", options: ["Un tipo de gráfico de control para el hemograma", "Un diagrama de causa y efecto que organiza visualmente las posibles causas de un problema", "El gráfico de Levey-Jennings para el control interno", "Un formulario de registro de no conformidades"], answer: "Un diagrama de causa y efecto que organiza visualmente las posibles causas de un problema" },
-    { question: "¿Qué diferencia a una queja de una no conformidad?", options: ["Son términos completamente equivalentes", "La queja es una expresión de insatisfacción del cliente; la no conformidad es un incumplimiento de un requisito del sistema", "La queja siempre genera una no conformidad mayor", "Solo las no conformidades requieren documentación"], answer: "La queja es una expresión de insatisfacción del cliente; la no conformidad es un incumplimiento de un requisito del sistema" },
-    { question: "¿Por qué es importante registrar las no conformidades aunque sean menores?", options: ["Solo por requisito burocrático", "Porque el análisis de patrones de no conformidades menores puede revelar fallas sistémicas antes de que ocurra un problema mayor", "Para sancionar al personal responsable", "Solo si afectaron resultados de pacientes"], answer: "Porque el análisis de patrones de no conformidades menores puede revelar fallas sistémicas antes de que ocurra un problema mayor" },
-  ],
-  dictation: "Una acción correctiva real debe identificar la causa raíz, cambiar el proceso y verificar la eficacia de las acciones implementadas.",
-},
-{
-  id: "iso15189", title: "ISO 15189", level: "Avanzado", category: "Gestión", emoji: "🏅",
-  description: "Requisitos de la norma internacional para laboratorios clínicos.",
-  readingTitle: "El estándar que define la excelencia",
-  reading: [
-    "La norma ISO 15189 es el estándar internacional que establece los requisitos específicos de calidad y competencia para los laboratorios clínicos. Está diseñada específicamente para el contexto del laboratorio médico, a diferencia de la ISO 17025, que aplica a laboratorios de ensayo en general.",
-    "La norma está estructurada en dos grandes bloques: los requisitos de gestión, que incluyen el sistema de gestión de la calidad, el control de documentos, la gestión de no conformidades y las auditorías internas; y los requisitos técnicos, que abordan el personal, las instalaciones, los equipos y los procesos.",
-    "Uno de los conceptos centrales de la ISO 15189 es el enfoque en el paciente. El laboratorio no es solo un proveedor de datos numéricos: es un actor clave en la cadena de atención al paciente.",
-    "La acreditación bajo ISO 15189 es un proceso formal en el que un organismo evaluador independiente verifica que el laboratorio cumple con todos los requisitos de la norma. Los evaluadores son profesionales con experiencia en laboratorio clínico.",
-    "Implementar ISO 15189 no es solo cumplir con una lista de requisitos formales. Es adoptar una cultura de mejora continua en la que cada proceso es documentado, medido, evaluado y mejorado de manera sistemática.",
-  ],
-  vocab: [
-    { es: "acreditación", pt: "acreditação" },
-    { es: "norma ISO 15189", pt: "norma ISO 15189" },
-    { es: "requisito técnico", pt: "requisito técnico" },
-    { es: "revisión por la dirección", pt: "análise crítica pela direção" },
-    { es: "mejora continua", pt: "melhoria contínua" },
-    { es: "evaluación de pares", pt: "avaliação por pares" },
-  ],
-  quiz: [
-    { question: "¿Para qué tipo de laboratorio fue diseñada específicamente la ISO 15189?", options: ["Para laboratorios industriales de control de calidad", "Para laboratorios clínicos médicos específicamente", "Para laboratorios ambientales", "Para cualquier tipo de laboratorio de ensayo"], answer: "Para laboratorios clínicos médicos específicamente" },
-    { question: "¿Cuáles son los dos grandes bloques de requisitos de la ISO 15189?", options: ["Recursos humanos y equipamiento", "Requisitos de gestión y requisitos técnicos", "Documentación y control de calidad", "Procesos analíticos y postanalíticos"], answer: "Requisitos de gestión y requisitos técnicos" },
-    { question: "¿Cuál es el concepto central de la ISO 15189?", options: ["La rentabilidad del laboratorio", "El enfoque en el paciente como actor clave de la cadena de atención", "La velocidad de procesamiento", "La reducción de costos operativos"], answer: "El enfoque en el paciente como actor clave de la cadena de atención" },
-    { question: "¿Qué diferencia la acreditación ISO 15189 de la certificación ISO 9001?", options: ["Son equivalentes y se usan indistintamente", "La 15189 evalúa competencia técnica específica; la 9001 solo el sistema de gestión general", "La 9001 es más exigente técnicamente", "Solo difieren en el costo del proceso"], answer: "La 15189 evalúa competencia técnica específica; la 9001 solo el sistema de gestión general" },
-    { question: "¿Quiénes son los evaluadores en una acreditación ISO 15189?", options: ["Auditores financieros generales", "Profesionales con experiencia en laboratorio clínico", "Funcionarios del gobierno de salud", "Solo personal del organismo acreditador sin experiencia técnica"], answer: "Profesionales con experiencia en laboratorio clínico" },
-    { question: "¿Qué exige la norma respecto a los resultados críticos?", options: ["Incluirlos solo en el informe impreso", "Informarlos de manera oportuna al médico", "Solo documentarlos internamente", "Repetirlos antes de comunicarlos"], answer: "Informarlos de manera oportuna al médico" },
-    { question: "¿La ISO 15189 es un fin en sí misma?", options: ["Sí, cumplirla es el objetivo principal", "No, es un medio para adoptar una cultura de mejora continua", "Sí, el certificado es lo que importa", "Depende del tipo de laboratorio"], answer: "No, es un medio para adoptar una cultura de mejora continua" },
-    { question: "¿Qué reportan los laboratorios que implementan ISO 15189?", options: ["Solo mejoras en documentación formal", "Mejoras en calidad, satisfacción del cliente y motivación del personal", "Solo reducción de costos operativos", "Solo mejoras en tiempos de respuesta"], answer: "Mejoras en calidad, satisfacción del cliente y motivación del personal" },
-    { question: "¿Qué es la revisión por la dirección en el contexto de la ISO 15189?", options: ["Una auditoría externa anual obligatoria", "Una revisión periódica formal del desempeño del sistema de calidad realizada por la alta dirección", "La revisión de los informes de calidad por el área técnica", "El proceso de renovación de la acreditación"], answer: "Una revisión periódica formal del desempeño del sistema de calidad realizada por la alta dirección" },
-    { question: "¿Qué debe contener el manual de calidad de un laboratorio acreditado bajo ISO 15189?", options: ["Solo los procedimientos técnicos analíticos", "La política de calidad, objetivos, estructura del sistema de gestión y referencia a los procedimientos", "Solo los registros históricos de control de calidad", "Solo la lista de equipos acreditados"], answer: "La política de calidad, objetivos, estructura del sistema de gestión y referencia a los procedimientos" },
-    { question: "¿Qué es la trazabilidad metrológica en el contexto de la ISO 15189?", options: ["El seguimiento de cada muestra dentro del laboratorio", "La propiedad de una medición que puede relacionarse con una referencia estándar mediante una cadena ininterrumpida de calibraciones", "El registro histórico de todas las calibraciones realizadas", "Solo aplica a los equipos de medición de volumen"], answer: "La propiedad de una medición que puede relacionarse con una referencia estándar mediante una cadena ininterrumpida de calibraciones" },
-    { question: "¿Cuál es la diferencia entre la ISO 15189 y la ISO 17043?", options: ["Son normas equivalentes para laboratorios", "La ISO 15189 aplica a laboratorios clínicos; la ISO 17043 aplica a proveedores de ensayos de aptitud como Controllab", "La ISO 17043 es más exigente que la 15189", "Solo difieren en el organismo que las emite"], answer: "La ISO 15189 aplica a laboratorios clínicos; la ISO 17043 aplica a proveedores de ensayos de aptitud como Controllab" },
-    { question: "¿Con qué frecuencia debe revisarse y actualizarse la documentación del sistema de calidad?", options: ["Solo cuando hay una auditoría externa", "Cada vez que hay un cambio en el proceso o la norma, con revisión periódica programada aunque no haya cambios", "Solo cuando el personal lo solicita", "Una vez cada cinco años"], answer: "Cada vez que hay un cambio en el proceso o la norma, con revisión periódica programada aunque no haya cambios" },
-  ],
-  dictation: "La ISO 15189 establece requisitos de calidad y competencia para laboratorios clínicos con enfoque en el paciente y en la mejora continua.",
-},
-// ══ COMUNICACIÓN ══
-{
-  id: "atencion-cliente", title: "Atención técnica al cliente", level: "Intermedio", category: "Comunicación", emoji: "📞",
-  description: "Español profesional para explicar resultados y gestionar consultas técnicas.",
-  readingTitle: "Una llamada que exigía claridad",
-  reading: [
-    "A media mañana, una analista del área de atención al cliente recibió una llamada de un médico clínico que estaba confundido porque el informe de laboratorio de uno de sus pacientes mostraba un valor de creatinina diferente al del mes anterior.",
-    "La analista escuchó el planteo completo sin interrumpir. Luego pidió al médico que le confirmara el número de solicitud y el nombre del paciente para poder acceder al historial.",
-    "Al revisar el historial, la analista encontró la explicación: el laboratorio había implementado un nuevo método para la determinación de creatinina el mes anterior, con una calibración trazable a un estándar de referencia diferente.",
-    "La analista explicó la situación con claridad, describió el cambio de método y el impacto clínico real. También se disculpó por no haber comunicado el cambio proactivamente y ofreció enviar una carta técnica con la información completa.",
-    "La llamada terminó con el médico agradecido. El laboratorio estableció un procedimiento formal para comunicar a los médicos cualquier cambio de método con al menos quince días de anticipación.",
-  ],
-  vocab: [
-    { es: "duda / consulta", pt: "dúvida / consulta" },
-    { es: "informe", pt: "relatório / laudo" },
-    { es: "validado", pt: "validado" },
-    { es: "trazabilidad metrológica", pt: "rastreabilidade metrológica" },
-    { es: "transmitir confianza", pt: "transmitir confiança" },
-    { es: "comunicación proactiva", pt: "comunicação proativa" },
-  ],
-  quiz: [
-    { question: "¿Por qué llamó el médico al laboratorio?", options: ["Para cambiar de proveedor", "Por una diferencia aparente en el valor de creatinina entre dos meses consecutivos", "Por un error en la factura", "Para solicitar un análisis urgente"], answer: "Por una diferencia aparente en el valor de creatinina entre dos meses consecutivos" },
-    { question: "¿Cuál era la causa real de la diferencia en los valores?", options: ["Un error analítico", "Un cambio de método con calibración trazable a un estándar diferente", "Una muestra hemolizada", "Un error de identificación del paciente"], answer: "Un cambio de método con calibración trazable a un estándar diferente" },
-    { question: "¿Qué ofreció la analista al finalizar la llamada?", options: ["Solo una disculpa verbal", "Enviar una carta técnica con información completa sobre el cambio de método ese mismo día", "Repetir el análisis gratuitamente", "Revertir al método anterior"], answer: "Enviar una carta técnica con información completa sobre el cambio de método ese mismo día" },
-    { question: "¿Cuál fue el error que el laboratorio reconoció?", options: ["Que el cambio de método no había sido validado", "Que no había comunicado proactivamente el cambio de método a los médicos", "Que el resultado estaba incorrecto", "Que el médico no había recibido el informe"], answer: "Que no había comunicado proactivamente el cambio de método a los médicos" },
-    { question: "¿Qué procedimiento formal se implementó como mejora preventiva?", options: ["Volver a usar siempre el mismo método", "Comunicar a los médicos cualquier cambio de método con al menos 15 días de anticipación", "Solo notificar a los médicos que llamen a preguntar", "Publicar los cambios en el portal"], answer: "Comunicar a los médicos cualquier cambio de método con al menos 15 días de anticipación" },
-    { question: "¿Qué hizo la analista mientras buscaba información en el sistema?", options: ["Puso al médico en espera en silencio", "Verbalizó en voz alta lo que estaba haciendo para transmitir atención y profesionalismo", "Le pidió que llamara más tarde", "Le transfirió la llamada"], answer: "Verbalizó en voz alta lo que estaba haciendo para transmitir atención y profesionalismo" },
-    { question: "¿Qué lección central transmite este caso?", options: ["Que los médicos deben conocer mejor los métodos analíticos", "Que en atención técnica es necesario anticiparse a las dudas y comunicar proactivamente", "Que los cambios de método deben evitarse", "Que el teléfono es mejor que el correo para comunicar cambios"], answer: "Que en atención técnica es necesario anticiparse a las dudas y comunicar proactivamente" },
-    { question: "¿Por qué es importante escuchar el planteo completo antes de responder?", options: ["Solo por cortesía formal", "Para entender el contexto completo y no responder basándose en una interpretación incorrecta del problema", "Para ganar tiempo mientras se busca la información", "Solo es importante si el cliente está muy enojado"], answer: "Para entender el contexto completo y no responder basándose en una interpretación incorrecta del problema" },
-    { question: "¿Cómo debe formularse una disculpa profesional en atención técnica?", options: ["Evitando mencionar el error para no perder autoridad", "Reconociendo el error específico, explicando qué se hará diferente y comprometiéndose a mejorar", "Culpando al procedimiento anterior sin asumir responsabilidad", "Solo si el cliente la exige explícitamente"], answer: "Reconociendo el error específico, explicando qué se hará diferente y comprometiéndose a mejorar" },
-    { question: "¿Qué información debe incluir una carta técnica sobre cambio de método?", options: ["Solo la fecha del cambio", "Descripción del nuevo método, motivo del cambio, impacto en los valores de referencia y acción recomendada para resultados históricos", "Solo el nombre del nuevo reactivo", "Solo la firma del director técnico"], answer: "Descripción del nuevo método, motivo del cambio, impacto en los valores de referencia y acción recomendada para resultados históricos" },
-    { question: "¿Cómo se adapta el lenguaje técnico según el interlocutor?", options: ["Siempre se usa el mismo nivel de detalle técnico", "Se ajusta según si el interlocutor es un médico especialista, un médico general o un paciente", "Solo se simplifica para pacientes, nunca para médicos", "El lenguaje técnico no debe modificarse para mantener credibilidad"], answer: "Se ajusta según si el interlocutor es un médico especialista, un médico general o un paciente" },
-    { question: "¿Qué herramientas ayudan a manejar una llamada técnica difícil con profesionalismo?", options: ["Transferir la llamada al director técnico siempre", "Escuchar activamente, tomar notas, parafrasear para confirmar comprensión y ofrecer próximos pasos concretos", "Responder rápido para demostrar conocimiento", "Evitar las preguntas del cliente haciéndolo hablar más"], answer: "Escuchar activamente, tomar notas, parafrasear para confirmar comprensión y ofrecer próximos pasos concretos" },
-    { question: "¿Cuándo es apropiado escalar una consulta técnica a un superior o especialista?", options: ["Nunca, el analista debe resolver todo", "Cuando la consulta supera el conocimiento o autorización del analista, siendo transparente con el cliente", "Solo si el cliente lo exige", "Siempre, para demostrar que el laboratorio tiene jerarquía"], answer: "Cuando la consulta supera el conocimiento o autorización del analista, siendo transparente con el cliente" },
-  ],
-  dictation: "En atención técnica, no alcanza con tener razón: también es necesario comunicar proactivamente para evitar que las dudas se conviertan en problemas.",
-},
-{
-  id: "llamada-urgente", title: "Llamada urgente al médico", level: "Intermedio", category: "Comunicación", emoji: "🚨",
-  description: "Protocolo y lenguaje para comunicar resultados críticos por teléfono.",
-  readingTitle: "La llamada que no puede esperar",
-  reading: [
-    "Hay resultados de laboratorio que no pueden esperar a que el médico revise el informe en el sistema. Son los llamados valores críticos o de pánico: resultados tan extremos que indican una amenaza inmediata para la vida del paciente y que requieren comunicación verbal directa.",
-    "La lista de valores críticos incluye ejemplos como glucosa menor a 40 mg/dL o mayor a 500 mg/dL, potasio menor a 2.5 o mayor a 6.5 mEq/L, hemoglobina menor a 7 g/dL en adultos, y troponina muy elevada en contexto agudo.",
-    "El procedimiento estándar implica varios pasos: el analista debe verificar el resultado antes de llamar, confirmando la identidad de la muestra y descartando errores preanalíticos. Luego llama al médico solicitante o, si no está disponible, al médico responsable del paciente.",
-    "Durante la llamada, el analista comunica el nombre del paciente, el número de muestra, el análisis y el resultado, indica que se trata de un valor crítico, y espera confirmación verbal de que el médico recibió y entendió la información.",
-    "Todo el proceso debe quedar documentado: fecha y hora de detección, resultado, nombre del analista que llamó, nombre del médico que recibió la llamada, hora de la llamada y confirmación de recepción.",
-  ],
-  vocab: [
-    { es: "valor crítico / de pánico", pt: "valor crítico / de pânico" },
-    { es: "protocolo de comunicación", pt: "protocolo de comunicação" },
-    { es: "escalar", pt: "escalar / acionar" },
-    { es: "confirmar recepción", pt: "confirmar recebimento" },
-    { es: "guardia / servicio de urgencias", pt: "plantão / pronto-socorro" },
-    { es: "trazabilidad de comunicación", pt: "rastreabilidade da comunicação" },
-  ],
-  quiz: [
-    { question: "¿Por qué existen los protocolos de valores críticos?", options: ["Por exigencia burocrática solamente", "Porque ciertos resultados indican amenaza inmediata para la vida y no pueden esperar", "Para reducir la carga de trabajo del analista", "Solo para cumplir con la acreditación"], answer: "Porque ciertos resultados indican amenaza inmediata para la vida y no pueden esperar" },
-    { question: "¿Qué debe verificar el analista antes de llamar?", options: ["Que el médico esté en su consultorio", "El resultado y la identidad de la muestra descartando errores preanalíticos", "Solo que el resultado esté fuera de rango", "Que el sistema registró el resultado"], answer: "El resultado y la identidad de la muestra descartando errores preanalíticos" },
-    { question: "¿Es suficiente dejar un mensaje de voz o correo para comunicar un valor crítico?", options: ["Sí, si queda registrado", "No, la comunicación debe ser en tiempo real y verificada verbalmente", "Sí, si es fuera del horario habitual", "Solo si el médico no tiene disponibilidad inmediata"], answer: "No, la comunicación debe ser en tiempo real y verificada verbalmente" },
-    { question: "¿Qué información debe comunicar el analista durante la llamada?", options: ["Solo el resultado y el nombre del paciente", "Nombre del paciente, número de muestra, análisis, resultado y confirmación de que es valor crítico", "Solo el análisis y el resultado numérico", "Solo el nombre del paciente y su diagnóstico previo"], answer: "Nombre del paciente, número de muestra, análisis, resultado y confirmación de que es valor crítico" },
-    { question: "¿Qué debe documentarse en el registro de valores críticos?", options: ["Solo la fecha y el resultado", "Fecha, hora, resultado, analista, médico contactado, hora de llamada y confirmación", "Solo el nombre del médico y el resultado", "Solo si el médico hizo algún cambio en el tratamiento"], answer: "Fecha, hora, resultado, analista, médico contactado, hora de llamada y confirmación" },
-    { question: "¿Qué se hace si no se puede contactar al médico solicitante?", options: ["Se deja el resultado en el sistema y se espera", "Se escala siguiendo el procedimiento: médico responsable, guardia o supervisor", "Se cancela el resultado hasta que el médico llame", "Se informa al día siguiente en el informe"], answer: "Se escala siguiendo el procedimiento: médico responsable, guardia o supervisor" },
-    { question: "¿Por qué la trazabilidad de la comunicación puede tener consecuencias legales?", options: ["Solo por requisito de la norma de calidad", "Porque documenta si se actuó correctamente ante una emergencia clínica", "Solo si el paciente hace una queja formal", "No tiene consecuencias legales reales"], answer: "Porque documenta si se actuó correctamente ante una emergencia clínica" },
-    { question: "¿Es un valor crítico de glucosa 300 mg/dL?", options: ["Sí, siempre es crítico", "No, el rango crítico típico es menor a 40 o mayor a 500 mg/dL", "Depende solo de la edad del paciente", "Sí, cualquier glucosa elevada es crítica"], answer: "No, el rango crítico típico es menor a 40 o mayor a 500 mg/dL" },
-    { question: "¿Qué frase concreta usa el analista para confirmar que el médico entendió el valor crítico?", options: ["'¿Está bien?' y finaliza la llamada", "'¿Podría repetirme el valor que le informé para confirmar que lo recibió correctamente?'", "'El sistema ya tiene el resultado, puede revisarlo ahí'", "'Le envío un correo con el detalle para que tenga constancia'"], answer: "'¿Podría repetirme el valor que le informé para confirmar que lo recibió correctamente?'" },
-    { question: "¿Cuánto tiempo máximo debe pasar entre detectar un valor crítico y comunicarlo al médico?", options: ["Al final del turno de trabajo", "Dentro de un tiempo definido en el procedimiento del laboratorio, generalmente entre 15 y 30 minutos", "Solo si el médico llama a preguntar", "Al emitir el informe final del día"], answer: "Dentro de un tiempo definido en el procedimiento del laboratorio, generalmente entre 15 y 30 minutos" },
-    { question: "¿Qué hacer si el médico expresa dudas sobre el resultado crítico comunicado?", options: ["Insistir en que el resultado es correcto sin más información", "Ofrecer revisar la muestra, verificar el control del día y, si corresponde, repetir el análisis antes de una decisión clínica importante", "Decirle que llame a otro laboratorio", "Solo repetir el valor numérico sin más contexto"], answer: "Ofrecer revisar la muestra, verificar el control del día y, si corresponde, repetir el análisis antes de una decisión clínica importante" },
-    { question: "¿Cada laboratorio puede definir sus propios valores críticos?", options: ["No, hay valores únicos internacionales para todos los laboratorios", "Sí, dentro de rangos clínicamente aceptables basados en guías, adaptados a la población atendida", "Solo si está acreditado por ISO 15189", "No, los valores críticos son definidos exclusivamente por el organismo regulador"], answer: "Sí, dentro de rangos clínicamente aceptables basados en guías, adaptados a la población atendida" },
-    { question: "¿Qué indicador de calidad está directamente relacionado con los valores críticos?", options: ["El tiempo de respuesta promedio de todas las muestras", "El porcentaje de valores críticos comunicados dentro del tiempo establecido y documentados correctamente", "Solo el número total de valores críticos detectados por mes", "El costo de procesamiento de las muestras críticas"], answer: "El porcentaje de valores críticos comunicados dentro del tiempo establecido y documentados correctamente" },
-  ],
-  dictation: "La comunicación de valores críticos debe ser verbal, en tiempo real, verificada y documentada con nombre, hora y confirmación del médico.",
-},
-// ══ TECNOLOGÍA ══
-{
-  id: "lims", title: "Sistema LIMS", level: "Intermedio", category: "Tecnología", emoji: "🖥️",
-  description: "Gestión digital del laboratorio: flujo de muestras, trazabilidad y reportes automáticos.",
-  readingTitle: "El flujo digital de una muestra",
-  reading: [
-    "Cuando una muestra ingresa al laboratorio, en ese mismo instante comienza a dejar un rastro digital en el LIMS. El número de recepción, el nombre y el código de barras del paciente, los análisis solicitados, el analista que recibió la muestra, la fecha y hora de ingreso: todo queda registrado y vinculado de forma automática.",
-    "El LIMS permite al laboratorio responder con precisión y rapidez cuando un cliente solicita información sobre el estado de su análisis o cuando un médico necesita verificar un resultado histórico. Sin el LIMS, esa búsqueda requeriría revisar registros en papel en varios archivos físicos.",
-    "El LIMS también permite automatizar gran parte del proceso de generación de informes. Una vez que el analista valida un resultado en el sistema, el LIMS puede generar automáticamente el informe con los rangos de referencia correspondientes, señalar los resultados fuera de rango, e incluso enviar el informe por correo electrónico al cliente.",
-    "La integración del LIMS con los equipos analíticos mediante interfaces bidireccionales es otro aspecto crítico. Una interfaz bidireccional significa que el LIMS puede enviar automáticamente las solicitudes al equipo y recibir automáticamente los resultados, prácticamente eliminando los errores de transcripción.",
-    "La implementación de un nuevo LIMS es un proyecto complejo que requiere planificación cuidadosa, formación del personal, validación del sistema y un plan de contingencia.",
-  ],
-  vocab: [
-    { es: "LIMS", pt: "LIMS" },
-    { es: "interfaz bidireccional", pt: "interface bidirecional" },
-    { es: "trazabilidad digital", pt: "rastreabilidade digital" },
-    { es: "informe automático", pt: "relatório automático" },
-    { es: "validación del sistema", pt: "validação do sistema" },
-    { es: "transcripción manual", pt: "transcrição manual" },
-  ],
-  quiz: [
-    { question: "¿Qué información queda registrada automáticamente en el LIMS desde el ingreso?", options: ["Solo el resultado final validado", "Número de recepción, paciente, análisis, analista, instrumento y resultado", "Solo el nombre del paciente y el análisis pedido", "Solo el resultado y la fecha de entrega"], answer: "Número de recepción, paciente, análisis, analista, instrumento y resultado" },
-    { question: "¿Qué puede hacer el LIMS automáticamente después de que el analista valida un resultado?", options: ["Solo guardarlo en la base de datos", "Generar el informe con rangos de referencia, marcadores y enviarlo al cliente sin intervención manual", "Solo imprimir el resultado en papel", "Solo notificar al médico por teléfono"], answer: "Generar el informe con rangos de referencia, marcadores y enviarlo al cliente sin intervención manual" },
-    { question: "¿Qué es una interfaz bidireccional entre el LIMS y el equipo analítico?", options: ["Una interfaz que solo recibe datos del equipo", "Una interfaz que envía solicitudes al equipo Y recibe resultados automáticamente", "Una conexión que funciona en ambos turnos del día", "Una interfaz que conecta dos laboratorios diferentes"], answer: "Una interfaz que envía solicitudes al equipo Y recibe resultados automáticamente" },
-    { question: "¿Qué error elimina prácticamente la interfaz bidireccional?", options: ["Los errores de calibración del equipo", "Los errores de transcripción manual de resultados", "Los errores de identificación de pacientes", "Los errores de control de calidad analítico"], answer: "Los errores de transcripción manual de resultados" },
-    { question: "¿Qué requiere la implementación exitosa de un nuevo LIMS?", options: ["Solo comprar el software más moderno", "Planificación cuidadosa, formación del personal, validación y plan de contingencia", "Solo migrar los datos del sistema anterior", "Solo capacitar al área de TI"], answer: "Planificación cuidadosa, formación del personal, validación y plan de contingencia" },
-    { question: "¿Por qué es fundamental la participación del equipo técnico en la implementación?", options: ["Para ahorrar costos de consultoría", "Porque conocen los flujos de trabajo reales y pueden garantizar que el sistema se configure correctamente", "Solo para aprobar el sistema ante el organismo acreditador", "Para justificar el presupuesto"], answer: "Porque conocen los flujos de trabajo reales y pueden garantizar que el sistema se configure correctamente" },
-    { question: "¿Qué puede ocurrir con un LIMS mal configurado?", options: ["Funciona igual que uno bien configurado", "Puede generar más problemas de los que resuelve en la operación diaria", "Solo afecta la velocidad de procesamiento", "Solo afecta la estética de los informes"], answer: "Puede generar más problemas de los que resuelve en la operación diaria" },
-    { question: "¿Cómo responde el LIMS ante una solicitud de revisión histórica?", options: ["Requiere buscar en archivos físicos", "Recupera toda la información de trazabilidad en segundos", "Solo puede recuperar los últimos 30 días", "Necesita intervención manual del administrador"], answer: "Recupera toda la información de trazabilidad en segundos" },
-    { question: "¿Qué es el plan de contingencia en una implementación de LIMS?", options: ["El presupuesto de emergencia para imprevistos económicos", "El procedimiento que permite al laboratorio operar si el sistema falla durante la transición o después", "El manual de usuario para casos de dudas", "Solo el soporte técnico del proveedor"], answer: "El procedimiento que permite al laboratorio operar si el sistema falla durante la transición o después" },
-    { question: "¿Por qué la validación del LIMS es un requisito de la ISO 15189?", options: ["Solo porque el organismo acreditador lo exige", "Porque el LIMS participa directamente en el proceso de generación y comunicación de resultados que afectan al paciente", "Solo para sistemas de gestión financiera", "Porque todos los software deben validarse independientemente de su función"], answer: "Porque el LIMS participa directamente en el proceso de generación y comunicación de resultados que afectan al paciente" },
-    { question: "¿Qué ventaja ofrece el LIMS en la gestión de los controles internos de calidad?", options: ["Ninguna, el control interno se gestiona por separado", "Permite registrar los resultados de control, graficarlos automáticamente y enviar alertas cuando se detectan patrones de falla", "Solo almacena los resultados de control sin análisis", "Solo imprime los gráficos de Levey-Jennings manualmente"], answer: "Permite registrar los resultados de control, graficarlos automáticamente y enviar alertas cuando se detectan patrones de falla" },
-    { question: "¿Qué información de trazabilidad debe registrar el LIMS para cada resultado?", options: ["Solo el resultado final y la fecha", "Muestra, paciente, análisis, método, instrumento, lote de reactivo, analista que validó, fecha y hora en cada paso", "Solo el nombre del analista y el instrumento", "Solo el resultado y el rango de referencia utilizado"], answer: "Muestra, paciente, análisis, método, instrumento, lote de reactivo, analista que validó, fecha y hora en cada paso" },
-    { question: "¿Cuándo debe actualizarse la validación del LIMS?", options: ["Solo una vez al implementarlo", "Cada vez que haya una actualización de software, cambio de configuración o modificación en los flujos del proceso", "Solo si hay una auditoría próxima", "Solo si el sistema presenta errores visibles"], answer: "Cada vez que haya una actualización de software, cambio de configuración o modificación en los flujos del proceso" },
-  ],
-  dictation: "El LIMS registra toda la cadena de información de cada muestra y permite automatizar la generación de informes, reduciendo errores de transcripción.",
-},
-// ══ GRAMÁTICA ══
-{
-  id: "ser-estar", title: "Ser vs. Estar", level: "Básico", category: "Gramática", emoji: "🔄",
-  description: "La distinción más importante entre español y portugués: ser y estar.",
-  readingTitle: "¿Es o está? La diferencia que cambia el significado",
-  reading: [
-    "La distinción entre 'ser' y 'estar' es probablemente el aspecto gramatical que más confunde a los hablantes de portugués cuando aprenden español. La regla más general: 'ser' se usa para características que se perciben como permanentes, esenciales o definitivas, mientras que 'estar' se usa para estados, condiciones o situaciones temporales.",
-    "En el contexto del laboratorio, esta distinción aparece constantemente. 'El reactivo es vencido' es incorrecto: el vencimiento es un estado temporal, por lo que la forma correcta es 'el reactivo está vencido'. De la misma manera, 'el equipo está en mantenimiento' usa estar porque es una condición temporal.",
-    "Los adjetivos que funcionan de forma diferente con 'ser' y 'estar' son una fuente constante de confusión. 'El analista es aburrido' significa que tiene una personalidad aburrida como característica permanente. 'El analista está aburrido' significa que en este momento se siente aburrido.",
-    "La ubicación y las condiciones físicas van casi siempre con 'estar': 'las muestras están en el refrigerador', 'el resultado está validado'. La excepción son los eventos: 'La reunión es en la sala de conferencias'.",
-    "Para los hablantes de portugués, 'é casado' en portugués equivale a 'está casado' en español, porque el matrimonio se percibe como un estado más que como una característica identitaria permanente.",
-  ],
-  vocab: [
-    { es: "ser (identidad/permanente)", pt: "ser (identidade/permanente)" },
-    { es: "estar (estado/temporal)", pt: "estar (estado/temporário)" },
-    { es: "el reactivo está vencido", pt: "o reagente está vencido" },
-    { es: "el resultado está validado", pt: "o resultado está validado" },
-    { es: "el equipo está en mantenimiento", pt: "o equipamento está em manutenção" },
-    { es: "ella es analista", pt: "ela é analista" },
-  ],
-  quiz: [
-    { question: "¿Cuál es la regla general para usar 'ser' en español?", options: ["Para estados y condiciones temporales", "Para características que se perciben como permanentes, esenciales o de identidad", "Para indicar ubicación siempre", "Para describir cómo está alguien en un momento específico"], answer: "Para características que se perciben como permanentes, esenciales o de identidad" },
-    { question: "¿Cuál es correcto en español para el estado de un reactivo vencido?", options: ["El reactivo es vencido", "El reactivo está vencido", "El reactivo fue vencido siempre", "El reactivo ser vencido hoy"], answer: "El reactivo está vencido" },
-    { question: "¿Qué significa 'el analista está aburrido'?", options: ["Que es una persona aburrida por naturaleza", "Que en este momento se siente aburrido sin implicar nada sobre su carácter habitual", "Que fue aburrido en el pasado", "Que aburre permanentemente a sus compañeros"], answer: "Que en este momento se siente aburrido sin implicar nada sobre su carácter habitual" },
-    { question: "¿Cuál es la diferencia entre 'el reactivo es malo' y 'el reactivo está malo'?", options: ["No hay ninguna diferencia real", "'Es malo' implica mala calidad inherente; 'está malo' implica que actualmente no está en condiciones de uso", "Solo una diferencia de registro formal vs informal", "'Está malo' es siempre incorrecto en español técnico"], answer: "'Es malo' implica mala calidad inherente; 'está malo' implica que actualmente no está en condiciones de uso" },
-    { question: "¿Por qué 'la reunión es en la sala de conferencias' usa 'ser'?", options: ["Por una excepción gramatical sin explicación", "Porque se describe el evento en sí mismo, no la condición de un lugar", "Porque las salas son características permanentes del edificio", "Porque es una expresión fija"], answer: "Porque se describe el evento en sí mismo, no la condición de un lugar" },
-    { question: "¿Qué equivale en portugués a 'está casado' en español?", options: ["'Está casado' también en portugués", "'É casado' con el verbo ser", "'Foi casado' en el pasado", "'Fica casado' con verbo diferente"], answer: "'É casado' con el verbo ser" },
-    { question: "¿Cuál es correcto para describir la ubicación de los reactivos?", options: ["Los reactivos son en el refrigerador", "Los reactivos están en el refrigerador", "Los reactivos serán en el refrigerador siempre", "Los reactivos estuvieron en el refrigerador siempre"], answer: "Los reactivos están en el refrigerador" },
-    { question: "¿Cuál es la mejor estrategia para internalizar ser y estar?", options: ["Memorizar todas las reglas abstractas de una vez", "Practicar con ejemplos del contexto laboral real y corregir errores en el momento", "Usar siempre 'estar' para evitar errores con 'ser'", "Traducir literalmente del portugués"], answer: "Practicar con ejemplos del contexto laboral real y corregir errores en el momento" },
-    { question: "¿Con qué verbo se expresa la profesión u ocupación en español?", options: ["Siempre con estar", "Con ser: 'Ella es analista', 'Él es médico'", "Con tener: 'Ella tiene analista'", "Depende de si es permanente o temporaria la ocupación"], answer: "Con ser: 'Ella es analista', 'Él es médico'" },
-    { question: "¿Cómo se dice en español que el equipo actualmente funciona bien?", options: ["El equipo es bien", "El equipo está funcionando bien / El equipo funciona bien", "El equipo ser bien ahora", "El equipo es bueno funcionando"], answer: "El equipo está funcionando bien / El equipo funciona bien" },
-    { question: "¿Cuál es correcto para describir el origen de algo?", options: ["El reactivo está fabricado en Alemania", "El reactivo es fabricado en Alemania / Es de origen alemán", "El reactivo está de Alemania", "El reactivo fue siendo de Alemania"], answer: "El reactivo es fabricado en Alemania / Es de origen alemán" },
-    { question: "¿Cómo se expresa que el resultado está listo para ser enviado?", options: ["El resultado es listo", "El resultado está listo para enviar", "El resultado ser listo ahora", "El resultado estaba siendo listo"], answer: "El resultado está listo para enviar" },
-    { question: "¿Cómo se diferencia 'es seguro' de 'está seguro' en español?", options: ["No hay ninguna diferencia", "'Es seguro' describe una característica inherente; 'está seguro' describe una condición actual que puede cambiar", "'Está seguro' siempre implica duda sobre la seguridad", "Solo 'es seguro' es gramaticalmente correcto"], answer: "'Es seguro' describe una característica inherente; 'está seguro' describe una condición actual que puede cambiar" },
-  ],
-  dictation: "El equipo está en mantenimiento, el resultado está validado y el reactivo está vencido: todos son estados temporales que usan estar, no ser.",
-},
-{
-  id: "conectores", title: "Conectores y cohesión", level: "Intermedio", category: "Gramática", emoji: "🔗",
-  description: "Conectores para textos técnicos: informes, hallazgos y comunicaciones formales.",
-  readingTitle: "El informe que fluía",
-  reading: [
-    "Un informe técnico de laboratorio es, ante todo, un texto que debe comunicar información compleja de forma clara y organizada. Los conectores son las palabras y expresiones que guían al lector de una idea a la siguiente y señalan relaciones lógicas entre los datos.",
-    "Los conectores de adición son los más simples y los más utilizados: además, también, asimismo, igualmente, del mismo modo, por otra parte. Por ejemplo: 'El control de nivel bajo fue rechazado. Además, el control de nivel alto mostró una tendencia descendente.'",
-    "Los conectores de contraste son fundamentales en los informes técnicos: sin embargo, no obstante, aunque, a pesar de que, por el contrario, en cambio. Por ejemplo: 'Los resultados del control de nivel bajo fueron aceptables. Sin embargo, el control de nivel alto presentó valores fuera del rango.'",
-    "Los conectores de causa y consecuencia son esenciales para explicar por qué ocurrió algo y qué efectos tuvo. Los causales son: porque, ya que, dado que, debido a que. Los de consecuencia son: por lo tanto, en consecuencia, como resultado, por ende.",
-    "El dominio de los conectores no solo mejora la calidad de los textos escritos: también mejora la claridad de la comunicación oral en reuniones, presentaciones y llamadas con clientes.",
-  ],
-  vocab: [
-    { es: "sin embargo / no obstante", pt: "no entanto / porém" },
-    { es: "además / asimismo", pt: "além disso / igualmente" },
-    { es: "por lo tanto / en consecuencia", pt: "portanto / consequentemente" },
-    { es: "dado que / ya que", pt: "dado que / uma vez que" },
-    { es: "aunque / a pesar de que", pt: "embora / apesar de que" },
-    { es: "por el contrario / en cambio", pt: "pelo contrário / em vez disso" },
-  ],
-  quiz: [
-    { question: "¿Por qué son importantes los conectores en un texto técnico?", options: ["Para hacer el texto más largo", "Porque guían al lector entre ideas y señalan las relaciones lógicas entre los datos", "Para complicar la lectura y demostrar conocimiento", "Solo por razones estéticas"], answer: "Porque guían al lector entre ideas y señalan las relaciones lógicas entre los datos" },
-    { question: "¿Qué tipo de relación expresa el conector 'por lo tanto'?", options: ["Adición de información nueva", "Contraste con lo expresado anteriormente", "Consecuencia lógica de lo que se dijo antes", "Causa de lo que se expresará después"], answer: "Consecuencia lógica de lo que se dijo antes" },
-    { question: "¿Cuál de estos conectores expresa contraste?", options: ["Además", "Asimismo", "Sin embargo", "Dado que"], answer: "Sin embargo" },
-    { question: "¿Qué conectores sirven para indicar causa?", options: ["Sin embargo, aunque, a pesar de que", "Porque, ya que, dado que, debido a que", "Además, también, asimismo, igualmente", "Por lo tanto, en consecuencia, así que"], answer: "Porque, ya que, dado que, debido a que" },
-    { question: "¿Qué diferencia hay entre 'además' y 'sin embargo'?", options: ["Son sinónimos en español técnico", "'Además' añade en la misma dirección; 'sin embargo' introduce una idea contraria o inesperada", "'Sin embargo' es más formal que 'además' siempre", "Solo se diferencian en el nivel de registro"], answer: "'Además' añade en la misma dirección; 'sin embargo' introduce una idea contraria o inesperada" },
-    { question: "¿Cuál es el conector adecuado para una consecuencia formal en un informe técnico?", options: ["Pero, como conector más simple", "En consecuencia, como conector más formal", "Y además, para agregar información", "O sea, para reformular"], answer: "En consecuencia, como conector más formal" },
-    { question: "¿Los conectores mejoran solo la comunicación escrita?", options: ["Sí, exclusivamente para textos escritos", "No, también mejoran la claridad del discurso oral en reuniones y presentaciones", "Solo son útiles para correos electrónicos formales", "Solo son útiles en informes de auditoría"], answer: "No, también mejoran la claridad del discurso oral en reuniones y presentaciones" },
-    { question: "¿Qué transmite quien organiza su discurso con conectores explícitos?", options: ["Que conoce muchas palabras en español técnico", "Mayor claridad de pensamiento y más confianza en el interlocutor", "Que estudió gramática avanzada", "Que habla más lento de lo necesario"], answer: "Mayor claridad de pensamiento y más confianza en el interlocutor" },
-    { question: "¿Cuál es el conector correcto para introducir una reformulación o aclaración?", options: ["Sin embargo", "Es decir / o sea / en otras palabras", "Dado que", "Por ende"], answer: "Es decir / o sea / en otras palabras" },
-    { question: "¿Cómo se usa correctamente 'aunque' en un informe técnico?", options: ["Solo al final de la oración", "Para introducir una concesión: 'Aunque el control estuvo dentro del rango, se observó una tendencia creciente'", "Solo como sinónimo de 'porque'", "Solo en oraciones negativas"], answer: "Para introducir una concesión: 'Aunque el control estuvo dentro del rango, se observó una tendencia creciente'" },
-    { question: "¿Qué error común cometen los hablantes de portugués con los conectores del español?", options: ["Usar demasiados conectores", "Traducir literalmente 'porém' como 'porém' en lugar de usar 'sin embargo' o 'no obstante'", "No usar ningún conector", "Confundir los conectores de causa con los de tiempo"], answer: "Traducir literalmente 'porém' como 'porém' en lugar de usar 'sin embargo' o 'no obstante'" },
-    { question: "¿Cómo se inicia un párrafo de conclusión en un informe técnico formal?", options: ["Con 'y' como primer conector", "Con 'En conclusión', 'En síntesis' o 'Para concluir' seguidos del hallazgo principal", "Con el nombre del analista responsable", "Con el número del análisis realizado"], answer: "Con 'En conclusión', 'En síntesis' o 'Para concluir' seguidos del hallazgo principal" },
-    { question: "¿Qué diferencia existe entre 'por lo tanto' y 'a pesar de ello'?", options: ["Son sinónimos intercambiables", "'Por lo tanto' expresa consecuencia; 'a pesar de ello' expresa que algo ocurre en contra de lo esperado", "Solo difieren en el nivel de formalidad", "'A pesar de ello' solo se usa en textos académicos"], answer: "'Por lo tanto' expresa consecuencia; 'a pesar de ello' expresa que algo ocurre en contra de lo esperado" },
-  ],
-  dictation: "El control presentó una desviación; sin embargo, el equipo actuó rápidamente y, por lo tanto, no fue necesario rechazar la corrida analítica.",
-},
-// ══ CONTROLLAB ══
-{
-  id: "controllab-historia", title: "Historia de Controllab", level: "Básico", category: "Controllab", emoji: "🏛️",
-  description: "Origen, hitos de acreditación y misión de Controllab desde 1977 hasta hoy.",
-  readingTitle: "Casi cincuenta años construyendo calidad",
-  reading: [
-    "Controllab fue fundada en 1977 por Marcio Biasoli en Rio de Janeiro, Brasil. Desde el primer día, la empresa eligió un propósito claro: ayudar a los laboratorios a medir mejor. Biasoli partió de una extensa experiencia laboratorial y de proyectos piloto de control de calidad, y con ese conocimiento construyó una empresa que, con el tiempo, se convertiría en referencia para la calidad analítica en toda Latinoamérica.",
-    "A lo largo de los años, Controllab acumuló una serie de hitos de acreditación que demuestran su compromiso con la transparencia y la excelencia. En agosto de 2001, fue el primer proveedor de Ensayo de Aptitud (EA) del Brasil habilitado por la ANVISA en el marco del programa REBLAS. En diciembre de 2002, fue acreditada por la Cgcre para servicios de calibración volumétrica. En junio de 2003, conquistó el sello ISO 9001. En septiembre de 2011 fue acreditada como provedor de Ensayo de Aptitud (EA) bajo el número PEP003. En octubre de 2012, fue certificada en Buenas Prácticas de Fabricación por ANVISA. En agosto de 2016, fue acreditada como Productor de Material de Referencia Certificado bajo el número PMR0009.",
-    "Controllab tiene el apoyo de importantes sociedades científicas: la Sociedad Brasileña de Patología Clínica y Medicina Laboratorial (SBPC/ML) y la Sociedad Brasileña de Medicina Veterinaria (SBMV). También es miembro de organizaciones internacionales como la IFCC (Federación Internacional de Química Clínica) y la EQALM (Asociación Europea para la Gestión de la Calidad en Laboratorios de Medicina).",
-    "La oferta de servicios de Controllab fue creciendo de forma sostenida. Además de los Ensayos de Aptitud (EA), incorporó la producción de materiales de referencia certificados, el desarrollo de programas educativos como los Questionários Ilustrados, la colección 'Gestión de la Fase Analítica del Laboratorio', y el acceso al Sistema Online para la gestión digital de la participación.",
-    "Hoy Controllab atiende a miles de laboratorios en toda Latinoamérica y Brasil, en sectores que van desde la clínica hasta la anatomía patológica, hemoterapia, veterinaria, microbiología, análisis físico-químicos, tuberculosis, leche humana y vigilancia de resistencia antimicrobiana (vigiRAM). La misión sigue siendo la misma que en 1977: estar lado a lado con el laboratorio en la búsqueda de la calidad.",
-  ],
-  vocab: [
-    { es: "Ensayo de Aptitud (EA)", pt: "ensaio de aptidão / proficiência" },
-    { es: "acreditación / habilitación", pt: "acreditação / habilitação" },
-    { es: "material de referencia certificado", pt: "material de referência certificado" },
-    { es: "provedor de Ensayo de Aptitud (EA)", pt: "provedor de Ensayo de Aptitud (EA)" },
-    { es: "sociedad científica", pt: "sociedade científica" },
-    { es: "buenas prácticas de fabricación", pt: "boas práticas de fabricação" },
-  ],
-  quiz: [
-    { question: "¿En qué año y ciudad fue fundada Controllab?", options: ["1990 en São Paulo", "1977 en Rio de Janeiro", "2001 en Brasília", "1985 en Belo Horizonte"], answer: "1977 en Rio de Janeiro" },
-    { question: "¿Quién fundó Controllab?", options: ["Un grupo de médicos brasileños", "Marcio Biasoli, con base en experiencia laboratorial y proyectos piloto de control de calidad", "El gobierno federal brasileño", "La Sociedad Brasileña de Patología Clínica"], answer: "Marcio Biasoli, con base en experiencia laboratorial y proyectos piloto de control de calidad" },
-    { question: "¿En qué año fue Controllab el primer proveedor de EP habilitado por ANVISA/REBLAS?", options: ["1977", "2003", "2001", "2011"], answer: "2001" },
-    { question: "¿Bajo qué número fue acreditada Controllab como provedor de Ensayo de Aptitud (EA)?", options: ["ISO 15189", "PMR0009", "PEP003", "CAL0214"], answer: "PEP003" },
-    { question: "¿En qué año fue Controllab acreditada como Productor de Material de Referencia Certificado?", options: ["2001", "2011", "2003", "2016"], answer: "2016" },
-    { question: "¿Cuáles son las dos sociedades científicas que apoyan a Controllab?", options: ["IFCC y EQALM", "SBPC/ML y SBMV", "ANVISA y Cgcre", "OPS y OMS"], answer: "SBPC/ML y SBMV" },
-    { question: "¿A qué organizaciones internacionales pertenece Controllab?", options: ["Solo a la OPS", "IFCC como miembro y EQALM como miembro asociado", "ISO y CLSI", "Solo a ANVISA como organismo nacional"], answer: "IFCC como miembro y EQALM como miembro asociado" },
-    { question: "¿En qué año obtuvo Controllab la certificación ISO 9001?", options: ["1977", "2001", "2003", "2016"], answer: "2003" },
-    { question: "¿Qué es el programa vigiRAM de Controllab?", options: ["Un programa de control de calidad para laboratorios veterinarios", "Un programa de vigilancia de resistencia antimicrobiana", "Un ensayo de aptitud para análisis físico-químicas", "Un programa educativo online"], answer: "Un programa de vigilancia de resistencia antimicrobiana" },
-    { question: "¿Qué documenta el 'Gibi do Controle de Qualidade' de Controllab?", options: ["Los procedimientos de Ensayo de Aptitud (EA) en detalle", "Los principales conceptos del servicio de control de calidad de forma didáctica", "Las acreditaciones vigentes de Controllab", "El catálogo de productos y precios"], answer: "Los principales conceptos del servicio de control de calidad de forma didáctica" },
-    { question: "¿Cuál es el número de identificación de la acreditación Cgcre para Buenas Prácticas de Fabricación?", options: ["PEP003", "PMR0009", "CAL0214", "La certificación BPF es otorgada por ANVISA, no por Cgcre"], answer: "La certificación BPF es otorgada por ANVISA, no por Cgcre" },
-    { question: "¿Qué sectores cubre actualmente la oferta de ensayos de Controllab?", options: ["Solo laboratorios clínicos en Brasil", "Clínica, anatomía patológica, hemoterapia, veterinaria, microbiología, físico-químicas, tuberculosis, leche humana y vigiRAM", "Solo análisis bioquímicos y hematológicos", "Solo laboratorios acreditados por ISO 15189"], answer: "Clínica, anatomía patológica, hemoterapia, veterinaria, microbiología, físico-químicas, tuberculosis, leche humana y vigiRAM" },
-    { question: "¿Qué significa el slogan 'Lado a lado com você' de Controllab?", options: ["Que Controllab es el proveedor más grande del mercado", "Que la empresa acompaña al laboratorio en el proceso de mejora continua, no solo provee servicios", "Que Controllab tiene oficinas en todo Brasil", "Que los clientes pueden visitar las instalaciones de Controllab"], answer: "Que la empresa acompaña al laboratorio en el proceso de mejora continua, no solo provee servicios" },
-  ],
-  dictation: "Controllab fue fundada en 1977 por Marcio Biasoli y fue el primer proveedor de Ensayo de Aptitud (EA) del Brasil habilitado por ANVISA en 2001.",
-},
-{
-  id: "controllab-ensayos", title: "Ensayos de aptitud (PT)", level: "Intermedio", category: "Controllab", emoji: "🔬",
-  description: "Cómo funcionan los programas de Ensayo de Aptitud (EA) de Controllab.",
-  readingTitle: "¿Cómo sabe un laboratorio si sus resultados son correctos?",
-  reading: [
-    "Un laboratorio enfrenta una pregunta fundamental: ¿cómo sé que mis resultados son correctos? El control interno le dice si el método es reproducible dentro de su propio sistema, pero no le dice si sus valores están alineados con los que obtendrían otros laboratorios procesando la misma muestra. Esa pregunta es la que responde el ensayo de aptitud.",
-    "Un ensayo de aptitud consiste en que un organismo coordinador, como Controllab, distribuye muestras idénticas a múltiples laboratorios participantes. Cada laboratorio analiza la muestra con sus propios métodos y reporta sus resultados al coordinador, quien compila todos los resultados y emite un informe de desempeño.",
-    "Controllab evalúa el desempeño siguiendo la norma ABNT NBR ISO/IEC 17043. Los participantes son evaluados en grupos según el sistema analítico utilizado. Para grupos de 12 o más participantes se usan estadísticas robustas conforme a la ISO 13528. Para grupos de menos de 12 participantes se aplican métodos estadísticos tradicionales con técnicas de remuestreo.",
-    "El indicador de desvío (ID) es el índice que Controllab utiliza para evaluar el desempeño de cada participante. Se calcula dividiendo el error del participante por el criterio del proveedor: ID = (resultado - media) / límite. Un ID entre -1 y +1 indica que el resultado está dentro del criterio establecido.",
-    "Los ensayos de aptitud de Controllab cubren bioquímica clínica, hematología, coagulación, microbiología, uroanálisis, inmunología, análisis físico-químicas, tuberculosis, leche humana y más programas educativos.",
-  ],
-  vocab: [
-    { es: "Ensayo de Aptitud (EA)", pt: "ensaio de aptidão / proficiência" },
-    { es: "índice de desvío (ID)", pt: "índice de desvio (ID)" },
-    { es: "faixa de avaliação / faja de evaluación", pt: "faixa de avaliação" },
-    { es: "valor alvo / valor alvo", pt: "valor alvo" },
-    { es: "desempeño satisfactorio / insatisfactorio", pt: "desempenho satisfatório / insatisfatório" },
-    { es: "muestra de aptitud", pt: "amostra de proficiência" },
-  ],
-  quiz: [
-    { question: "¿Qué pregunta responde un ensayo de aptitud?", options: ["¿El equipo está calibrado correctamente?", "¿Los resultados del laboratorio están alineados con los de otros laboratorios que miden lo mismo?", "¿El personal está capacitado adecuadamente?", "¿El control interno está dentro de los límites?"], answer: "¿Los resultados del laboratorio están alineados con los de otros laboratorios que miden lo mismo?" },
-    { question: "¿Bajo qué norma evalúa Controllab el desempeño en sus programas?", options: ["ISO 15189 exclusivamente", "ABNT NBR ISO/IEC 17043", "ISO 13528 como única referencia", "CLIA 88 como norma principal"], answer: "ABNT NBR ISO/IEC 17043" },
-    { question: "¿Qué índice utiliza Controllab para evaluar el desempeño de cada participante?", options: ["El Índice de Desvio (ID) del grupo", "El Índice de Desvío (ID)", "El coeficiente de variación del grupo", "El porcentaje de adecuación directo"], answer: "El Índice de Desvío (ID)" },
-    { question: "¿Cuál es la fórmula del Índice de Desvío (ID)?", options: ["ID = resultado / media", "ID = (resultado - media) / límite", "ID = (resultado - media) / desvío estándar del grupo", "ID = resultado × límite"], answer: "ID = (resultado - media) / límite" },
-    { question: "¿Qué rango de ID indica resultado dentro del criterio del proveedor?", options: ["Entre -2 y +2", "Entre -1 y +1", "Entre 0 y 1", "Cualquier valor positivo"], answer: "Entre -1 y +1" },
-    { question: "¿Cuál es la respuesta correcta ante un resultado insatisfactorio en un PT?", options: ["Ignorarlo si el control interno estaba bien", "Investigación sistemática de la causa raíz con documentación y verificación de acciones correctivas", "Repetir el ensayo hasta obtener un resultado satisfactorio", "Cambiar de proveedor del programa de EA"], answer: "Investigación sistemática de la causa raíz con documentación y verificación de acciones correctivas" },
-    { question: "¿Cuántos participantes mínimos requiere Controllab para usar estadísticas robustas?", options: ["Más de 5", "12 o más participantes en el grupo de evaluación", "Al menos 20 laboratorios", "30 participantes por rodada"], answer: "12 o más participantes en el grupo de evaluación" },
-    { question: "¿Qué diferencia al ID del Índice de Desvio (ID) (GA) que también ofrece Controllab?", options: ["Son exactamente iguales con distinto nombre", "El ID relativiza el error frente al criterio del proveedor; el Índice de Desvio (ID) (GA) considera la variación del grupo", "El Índice de Desvio (ID) es siempre más informativo que el ID", "El ID solo aplica a resultados cuantitativos"], answer: "El ID relativiza el error frente al criterio del proveedor; el Índice de Desvio (ID) (GA) considera la variación del grupo" },
-    { question: "¿Cuándo puede un resultado ser educativo en lugar de evaluado en el PT de Controllab?", options: ["Cuando el laboratorio así lo solicita", "Cuando tiene variabilidad atípica, resultado conocido, es calculado o es subjetivo sin posibilidad de estandarización", "Cuando el laboratorio no paga a tiempo", "Cuando el grupo tiene menos de 20 participantes"], answer: "Cuando tiene variabilidad atípica, resultado conocido, es calculado o es subjetivo sin posibilidad de estandarización" },
-    { question: "¿Cuál es el grau de desempenho mínimo para ensayos generales en Controllab?", options: ["100%", "90%", "80%", "70%"], answer: "80%" },
-    { question: "¿Cómo se identifica cada rodada del programa de Controllab?", options: ["Con un número secuencial único", "Con el mes (tres caracteres) y el año (cuatro dígitos) de la remesa", "Con el nombre del módulo y el año", "Con el número de participantes de esa rodada"], answer: "Con el mes (tres caracteres) y el año (cuatro dígitos) de la remesa" },
-    { question: "¿Qué es la Rodada Especial en el programa de Controllab?", options: ["Una rodada adicional pagada en cada trimestre", "Una oportunidad de recuperación de desempeño al final del año para participantes con resultados inadecuados", "La rodada más importante del año evaluada con criterio más exigente", "Una rodada solo para laboratorios acreditados"], answer: "Una oportunidad de recuperación de desempeño al final del año para participantes con resultados inadecuados" },
-    { question: "¿Cuándo puede el laboratorio emitir el Certificado de Proficiencia de Controllab?", options: ["Después de 3 meses de participación", "Al final del año, si alcanzó el grau de desempenho mínimo en los ensaios participados", "Inmediatamente al inscribirse", "Solo si está acreditado por ISO 15189"], answer: "Al final del año, si alcanzó el grau de desempenho mínimo en los ensaios participados" },
-  ],
-  dictation: "El Índice de Desvío de Controllab es igual al resultado menos la media dividido por el límite del proveedor, y valores entre menos uno y más uno indican resultado dentro del criterio.",
-},
-{
-  id: "controllab-id-vs-zscore", title: "ID vs. Índice de Desvio (ID) en Controllab", level: "Avanzado", category: "Controllab", emoji: "📐",
-  description: "Entiende la diferencia entre el Índice de Desvío y el Índice de Desvio (ID) que usa Controllab.",
-  readingTitle: "Dos índices, dos perspectivas",
-  reading: [
-    "Controllab utiliza principalmente el Índice de Desvío (ID) como indicador de desempeño en sus programas. El ID se calcula con la fórmula: ID = (resultado - media) / límite. Esto significa que el error del laboratorio se relativiza frente al criterio del proveedor, no frente a la variación del grupo. Un ID entre -1 y +1 indica que el resultado está dentro del criterio establecido.",
-    "La ventaja principal del ID es que permite comparar el desempeño del laboratorio a través de diferentes rodadas y diferentes analitos sobre una misma base, ya que siempre se relativiza frente al mismo tipo de criterio. Esto facilita la visualización de tendencias en programas con paneles múltiples.",
-    "El Índice de Desvio (ID) del grupo de evaluación, por su parte, utiliza la variación real de los participantes. Su fórmula es: Índice de Desvio (ID) (GA) = (resultado - media) / desvío estándar del grupo. Este índice permite comparar el comportamiento del laboratorio frente a sus pares en ese ciclo específico.",
-    "La diferencia práctica entre los dos índices es importante. Un laboratorio puede tener un ID satisfactorio (entre -1 y +1) pero un Índice de Desvio (ID) elevado si el grupo completo tiene resultados muy consistentes entre sí. Por el contrario, un laboratorio con resultado inadecuado (ID fuera de ±1) puede tener un Índice de Desvio (ID) aceptable si el grupo en ese ciclo tuvo mucha dispersión.",
-    "Controllab informa ambos índices para que el laboratorio pueda interpretar su desempeño desde dos perspectivas: si cumple el criterio de calidad establecido (ID) y cómo se compara con sus pares en ese ciclo (Índice de Desvio (ID) GA). El indicador primario de evaluación en Controllab es el ID.",
-  ],
-  vocab: [
-    { es: "índice de desvío (ID)", pt: "índice de desvio (ID)" },
-    { es: "Índice de Desvio (ID) del grupo de evaluación", pt: "Índice de Desvio (ID) do grupo de avaliação (GA)" },
-    { es: "límite del proveedor", pt: "limite do provedor" },
-    { es: "desvío estándar del grupo", pt: "desvio padrão do grupo" },
-    { es: "resultado adecuado / inadecuado", pt: "resultado adequado / inadequado" },
-    { es: "tendencia analítica", pt: "tendência analítica" },
-  ],
-  quiz: [
-    { question: "¿Cuál es la fórmula del Índice de Desvío (ID)?", options: ["ID = (resultado - media) / desvío estándar del grupo", "ID = (resultado - media) / límite del proveedor", "ID = resultado / media × 100", "ID = (resultado - media) × límite"], answer: "ID = (resultado - media) / límite del proveedor" },
-    { question: "¿Qué rango de ID indica resultado dentro del criterio del proveedor?", options: ["Entre -2 y +2", "Entre -1 y +1", "Cualquier valor positivo", "Entre 0 y 2"], answer: "Entre -1 y +1" },
-    { question: "¿Cuál es la fórmula del Índice de Desvio (ID) del grupo de evaluación (GA)?", options: ["z = resultado / media", "z = (resultado - media) / desvío estándar del grupo", "z = (resultado - media) / límite del proveedor", "z = resultado × desvío estándar"], answer: "z = (resultado - media) / desvío estándar del grupo" },
-    { question: "¿Cuál es la ventaja principal del ID sobre el Índice de Desvio (ID)?", options: ["Es más fácil de calcular", "Permite comparar el desempeño entre diferentes analitos y rodadas sobre una misma base, independiente de la variación del grupo", "Es siempre más favorable para el laboratorio", "Solo se calcula una vez por año"], answer: "Permite comparar el desempeño entre diferentes analitos y rodadas sobre una misma base, independiente de la variación del grupo" },
-    { question: "¿Un ID entre -1 y +1 siempre significa un Índice de Desvio (ID) entre -2 y +2?", options: ["Sí, siempre son equivalentes", "No, depende de la dispersión del grupo en ese ciclo específico", "Sí, cuando el grupo tiene más de 12 participantes", "No, el ID siempre es mayor que el Índice de Desvio (ID)"], answer: "No, depende de la dispersión del grupo en ese ciclo específico" },
-    { question: "¿Cuál es el indicador primario de evaluación en los programas de Controllab?", options: ["El Índice de Desvio (ID) del grupo (GA)", "El Índice de Desvío (ID)", "El porcentaje de adecuación acumulado", "El coeficiente de variación del grupo"], answer: "El Índice de Desvío (ID)" },
-    { question: "¿Qué significa un ID = 0?", options: ["El resultado está en el límite del criterio", "El resultado del laboratorio es exactamente igual a la media del grupo de evaluación", "El resultado es inaceptable", "No se puede calcular el ID"], answer: "El resultado del laboratorio es exactamente igual a la media del grupo de evaluación" },
-    { question: "¿Por qué el ID facilita el seguimiento de tendencias en programas con múltiples analitos?", options: ["Porque usa el mismo denominador para todos los analitos", "Porque todos los resultados se relativizan frente al criterio del proveedor, permitiendo comparación directa entre analitos", "Porque solo aplica a resultados cuantitativos de bioquímica", "Porque siempre da valores entre -1 y +1"], answer: "Porque todos los resultados se relativizan frente al criterio del proveedor, permitiendo comparación directa entre analitos" },
-    { question: "¿Cuándo el Índice de Desvio (ID) (GA) puede ser más informativo que el ID?", options: ["Siempre, es el índice más importante", "Cuando se quiere saber cómo se posiciona el laboratorio frente a sus pares en ese ciclo específico", "Solo cuando el grupo tiene menos de 12 participantes", "Nunca, el ID es siempre superior"], answer: "Cuando se quiere saber cómo se posiciona el laboratorio frente a sus pares en ese ciclo específico" },
-    { question: "¿Qué ocurre con el ID cuando el resultado del laboratorio es mayor que la media?", options: ["El ID siempre es negativo en ese caso", "Se usa el límite superior de la faja de evaluación en el denominador", "El ID no puede calcularse cuando el resultado supera la media", "El ID se multiplica por -1"], answer: "Se usa el límite superior de la faja de evaluación en el denominador" },
-    { question: "¿En qué condición el ID no aparece en el relatório de avaliação de Controllab?", options: ["Cuando el grupo tiene más de 12 participantes", "Cuando los datos no permiten usar una medida de tendencia central, cuando el ensayo es calculado, o cuando el resultado tiene signo > o <", "Cuando el laboratorio tiene ID perfecto de cero", "Solo cuando el resultado es inadecuado"], answer: "Cuando los datos no permiten usar una medida de tendencia central, cuando el ensayo es calculado, o cuando el resultado tiene signo > o <" },
-    { question: "¿Qué diferencia conceptual existe entre el ID y el Índice de Desvio (ID) como herramientas de mejora?", options: ["No hay diferencia conceptual relevante", "El ID dice si el resultado cumple el estándar de calidad; el Índice de Desvio (ID) dice si el resultado es similar o diferente al de los pares", "El Índice de Desvio (ID) siempre es más estricto que el ID", "Solo el ID es una herramienta de mejora; el Índice de Desvio (ID) es solo estadístico"], answer: "El ID dice si el resultado cumple el estándar de calidad; el Índice de Desvio (ID) dice si el resultado es similar o diferente al de los pares" },
-    { question: "¿Por qué un laboratorio debe analizar tanto el ID como el Índice de Desvio (ID) al interpretar sus resultados?", options: ["Solo por exigencia del organismo acreditador", "Porque juntos ofrecen una visión completa: cumplimiento del criterio de calidad y posicionamiento frente al grupo", "Para justificar resultados inadecuados", "Solo si el ID está fuera de ±1"], answer: "Porque juntos ofrecen una visión completa: cumplimiento del criterio de calidad y posicionamiento frente al grupo" },
-  ],
-  dictation: "El Índice de Desvío relativiza el error del laboratorio frente al criterio del proveedor, mientras que el Índice de Desvio (ID) del grupo considera la variación real de los participantes en ese ciclo.",
-},
-{
-  id: "controllab-materiales", title: "Materiales de referencia", level: "Intermedio", category: "Controllab", emoji: "🧪",
-  description: "Qué son, para qué sirven y cómo se usan los materiales de referencia certificados.",
-  readingTitle: "El patrón que todo laboratorio necesita",
-  reading: [
-    "Un material de referencia es una sustancia o mezcla con propiedades suficientemente homogéneas y estables para ser usada en la calibración de equipos, la validación de métodos o el control de calidad del proceso analítico.",
-    "Controllab produce y distribuye materiales de referencia certificados (MRC), acreditada por la Cgcre bajo el número PMR0009 desde agosto de 2016. Los MRC tienen un certificado especificando los valores de las propiedades junto con su incertidumbre de medición, determinados mediante procedimientos metrológicamente trazables.",
-    "En el laboratorio clínico, los materiales de referencia se usan para tres propósitos principales: la calibración de los equipos analíticos, la validación de métodos y el control interno de calidad.",
-    "La trazabilidad metrológica es el concepto que conecta el resultado de una medición con un patrón de referencia internacional a través de una cadena ininterrumpida de calibraciones. Cuando un laboratorio usa un material de referencia certificado trazable al SI, sus resultados son comparables con los de cualquier otro laboratorio del mundo.",
-    "Los materiales de referencia de Controllab cubren matrices diversas: suero, plasma, orina, agua, alimentos, suelos y otros. La estabilidad del material durante el período de uso declarado en el certificado es un parámetro crítico que Controllab evalúa y garantiza.",
-  ],
-  vocab: [
-    { es: "material de referencia certificado (MRC)", pt: "material de referência certificado (MRC)" },
-    { es: "trazabilidad metrológica", pt: "rastreabilidade metrológica" },
-    { es: "incertidumbre de medición", pt: "incerteza de medição" },
-    { es: "calibración trazable", pt: "calibração rastreável" },
-    { es: "comparabilidad de resultados", pt: "comparabilidade de resultados" },
-    { es: "homogeneidad / estabilidad", pt: "homogeneidade / estabilidade" },
-  ],
-  quiz: [
-    { question: "¿Qué es un material de referencia?", options: ["Un reactivo comercial de alta calidad", "Una sustancia con propiedades determinadas con alta precisión para calibración, validación o control de calidad", "Un estándar solo usado en investigación académica", "Un control de calidad interno sin certificación"], answer: "Una sustancia con propiedades determinadas con alta precisión para calibración, validación o control de calidad" },
-    { question: "¿Bajo qué número está acreditada Controllab como Productor de Material de Referencia Certificado?", options: ["PEP003", "CAL0214", "PMR0009", "ISO 17034"], answer: "PMR0009" },
-    { question: "¿Cuáles son los tres usos principales de los materiales de referencia?", options: ["Calibración, diagnóstico clínico y facturación", "Calibración de equipos, validación de métodos y control interno de calidad", "Solo calibración y validación de métodos", "Control interno, ensayos de aptitud y certificación"], answer: "Calibración de equipos, validación de métodos y control interno de calidad" },
-    { question: "¿Qué es la trazabilidad metrológica?", options: ["El registro histórico de todas las calibraciones del equipo", "La cadena ininterrumpida que conecta una medición con un patrón de referencia internacional", "El proceso de verificar que el material no está vencido", "El conjunto de normas que regulan el uso de materiales de referencia"], answer: "La cadena ininterrumpida que conecta una medición con un patrón de referencia internacional" },
-    { question: "¿Por qué la trazabilidad es esencial para la comparabilidad de resultados?", options: ["Por exigencia burocrática de la norma únicamente", "Porque permite que los resultados de diferentes laboratorios sean comparables entre sí en todo el mundo", "Solo porque lo requieren los organismos acreditadores", "Porque reduce los costos de producción de los materiales"], answer: "Porque permite que los resultados de diferentes laboratorios sean comparables entre sí en todo el mundo" },
-    { question: "¿Qué matrices cubren los materiales de referencia de Controllab?", options: ["Solo suero y plasma para laboratorio clínico", "Suero, plasma, orina, agua, alimentos, suelos y otras matrices", "Solo matrices de laboratorio clínico", "Solo matrices industriales sin aplicación clínica"], answer: "Suero, plasma, orina, agua, alimentos, suelos y otras matrices" },
-    { question: "¿Qué parámetro crítico garantiza Controllab respecto a sus materiales?", options: ["La velocidad de entrega al laboratorio", "La estabilidad del material durante el período de uso declarado en el certificado", "El precio más bajo del mercado", "La cantidad mínima de viales por pedido"], answer: "La estabilidad del material durante el período de uso declarado en el certificado" },
-    { question: "¿Qué diferencia a un MRC de un material de referencia sin certificar?", options: ["Solo el precio más alto del MRC", "El MRC tiene certificado con valores e incertidumbre determinados por procedimientos metrológicamente trazables", "El MRC es producido por organismos gubernamentales únicamente", "El MRC no requiere condiciones especiales de almacenamiento"], answer: "El MRC tiene certificado con valores e incertidumbre determinados por procedimientos metrológicamente trazables" },
-    { question: "¿Qué es la incertidumbre de medición declarada en el certificado de un MRC?", options: ["El margen de error del equipo del laboratorio", "La dispersión de los valores que le son atribuidos razonablemente al mensurando, cuantificada en el proceso de caracterización", "El porcentaje de variación permitido en el uso del material", "Solo aplica a materiales de referencia para pH"], answer: "La dispersión de los valores que le son atribuidos razonablemente al mensurando, cuantificada en el proceso de caracterización" },
-    { question: "¿Cuándo debe el laboratorio verificar las condiciones de almacenamiento de un MRC?", options: ["Solo al vencimiento del certificado", "Al recibirlo, antes de usarlo y durante todo el período de uso para garantizar la integridad del material", "Solo si nota cambios visuales en el material", "Solo para materiales de calibración, no para controles"], answer: "Al recibirlo, antes de usarlo y durante todo el período de uso para garantizar la integridad del material" },
-    { question: "¿Por qué un laboratorio no debe usar un MRC como calibrador si fue caracterizado solo como control?", options: ["Por razones de costo", "Porque su caracterización y trazabilidad pueden no ser las adecuadas para la función de calibración", "Por exigencia del fabricante del equipo exclusivamente", "Solo si el equipo no lo acepta en el protocolo"], answer: "Porque su caracterización y trazabilidad pueden no ser las adecuadas para la función de calibración" },
-    { question: "¿Qué norma regula la producción de materiales de referencia certificados?", options: ["ISO 15189", "ISO 17034 para productores de materiales de referencia", "CLIA 88", "Solo las regulaciones de ANVISA"], answer: "ISO 17034 para productores de materiales de referencia" },
-    { question: "¿Cómo contribuye el uso de MRC de Controllab a la armonización de resultados entre laboratorios?", options: ["Haciendo que todos los laboratorios usen el mismo equipo analítico", "Garantizando que todos los laboratorios que usan el mismo MRC tienen sus resultados referenciados al mismo patrón de trazabilidad", "Obligando a todos a reportar resultados con las mismas unidades", "Eliminando la variabilidad biológica de las muestras"], answer: "Garantizando que todos los laboratorios que usan el mismo MRC tienen sus resultados referenciados al mismo patrón de trazabilidad" },
-  ],
-  dictation: "Los materiales de referencia certificados de Controllab tienen trazabilidad metrológica y se usan para calibración, validación de métodos y control interno de calidad.",
-},
-{
-  id: "controllab-comunicacion", title: "Comunicar con clientes de Controllab", level: "Intermedio", category: "Controllab", emoji: "📞",
-  description: "Vocabulario y situaciones reales de comunicación con laboratorios clientes en español.",
-  readingTitle: "La llamada desde Buenos Aires",
-  reading: [
-    "Una mañana de lunes, una analista del equipo de Controllab recibió una llamada de un laboratorio clínico en Buenos Aires. El responsable de calidad del laboratorio estaba preocupado: acababa de recibir el informe del último ciclo del programa de bioquímica y su resultado de glucosa aparecía con un Índice de Desvío (ID) de 1.4, lo que lo colocaba fuera del criterio del proveedor.",
-    "La analista escuchó el planteo completo antes de responder. Luego revisó el informe en el sistema y confirmó que el ID era efectivamente de 1.4, lo que indicaba que el resultado estaba fuera de la faja de evaluación establecida por Controllab.",
-    "La conversación fue un ejercicio práctico de comunicación técnica en español. La analista tuvo que explicar conceptos como el Índice de Desvío, el valor alvo, el límite del proveedor y la faja de avaliação, usando un lenguaje claro y accesible pero sin perder precisión técnica.",
-    "La analista sugirió al laboratorio revisar tres aspectos: primero, el lote de calibrador vigente durante el ciclo del EA; segundo, los resultados del control interno del mismo período; tercero, si otros laboratorios que usaban el mismo método habían tenido resultados similares, consultando la sección de comparación por método en el informe.",
-    "Ese tipo de interacción es el núcleo de la relación entre Controllab y sus clientes hispanohablantes. Acompañar al laboratorio en la interpretación del ID, del informe y en la mejora de su desempeño requiere un dominio sólido del español técnico del laboratorio.",
-  ],
-  vocab: [
-    { es: "índice de desvío (ID)", pt: "índice de desvio (ID)" },
-    { es: "faja de evaluación / faixa de avaliação", pt: "faixa de avaliação" },
-    { es: "responsable de calidad del laboratorio", pt: "responsável pela qualidade do laboratório" },
-    { es: "lote de calibrador", pt: "lote de calibrador" },
-    { es: "documentar la consulta", pt: "documentar a consulta" },
-    { es: "soporte técnico", pt: "suporte técnico" },
-  ],
-  quiz: [
-    { question: "¿Por qué llamó el responsable de calidad del laboratorio de Buenos Aires?", options: ["Para cancelar su participación en el programa de EA", "Porque su ID de glucosa estaba en 1.4, fuera del criterio del proveedor, y quería orientación", "Porque no recibió el informe del ciclo en tiempo y forma", "Para solicitar un nuevo ciclo de análisis gratuito"], answer: "Porque su ID de glucosa estaba en 1.4, fuera del criterio del proveedor, y quería orientación" },
-    { question: "¿Qué hizo la analista antes de responder al cliente?", options: ["Le envió directamente el protocolo de investigación por correo", "Escuchó el planteo completo y revisó el informe en el sistema antes de responder", "Le pidió que enviara los datos por correo electrónico", "Le indicó que el resultado era inaceptable sin revisar el contexto"], answer: "Escuchó el planteo completo y revisó el informe en el sistema antes de responder" },
-    { question: "¿Un ID de 1.4 significa que el resultado del laboratorio está dentro del criterio de Controllab?", options: ["Sí, cualquier ID menor a 2 es aceptable", "No, el criterio de Controllab es ID entre -1 y +1; un ID de 1.4 está fuera", "Sí, 1.4 es solo una señal de alerta sin consecuencia", "Depende del analito evaluado"], answer: "No, el criterio de Controllab es ID entre -1 y +1; un ID de 1.4 está fuera" },
-    { question: "¿Qué tres aspectos sugirió revisar la analista al laboratorio?", options: ["El equipo, el reactivo y el personal", "El lote de calibrador, los controles internos del período y la comparación por método en el informe", "Solo los resultados de los controles internos", "Solo la calibración del equipo analítico"], answer: "El lote de calibrador, los controles internos del período y la comparación por método en el informe" },
-    { question: "¿Qué refleja ese tipo de interacción sobre la relación de Controllab con sus clientes?", options: ["Que Controllab solo distribuye materiales y espera resultados", "Que Controllab acompaña al laboratorio en la interpretación del ID y en la mejora del desempeño", "Que el soporte técnico es solo por correo electrónico", "Que la relación es exclusivamente comercial sin soporte técnico"], answer: "Que Controllab acompaña al laboratorio en la interpretación del ID y en la mejora del desempeño" },
-    { question: "¿Qué requiere el soporte técnico a clientes hispanohablantes del equipo Controllab?", options: ["Solo conocer el sistema informático de gestión de clientes", "Dominio sólido del español técnico del laboratorio: vocabulario específico y habilidades comunicativas", "Solo hablar español a nivel básico conversacional", "Solo conocer los productos del catálogo de Controllab"], answer: "Dominio sólido del español técnico del laboratorio: vocabulario específico y habilidades comunicativas" },
-    { question: "¿Qué hizo la analista al finalizar la llamada?", options: ["Solo cerró la llamada sin registro adicional", "Documentó la consulta en el sistema con el plan de acción acordado", "Envió un correo de seguimiento al directorio del laboratorio", "Solicitó al laboratorio que repitiera el análisis"], answer: "Documentó la consulta en el sistema con el plan de acción acordado" },
-    { question: "¿Por qué el ID de 1.4 es más informativo que solo saber que el resultado fue 'inadecuado'?", options: ["No hay diferencia, ambos dicen lo mismo", "El ID cuantifica qué tan lejos está el resultado del límite y en qué dirección, facilitando la investigación", "El ID es menos informativo porque requiere cálculo matemático", "Solo el Índice de Desvio (ID) es informativo; el ID solo indica adecuado o inadecuado"], answer: "El ID cuantifica qué tan lejos está el resultado del límite y en qué dirección, facilitando la investigación" },
-    { question: "¿Cómo puede el laboratorio acceder a la comparación por método dentro del informe de Controllab?", options: ["Solo contactando al equipo técnico de Controllab", "A través del Sistema Online de Controllab en la sección de relatório de avaliação y perfil de resultados", "Solo en la versión impresa del informe", "Solo si tiene acreditación ISO 15189"], answer: "A través del Sistema Online de Controllab en la sección de relatório de avaliação y perfil de resultados" },
-    { question: "¿Qué es el valor alvo en el informe de Controllab?", options: ["El resultado del laboratorio en esa rodada", "La media (o mediana) de las respuestas del grupo de evaluación tras el tratamiento estadístico", "El valor esperado según el fabricante del reactivo", "El resultado del laboratorio de referencia designado"], answer: "La media (o mediana) de las respuestas del grupo de evaluación tras el tratamiento estadístico" },
-    { question: "¿Por qué el laboratorio no debe comparar su resultado solo con el valor alvo sino también con la faja de avaliação?", options: ["Porque el valor alvo siempre es incorrecto", "Porque la faja de avaliação es el intervalo aceptable; el ID indica su posición dentro o fuera de ese intervalo", "Solo por exigencia del sistema online", "Porque el valor alvo no aparece en el informe impreso"], answer: "Porque la faja de avaliação es el intervalo aceptable; el ID indica su posición dentro o fuera de ese intervalo" },
-    { question: "¿Qué dificultad lingüística adicional enfrenta el equipo de Controllab al comunicarse con laboratorios hispanohablantes de distintos países?", options: ["No hay dificultades adicionales en español", "Las diferencias de vocabulario técnico y coloquial entre países como Argentina, Colombia y México, que pueden generar malentendidos", "Solo la diferencia de zona horaria", "Solo la pronunciación diferente del español"], answer: "Las diferencias de vocabulario técnico y coloquial entre países como Argentina, Colombia y México, que pueden generar malentendidos" },
-    { question: "¿Qué actitud profesional debe mantener el equipo de Controllab cuando un cliente está ansioso por un resultado insatisfactorio?", options: ["Transmitir urgencia y preocupación para que el cliente tome el problema en serio", "Mantener calma, validar la preocupación del cliente y orientarlo con un plan de acción concreto y alcanzable", "Minimizar el problema para reducir la ansiedad del cliente", "Transferir la llamada a un supervisor inmediatamente"], answer: "Mantener calma, validar la preocupación del cliente y orientarlo con un plan de acción concreto y alcanzable" },
-  ],
-  dictation: "El soporte técnico a clientes hispanohablantes de Controllab requiere explicar el Índice de Desvío y la faja de evaluación con claridad, calma y un plan de acción concreto.",
-},
-
-// ══ LABORATORIO (5 nuevos) ══
-{
-  id: "inmunologia", title: "Inmunología básica", level: "Intermedio", category: "Laboratorio", emoji: "🛡️",
-  description: "Serología, anticuerpos y pruebas inmunológicas en el laboratorio clínico.",
-  readingTitle: "Cuando el cuerpo deja rastros en la sangre",
-  reading: [
-    "La inmunología clínica estudia las respuestas del sistema inmune que pueden detectarse en el laboratorio. A través del suero del paciente, es posible identificar anticuerpos que evidencian infecciones pasadas o actuales, enfermedades autoinmunes o el estado vacunal.",
-    "Las pruebas serológicas detectan anticuerpos específicos contra agentes infecciosos. En la hepatitis B, por ejemplo, el laboratorio puede determinar simultáneamente el antígeno de superficie (HBsAg), que indica infección activa, y los anticuerpos anti-HBs, que indican inmunidad.",
-    "Las enfermedades autoinmunes son otra área clave de la inmunología clínica. El FAN (factor antinuclear) es un marcador de cribado para lupus eritematoso sistémico y otras enfermedades autoinmunes. Un FAN positivo no es diagnóstico pero requiere investigación adicional.",
-    "La interpretación de las pruebas inmunológicas exige conocer la diferencia entre IgM e IgG. La IgM es el primer anticuerpo que aparece en una infección aguda y desaparece relativamente rápido. La IgG aparece más tarde, persiste durante años y es el indicador de inmunidad duradera o infección pasada.",
-    "Los factores preanalíticos también afectan las pruebas inmunológicas. Una muestra hemolizada puede interferir con técnicas de quimioluminiscencia. El tiempo transcurrido entre la extracción y el procesamiento puede afectar la estabilidad de algunos anticuerpos. El analista debe evaluar la calidad de la muestra antes de validar cualquier resultado serológico.",
-  ],
-  vocab: [
-    { es: "anticuerpo", pt: "anticorpo" },
-    { es: "antígeno", pt: "antígeno" },
-    { es: "serología", pt: "sorologia" },
-    { es: "FAN / factor antinuclear", pt: "FAN / fator antinuclear" },
-    { es: "inmunidad", pt: "imunidade" },
-    { es: "IgM / IgG", pt: "IgM / IgG" },
-  ],
-  quiz: [
-    { question: "¿Qué detectan las pruebas serológicas?", options: ["Glucosa y creatinina en suero", "Anticuerpos específicos contra agentes infecciosos o autoantígenos", "Solo bacterias cultivables en placa", "Solo antígenos de superficie de hepatitis"], answer: "Anticuerpos específicos contra agentes infecciosos o autoantígenos" },
-    { question: "¿Qué indica la presencia de HBsAg en el suero del paciente?", options: ["Inmunidad vacunal contra hepatitis B", "Infección activa por hepatitis B", "Infección pasada ya resuelta", "Solo contacto previo con el virus"], answer: "Infección activa por hepatitis B" },
-    { question: "¿Qué diferencia hay entre IgM e IgG en una infección?", options: ["Son iguales, solo difieren en el nombre", "IgM indica infección aguda reciente; IgG indica infección pasada o inmunidad duradera", "IgG aparece primero y desaparece rápido", "IgM persiste toda la vida"], answer: "IgM indica infección aguda reciente; IgG indica infección pasada o inmunidad duradera" },
-    { question: "¿Qué significa un FAN positivo en el laboratorio?", options: ["Confirma diagnóstico de lupus", "Es un marcador de cribado que requiere investigación adicional, no es diagnóstico por sí solo", "Indica infección viral activa", "Es un hallazgo sin significado clínico"], answer: "Es un marcador de cribado que requiere investigación adicional, no es diagnóstico por sí solo" },
-    { question: "¿Cómo puede la hemólisis afectar las pruebas serológicas?", options: ["No tiene ningún efecto", "Puede interferir con técnicas fotométricas o de quimioluminiscencia dando resultados falsos", "Solo eleva la IgM", "Solo afecta el FAN"], answer: "Puede interferir con técnicas fotométricas o de quimioluminiscencia dando resultados falsos" },
-    { question: "¿Qué indica anti-HBs positivo?", options: ["Infección activa de hepatitis B", "Inmunidad, ya sea por vacunación o infección pasada resuelta", "Portador crónico del virus", "Necesidad de nueva dosis de vacuna"], answer: "Inmunidad, ya sea por vacunación o infección pasada resuelta" },
-    { question: "¿Por qué un resultado inmunológico no puede interpretarse aisladamente?", options: ["Porque los equipos no son confiables", "Porque el contexto clínico, el tiempo de evolución y otros marcadores son esenciales para la interpretación", "Solo porque la norma lo exige", "Porque todos los resultados positivos son falsos"], answer: "Porque el contexto clínico, el tiempo de evolución y otros marcadores son esenciales para la interpretación" },
-    { question: "¿Qué debe evaluar el analista antes de validar un resultado serológico?", options: ["Solo si el paciente tiene seguro médico", "La calidad de la muestra: hemólisis, lipemia, tiempo transcurrido y condiciones de almacenamiento", "Solo si el equipo fue calibrado ese día", "Solo si el reactivo es del mismo lote que el anterior"], answer: "La calidad de la muestra: hemólisis, lipemia, tiempo transcurrido y condiciones de almacenamiento" },
-  ],
-  dictation: "En inmunología clínica, la IgM indica infección aguda reciente y la IgG indica inmunidad duradera o infección pasada ya resuelta.",
-},
-{
-  id: "gasometria", title: "Gasometría arterial", level: "Avanzado", category: "Laboratorio", emoji: "💨",
-  description: "pH, pO₂, pCO₂ y equilibrio ácido-base en el paciente crítico.",
-  readingTitle: "La muestra que no puede esperar",
-  reading: [
-    "La gasometría arterial es uno de los análisis más urgentes del laboratorio clínico. Evalúa el pH sanguíneo, la presión parcial de oxígeno (pO₂), la presión parcial de dióxido de carbono (pCO₂) y el bicarbonato (HCO₃⁻). Estos parámetros reflejan el estado de la ventilación pulmonar y del equilibrio ácido-base del organismo.",
-    "El pH normal de la sangre arterial es entre 7.35 y 7.45. Un pH por debajo de 7.35 indica acidosis; por encima de 7.45, alcalosis. La causa puede ser respiratoria, si el problema está en los pulmones y el CO₂, o metabólica, si está en los riñones y el bicarbonato.",
-    "La acidosis respiratoria se produce cuando los pulmones no eliminan suficiente CO₂, que se acumula en sangre y acidifica el medio. La alcalosis respiratoria ocurre cuando se elimina demasiado CO₂, por ejemplo en la hiperventilación. En cambio, la acidosis metabólica se asocia a situaciones como diabetes descompensada, insuficiencia renal o intoxicaciones.",
-    "Desde el punto de vista preanalítico, la gasometría es extremadamente sensible. La muestra debe analizarse dentro de los 30 minutos de obtenida si se mantiene a temperatura ambiente, o dentro de los 60 minutos si se mantiene en hielo. Los eritrocitos continúan consumiendo oxígeno después de la extracción, lo que puede modificar la pO₂.",
-    "Las burbujas de aire en la jeringa son uno de los errores preanalíticos más frecuentes en gasometría: elevan la pO₂ y reducen la pCO₂, produciendo resultados falsamente normales. El analista debe revisar la muestra al recibirla y rechazarla si hay burbujas visibles.",
-  ],
-  vocab: [
-    { es: "gasometría", pt: "gasometria" },
-    { es: "pH sanguíneo", pt: "pH sanguíneo" },
-    { es: "acidosis / alcalosis", pt: "acidose / alcalose" },
-    { es: "bicarbonato (HCO₃⁻)", pt: "bicarbonato (HCO₃⁻)" },
-    { es: "pO₂ / pCO₂", pt: "pO₂ / pCO₂" },
-    { es: "equilibrio ácido-base", pt: "equilíbrio ácido-base" },
-  ],
-  quiz: [
-    { question: "¿Cuál es el rango normal del pH arterial?", options: ["7.20 a 7.30", "7.35 a 7.45", "7.50 a 7.60", "7.00 a 7.20"], answer: "7.35 a 7.45" },
-    { question: "¿Qué indica un pH menor a 7.35?", options: ["Alcalosis", "Acidosis", "Resultado normal", "Error analítico"], answer: "Acidosis" },
-    { question: "¿Qué causa la acidosis respiratoria?", options: ["Exceso de bicarbonato renal", "Acumulación de CO₂ por ventilación insuficiente", "Pérdida de ácidos por vómitos", "Hiperventilación severa"], answer: "Acumulación de CO₂ por ventilación insuficiente" },
-    { question: "¿En cuánto tiempo debe analizarse la gasometría a temperatura ambiente?", options: ["Dentro de 2 horas", "Dentro de 30 minutos", "Dentro de 4 horas si se tapa la jeringa", "En 24 horas si se refrigera"], answer: "Dentro de 30 minutos" },
-    { question: "¿Qué efecto tienen las burbujas de aire en la jeringa?", options: ["No tienen ningún efecto conocido", "Elevan la pO₂ y reducen la pCO₂ dando resultados falsamente normales", "Solo afectan el pH", "Bajan la pO₂ y elevan la pCO₂"], answer: "Elevan la pO₂ y reducen la pCO₂ dando resultados falsamente normales" },
-    { question: "¿Qué evalúa principalmente la pCO₂ en gasometría?", options: ["La función renal", "La ventilación pulmonar y la componente respiratoria del equilibrio ácido-base", "La oxigenación de los tejidos periféricos", "La función hepática"], answer: "La ventilación pulmonar y la componente respiratoria del equilibrio ácido-base" },
-    { question: "¿Con qué se asocia la acidosis metabólica?", options: ["Hiperventilación por ansiedad", "Diabetes descompensada, insuficiencia renal o intoxicaciones", "Retención de CO₂ por enfermedad pulmonar", "Uso de diuréticos"], answer: "Diabetes descompensada, insuficiencia renal o intoxicaciones" },
-    { question: "¿Por qué los eritrocitos afectan la muestra de gasometría en el tiempo?", options: ["No tienen metabolismo fuera del organismo", "Continúan consumiendo oxígeno después de la extracción, modificando la pO₂ real", "Solo afectan el pH pero no los gases", "Solo importa si la muestra es venosa"], answer: "Continúan consumiendo oxígeno después de la extracción, modificando la pO₂ real" },
-  ],
-  dictation: "La gasometría debe procesarse dentro de los treinta minutos y las burbujas de aire en la jeringa elevan falsamente la pO₂ y reducen la pCO₂.",
-},
-{
-  id: "toxicologia", title: "Toxicología clínica", level: "Avanzado", category: "Laboratorio", emoji: "☠️",
-  description: "Drogas de abuso, fármacos y monitoreo terapéutico en el laboratorio.",
-  readingTitle: "Lo que el laboratorio puede revelar",
-  reading: [
-    "La toxicología clínica comprende la detección de drogas de abuso, la monitorización de fármacos de rango terapéutico estrecho y la detección de intoxicaciones agudas. Es un área en la que el resultado del laboratorio puede tener consecuencias legales, laborales o clínicas inmediatas.",
-    "El monitoreo de fármacos terapéuticos es fundamental para medicamentos con ventana terapéutica estrecha, como digoxina, vancomicina, litio, ciclosporina y antiepilépticos. El objetivo es mantener la concentración plasmática dentro del rango terapéutico para garantizar eficacia sin toxicidad.",
-    "El momento de la extracción es crítico en el monitoreo de fármacos. La concentración valle, tomada justo antes de la siguiente dosis, refleja el nivel mínimo del fármaco. La concentración pico, tomada en el momento de máxima absorción, refleja el nivel máximo. Comunicar el horario de extracción al médico es esencial para interpretar correctamente el resultado.",
-    "Para el screening de drogas de abuso, los inmunoensayos son la técnica de primera línea por su rapidez. Sin embargo, pueden dar reacciones cruzadas con otras sustancias: algunos antihistamínicos pueden dar positivo en el screening de anfetaminas. Por eso, todo positivo en el screening debe confirmarse con una técnica más específica como la cromatografía.",
-    "La cadena de custodia es un requisito indispensable cuando los resultados toxicológicos tienen implicaciones legales. Cada paso desde la obtención de la muestra hasta la emisión del resultado debe estar documentado de forma ininterrumpida para garantizar la integridad de la evidencia.",
-  ],
-  vocab: [
-    { es: "fármaco / medicamento", pt: "fármaco / medicamento" },
-    { es: "rango terapéutico", pt: "faixa terapêutica" },
-    { es: "concentración valle / pico", pt: "concentração vale / pico" },
-    { es: "droga de abuso", pt: "droga de abuso" },
-    { es: "cadena de custodia", pt: "cadeia de custódia" },
-    { es: "cromatografía de confirmación", pt: "cromatografia de confirmação" },
-  ],
-  quiz: [
-    { question: "¿Para qué se realiza el monitoreo de fármacos terapéuticos?", options: ["Para detectar drogas ilegales en el paciente", "Para mantener la concentración del fármaco dentro del rango eficaz y seguro", "Solo por exigencia legal hospitalaria", "Para verificar si el paciente tomó la medicación"], answer: "Para mantener la concentración del fármaco dentro del rango eficaz y seguro" },
-    { question: "¿Qué representa la concentración valle de un fármaco?", options: ["El nivel máximo alcanzado tras la dosis", "El nivel mínimo justo antes de la siguiente dosis", "El promedio entre pico y valle", "El nivel al momento del primer síntoma de toxicidad"], answer: "El nivel mínimo justo antes de la siguiente dosis" },
-    { question: "¿Por qué el horario de extracción es crítico en el monitoreo farmacológico?", options: ["Solo por requisito del sistema informático", "Porque la concentración varía según el momento del ciclo de dosificación y determina si es valle o pico", "Solo importa para antiepilépticos", "Porque el fármaco se destruye rápidamente a temperatura ambiente"], answer: "Porque la concentración varía según el momento del ciclo de dosificación y determina si es valle o pico" },
-    { question: "¿Por qué un positivo en screening de drogas debe confirmarse?", options: ["Por exigencia burocrática únicamente", "Por posibles reacciones cruzadas con otras sustancias que den falsos positivos", "Porque el screening siempre da falsos resultados", "Solo si el paciente lo solicita"], answer: "Por posibles reacciones cruzadas con otras sustancias que den falsos positivos" },
-    { question: "¿Qué es la cadena de custodia en toxicología?", options: ["El protocolo de envío de muestras al laboratorio de referencia", "La documentación ininterrumpida de cada paso desde la obtención hasta el resultado para garantizar la integridad legal", "El registro de los fármacos administrados al paciente", "El conjunto de reactivos usados en el análisis"], answer: "La documentación ininterrumpida de cada paso desde la obtención hasta el resultado para garantizar la integridad legal" },
-    { question: "¿Qué fármacos requieren monitoreo por rango terapéutico estrecho?", options: ["Antibióticos comunes como amoxicilina", "Digoxina, vancomicina, litio, ciclosporina y antiepilépticos", "Solo vitaminas y suplementos", "Solo los fármacos de uso intravenoso"], answer: "Digoxina, vancomicina, litio, ciclosporina y antiepilépticos" },
-    { question: "¿Qué técnica se usa para la confirmación de drogas de abuso?", options: ["Repetir el mismo inmunoensayo", "Cromatografía, que tiene mayor especificidad que el screening", "Solicitar una nueva muestra al día siguiente", "Electroforesis de proteínas"], answer: "Cromatografía, que tiene mayor especificidad que el screening" },
-    { question: "¿Qué consecuencias puede tener un error en toxicología clínica?", options: ["Solo consecuencias técnicas internas", "Consecuencias clínicas, legales o laborales para el paciente dependiendo del contexto", "Solo consecuencias para la certificación del laboratorio", "Ninguna si el error se corrige rápidamente"], answer: "Consecuencias clínicas, legales o laborales para el paciente dependiendo del contexto" },
-  ],
-  dictation: "En toxicología clínica todo positivo en el screening de drogas de abuso debe confirmarse con cromatografía antes de emitir el resultado definitivo.",
-},
-{
-  id: "validacion-metodo", title: "Validación de métodos", level: "Avanzado", category: "Laboratorio", emoji: "✅",
-  description: "Parámetros de validación: exactitud, precisión, linealidad e interferencias.",
-  readingTitle: "Antes de liberar el primer resultado",
-  reading: [
-    "Antes de que un método analítico sea utilizado en la rutina del laboratorio, debe demostrarse que produce resultados confiables para el propósito previsto. Ese proceso se llama validación del método, y es un requisito tanto de la ISO 15189 como de las buenas prácticas de laboratorio.",
-    "Los parámetros principales de la validación incluyen la exactitud, que mide qué tan cerca está el resultado del valor verdadero; la precisión, que evalúa la reproducibilidad de los resultados en condiciones iguales; la linealidad, que establece el rango de concentración en el que el método responde de forma proporcional; y los límites de detección y cuantificación.",
-    "El estudio de interferencias es otro componente crítico de la validación. Se evalúa el efecto de sustancias potencialmente interferentes en la muestra, como hemoglobina (hemólisis), bilirrubina (ictericia) y lípidos (lipemia). Si la interferencia supera un umbral clínicamente significativo, debe quedar documentado en el procedimiento.",
-    "La verificación es diferente de la validación. Cuando el laboratorio implementa un método ya validado por el fabricante, no necesita repetir la validación completa sino verificar que el método funciona correctamente en su propio entorno, con su personal, sus equipos y sus condiciones.",
-    "La documentación de la validación debe incluir el protocolo utilizado, los datos crudos, el análisis estadístico y las conclusiones. Si en el futuro cambia el reactivo, el equipo o el procedimiento de manera significativa, debe realizarse una nueva validación o al menos una verificación parcial.",
-  ],
-  vocab: [
-    { es: "validación del método", pt: "validação do método" },
-    { es: "exactitud", pt: "exatidão" },
-    { es: "precisión", pt: "precisão" },
-    { es: "linealidad", pt: "linearidade" },
-    { es: "interferencia analítica", pt: "interferência analítica" },
-    { es: "verificación", pt: "verificação" },
-  ],
-  quiz: [
-    { question: "¿Qué demuestra la validación de un método analítico?", options: ["Que el equipo está calibrado correctamente", "Que el método produce resultados confiables para el propósito previsto", "Que el reactivo no está vencido", "Que el analista está capacitado para el método"], answer: "Que el método produce resultados confiables para el propósito previsto" },
-    { question: "¿Qué mide la exactitud de un método?", options: ["La reproducibilidad de resultados repetidos", "Qué tan cerca está el resultado del valor verdadero", "El rango de concentración en que el método es lineal", "El tiempo de procesamiento del método"], answer: "Qué tan cerca está el resultado del valor verdadero" },
-    { question: "¿Qué evalúa la precisión?", options: ["La cercanía al valor verdadero", "La reproducibilidad de los resultados en condiciones iguales (repetibilidad e imprecisión)", "El límite de detección del método", "La estabilidad del reactivo en el tiempo"], answer: "La reproducibilidad de los resultados en condiciones iguales (repetibilidad e imprecisión)" },
-    { question: "¿Para qué sirve el estudio de interferencias?", options: ["Para calibrar el equipo analítico", "Para evaluar el efecto de sustancias presentes en la muestra que pueden alterar el resultado", "Para verificar la linealidad del método", "Para comparar el método con otros laboratorios"], answer: "Para evaluar el efecto de sustancias presentes en la muestra que pueden alterar el resultado" },
-    { question: "¿Cuál es la diferencia entre validación y verificación?", options: ["Son lo mismo con distinto nombre", "La validación es completa (nuevo método); la verificación confirma que un método ya validado funciona en ese laboratorio específico", "La verificación es más costosa que la validación", "Solo la validación es requerida por la ISO 15189"], answer: "La validación es completa (nuevo método); la verificación confirma que un método ya validado funciona en ese laboratorio específico" },
-    { question: "¿Qué incluye la documentación de la validación?", options: ["Solo el resultado final y la firma del director", "Protocolo, datos crudos, análisis estadístico y conclusiones", "Solo las interferencias identificadas", "Solo la curva de calibración del día"], answer: "Protocolo, datos crudos, análisis estadístico y conclusiones" },
-    { question: "¿Cuándo debe realizarse una nueva validación o verificación parcial?", options: ["Solo cada 5 años por protocolo", "Cuando cambia significativamente el reactivo, equipo o procedimiento", "Solo si el EA da resultado inadecuado", "Solo si el cliente lo solicita expresamente"], answer: "Cuando cambia significativamente el reactivo, equipo o procedimiento" },
-    { question: "¿Cuáles son las tres interferencias más comunes evaluadas en validación?", options: ["Glucosa, creatinina y colesterol", "Hemólisis, ictericia (bilirrubina) y lipemia (lípidos)", "Sodio, potasio y cloro", "Temperatura, humedad y luz"], answer: "Hemólisis, ictericia (bilirrubina) y lipemia (lípidos)" },
-  ],
-  dictation: "La validación del método demuestra que produce resultados confiables evaluando exactitud, precisión, linealidad e interferencias analíticas antes de usarlo en rutina.",
-},
-{
-  id: "electroitos", title: "Electrolitos y función renal", level: "Intermedio", category: "Laboratorio", emoji: "⚡",
-  description: "Sodio, potasio, cloro y su interpretación clínica en desequilibrios hidroelectrolíticos.",
-  readingTitle: "El equilibrio que sostiene todo",
-  reading: [
-    "Los electrolitos son iones disueltos en los fluidos corporales que mantienen el equilibrio osmótico, la función nerviosa y muscular y el equilibrio ácido-base. Los principales que mide el laboratorio son el sodio (Na⁺), el potasio (K⁺) y el cloro (Cl⁻).",
-    "El sodio es el principal catión extracelular y el principal determinante de la osmolalidad plasmática. La hiponatremia (Na⁺ bajo) puede producir confusión, convulsiones y coma. La hipernatremia (Na⁺ alto) se asocia a deshidratación grave. Ambas situaciones pueden ser críticas y requieren comunicación urgente.",
-    "El potasio es el principal catión intracelular y tiene un impacto directo en la función cardíaca. Una hipopotasemia severa (K⁺ bajo) puede producir arritmias letales. Una hiperpotasemia (K⁺ alto) también puede desencadenar una parada cardíaca. Ambos extremos son valores críticos que requieren comunicación inmediata al médico.",
-    "Desde el punto de vista preanalítico, el potasio es especialmente sensible a la hemólisis: cuando los glóbulos rojos se rompen, liberan su contenido intracelular de potasio al suero, elevando falsamente la potasemia. Un valor de K⁺ inesperadamente elevado en un paciente sin factores de riesgo debe hacer sospechar hemólisis antes de asumir hiperpotasemia real.",
-    "La brecha aniónica o anion gap es un cálculo derivado de los electrolitos: AG = Na⁺ − (Cl⁻ + HCO₃⁻). Permite identificar la causa de una acidosis metabólica. Una brecha aniónica elevada sugiere la presencia de aniones no medidos como lactato, cetonas o toxinas. Es una herramienta diagnóstica que el laboratorio puede calcular e incluir en el informe.",
-  ],
-  vocab: [
-    { es: "sodio / potasio / cloro", pt: "sódio / potássio / cloro" },
-    { es: "hiponatremia / hipernatremia", pt: "hiponatremia / hipernatremia" },
-    { es: "hipopotasemia / hiperpotasemia", pt: "hipopotassemia / hiperpotassemia" },
-    { es: "osmolalidad", pt: "osmolalidade" },
-    { es: "brecha aniónica / anion gap", pt: "ânion gap" },
-    { es: "desequilibrio hidroelectrolítico", pt: "desequilíbrio hidroeletrolítico" },
-  ],
-  quiz: [
-    { question: "¿Cuál es el principal catión extracelular?", options: ["Potasio (K⁺)", "Sodio (Na⁺)", "Calcio (Ca²⁺)", "Magnesio (Mg²⁺)"], answer: "Sodio (Na⁺)" },
-    { question: "¿Qué puede ocurrir en una hiperpotasemia severa?", options: ["Solo debilidad muscular leve", "Arritmias letales o parada cardíaca", "Solo confusión mental", "Deshidratación severa"], answer: "Arritmias letales o parada cardíaca" },
-    { question: "¿Por qué la hemólisis eleva falsamente el potasio?", options: ["Porque activa enzimas que producen potasio", "Porque los glóbulos rojos liberan su potasio intracelular al suero cuando se rompen", "Porque interfiere con el electrodo de medición", "Solo en muestras de plasma, no en suero"], answer: "Porque los glóbulos rojos liberan su potasio intracelular al suero cuando se rompen" },
-    { question: "¿Qué es la brecha aniónica (anion gap)?", options: ["La diferencia entre sodio arterial y venoso", "AG = Na⁺ − (Cl⁻ + HCO₃⁻), útil para identificar causas de acidosis metabólica", "La suma de todos los cationes plasmáticos", "La diferencia entre osmolalidad medida y calculada"], answer: "AG = Na⁺ − (Cl⁻ + HCO₃⁻), útil para identificar causas de acidosis metabólica" },
-    { question: "¿Qué indica una brecha aniónica elevada?", options: ["Alcalosis metabólica", "Presencia de aniones no medidos como lactato, cetonas o toxinas", "Deshidratación simple", "Solo error de calibración del equipo"], answer: "Presencia de aniones no medidos como lactato, cetonas o toxinas" },
-    { question: "¿Con qué se asocia la hipernatremia?", options: ["Insuficiencia cardíaca", "Deshidratación grave con pérdida de agua libre", "Insuficiencia renal crónica", "Cirrosis hepática avanzada"], answer: "Deshidratación grave con pérdida de agua libre" },
-    { question: "¿Por qué sodio y potasio son valores que pueden ser críticos?", options: ["Por exigencia de la norma ISO", "Sus alteraciones extremas pueden producir emergencias neurológicas y cardíacas letales", "Solo porque son los análisis más solicitados", "Solo en pacientes pediátricos"], answer: "Sus alteraciones extremas pueden producir emergencias neurológicas y cardíacas letales" },
-    { question: "¿Qué función tienen los electrolitos en el organismo?", options: ["Solo regular la glucemia", "Mantener el equilibrio osmótico, la función nerviosa y muscular y el equilibrio ácido-base", "Solo regular la función renal", "Solo participar en la coagulación"], answer: "Mantener el equilibrio osmótico, la función nerviosa y muscular y el equilibrio ácido-base" },
-  ],
-  dictation: "Un potasio falsamente elevado por hemólisis debe sospecharse siempre antes de asumir hiperpotasemia real en un paciente sin factores de riesgo.",
-},
-// ══ GESTIÓN (5 nuevos) ══
-{
-  id: "gestion-riesgos", title: "Gestión de riesgos", level: "Avanzado", category: "Gestión", emoji: "⚖️",
-  description: "Identificación, evaluación y control de riesgos en el laboratorio clínico.",
-  readingTitle: "Lo que puede salir mal, antes de que salga",
-  reading: [
-    "La gestión de riesgos es el proceso sistemático de identificar qué podría salir mal en un proceso, evaluar la probabilidad y el impacto de ese evento, y tomar acciones para reducirlo a un nivel aceptable. En el laboratorio clínico, un riesgo no controlado puede derivar en un resultado incorrecto que afecte la salud del paciente.",
-    "La ISO 15189 y la ISO 22367 exigen que los laboratorios implementen un proceso de gestión de riesgos para toda la fase preanalítica, analítica y postanalítica. El objetivo no es eliminar todos los riesgos, que sería imposible, sino identificarlos explícitamente y gestionarlos de forma consciente.",
-    "La evaluación del riesgo combina dos dimensiones: la probabilidad de que el evento ocurra y la severidad del impacto si ocurre. Una matriz de riesgo clasifica los riesgos en una escala: los de alta probabilidad y alto impacto son prioritarios; los de baja probabilidad y bajo impacto pueden monitorearse sin acción inmediata.",
-    "Un ejemplo práctico: el riesgo de que una muestra de potasio hemolizada sea liberada como resultado válido tiene una severidad alta (puede llevar a un tratamiento innecesario) pero puede reducirse con controles de verificación visual y bloqueo automático del sistema cuando la hemólisis supera un umbral definido.",
-    "El proceso de gestión de riesgos es dinámico. Debe revisarse cuando ocurre un incidente, cuando se incorpora un nuevo proceso o equipo, y en las revisiones periódicas del sistema de gestión. Un laboratorio que gestiona riesgos proactivamente reduce tanto los errores como el costo asociado a su corrección.",
-  ],
-  vocab: [
-    { es: "riesgo", pt: "risco" },
-    { es: "probabilidad / impacto", pt: "probabilidade / impacto" },
-    { es: "matriz de riesgo", pt: "matriz de risco" },
-    { es: "gestión proactiva", pt: "gestão proativa" },
-    { es: "severidad", pt: "severidade" },
-    { es: "control del riesgo", pt: "controle do risco" },
-  ],
-  quiz: [
-    { question: "¿Cuál es el objetivo de la gestión de riesgos en el laboratorio?", options: ["Eliminar absolutamente todos los riesgos posibles", "Identificar riesgos explícitamente y gestionarlos a un nivel aceptable", "Documentar los errores ocurridos para fines legales", "Reducir los costos operativos del laboratorio"], answer: "Identificar riesgos explícitamente y gestionarlos a un nivel aceptable" },
-    { question: "¿Qué dos dimensiones combina la evaluación del riesgo?", options: ["Costo y tiempo de resolución", "Probabilidad de ocurrencia y severidad del impacto", "Frecuencia histórica y costo de la acción correctiva", "Número de afectados y tipo de error"], answer: "Probabilidad de ocurrencia y severidad del impacto" },
-    { question: "¿Qué riesgos son prioritarios en una matriz de riesgo?", options: ["Los de baja probabilidad y alto impacto únicamente", "Los de alta probabilidad y alto impacto", "Los más fáciles de resolver primero", "Los que afectan al personal técnico"], answer: "Los de alta probabilidad y alto impacto" },
-    { question: "¿Cuándo debe revisarse el proceso de gestión de riesgos?", options: ["Solo una vez al año en la reunión anual", "Cuando ocurre un incidente, se incorpora algo nuevo o en revisiones periódicas del sistema", "Solo cuando lo exige el organismo acreditador", "Solo después de una auditoría externa"], answer: "Cuando ocurre un incidente, se incorpora algo nuevo o en revisiones periódicas del sistema" },
-    { question: "¿Qué normas exigen gestión de riesgos en el laboratorio clínico?", options: ["Solo la norma CLIA 88", "ISO 15189 e ISO 22367 entre otras", "Solo la ISO 9001 de gestión general", "Solo la legislación sanitaria local"], answer: "ISO 15189 e ISO 22367 entre otras" },
-    { question: "¿Cómo puede reducirse el riesgo de liberar un potasio hemolizado como válido?", options: ["Eliminando el análisis de potasio en hemolizados", "Con verificación visual y bloqueo automático cuando la hemólisis supera un umbral definido", "Solo repitiendo el análisis manualmente", "Solo documentando el incidente después"], answer: "Con verificación visual y bloqueo automático cuando la hemólisis supera un umbral definido" },
-    { question: "¿Por qué la gestión de riesgos es un proceso dinámico?", options: ["Porque los riesgos desaparecen solos con el tiempo", "Porque los procesos, equipos y contextos cambian y nuevos riesgos pueden surgir", "Solo porque la norma lo exige", "Porque los riesgos no pueden documentarse de forma permanente"], answer: "Porque los procesos, equipos y contextos cambian y nuevos riesgos pueden surgir" },
-    { question: "¿Qué beneficio adicional tiene gestionar riesgos proactivamente?", options: ["Elimina la necesidad de auditorías internas", "Reduce tanto los errores como el costo asociado a su corrección posterior", "Solo mejora la imagen del laboratorio ante los clientes", "Permite eliminar algunos controles internos"], answer: "Reduce tanto los errores como el costo asociado a su corrección posterior" },
-  ],
-  dictation: "La gestión de riesgos combina probabilidad e impacto para priorizar acciones y debe revisarse cada vez que cambia el proceso o cuando ocurre un incidente.",
-},
-{
-  id: "documentacion", title: "Control de documentos", level: "Intermedio", category: "Gestión", emoji: "📋",
-  description: "Procedimientos, registros y control de versiones en el sistema de calidad.",
-  readingTitle: "El documento que nadie había actualizado",
-  reading: [
-    "En una auditoría de seguimiento, el evaluador pidió ver el procedimiento operativo estándar del área de hematología. El analista lo buscó en la carpeta de procedimientos y encontró dos versiones: una impresa de 2021 y otra digital de 2023. Cuando el evaluador preguntó cuál era la vigente, nadie en el turno pudo responderlo con seguridad.",
-    "El control de documentos es uno de los requisitos más básicos y más frecuentemente encontrados como hallazgo en auditorías. Un sistema documental eficaz debe garantizar que solo los documentos vigentes están disponibles en los puntos de uso, que las versiones obsoletas están retiradas o claramente identificadas, y que cada documento tiene un responsable de revisión y aprobación.",
-    "Los documentos del sistema de calidad incluyen los procedimientos operativos estándar (POE), las instrucciones de trabajo, los formularios y los registros. Los POE describen cómo se realiza una actividad. Los registros documentan que esa actividad fue realizada tal como se describe.",
-    "Cada vez que un procedimiento cambia, debe seguirse el proceso de revisión y aprobación antes de implementarlo. El personal debe ser notificado del cambio y capacitado si es necesario. No es aceptable modificar un procedimiento verbalmente sin actualizar el documento.",
-    "El control de versiones asigna un número de versión y una fecha de vigencia a cada documento. Un sistema informático de gestión documental facilita enormemente este control, pero incluso con carpetas físicas es posible mantener un sistema eficaz con una lista maestra de documentos vigentes.",
-  ],
-  vocab: [
-    { es: "procedimiento operativo estándar (POE)", pt: "procedimento operacional padrão (POP)" },
-    { es: "versión vigente", pt: "versão vigente" },
-    { es: "lista maestra de documentos", pt: "lista mestra de documentos" },
-    { es: "registro", pt: "registro" },
-    { es: "revisión y aprobación", pt: "revisão e aprovação" },
-    { es: "control de versiones", pt: "controle de versões" },
-  ],
-  quiz: [
-    { question: "¿Qué problema crítico encontró el evaluador en la auditoría?", options: ["Un resultado incorrecto liberado", "Dos versiones del mismo procedimiento sin que nadie supiera cuál era la vigente", "Un
-  { id: "marilia", name: "Marília", code: "MARILIA" }, { id: "claudio", name: "Claudio", code: "CLAUDIO" },
-  { id: "juliana", name: "Juliana", code: "JULIANA" }, { id: "thamiris", name: "Thamiris", code: "THAMIRIS" },
-  { id: "livia", name: "Livia", code: "LIVIA" }, { id: "adriana", name: "Adriana", code: "ADRIANA" },
-  { id: "rafael", name: "Rafael", code: "RAFAEL" }, { id: "jessica", name: "Jessica", code: "JESSICA" },
-  { id: "luiza", name: "Luiza", code: "LUIZA" }, { id: "ana-paula", name: "Ana Paula", code: "ANAPAULA" },
-  { id: "lucas", name: "Lucas", code: "LUCAS" }, { id: "katia", name: "Katia", code: "KATIA" },
-  { id: "vinicius", name: "Vinicius", code: "VINICIUS" }, { id: "thiago", name: "Thiago", code: "THIAGO" },
+  /* ── LABORATORIO ─────────────────────────── */
+  {
+    id: "control-interno",
+    title: "Control interno",
+    level: "Intermedio",
+    category: "Laboratorio",
+    emoji: "🔬",
+    description: "Monitoreo analítico, tendencias y decisiones preventivas.",
+    readingTitle: "Una desviación que parecía pequeña",
+    reading: [
+      "Durante una revisión de rutina, el equipo técnico detectó una desviación en los controles internos de uno de los analitos más procesados de la semana. Al principio, la diferencia parecía pequeña, pero al comparar los datos con los registros históricos, observaron que la tendencia se repetía desde hacía varios días.",
+      "La supervisora decidió reunir al equipo para revisar materiales de control, curvas de calibración, lotes de reactivos y condiciones de almacenamiento. Concluyeron que la causa más probable era una combinación entre una variación del reactivo y una calibración que ya no representaba de manera precisa el desempeño real del método.",
+      "Como medida preventiva, suspendieron temporalmente la liberación de algunos resultados, repitieron las corridas y comunicaron el hallazgo al área responsable. El caso reforzó la importancia de identificar tendencias antes de que aparezca un error mayor.",
+    ],
+    vocab: [
+      { es: "control interno", pt: "controle interno" },
+      { es: "desviación", pt: "desvio" },
+      { es: "liberación de resultados", pt: "liberação de resultados" },
+      { es: "reactivo", pt: "reagente" },
+      { es: "tendencia", pt: "tendência" },
+      { es: "corrida analítica", pt: "corrida analítica" },
+    ],
+    quiz: [
+      { question: "¿Qué detectó primero el equipo técnico?", options: ["Un error en la facturación", "Una desviación en los controles internos", "Una falla en el equipo de refrigeración"], answer: "Una desviación en los controles internos" },
+      { question: "¿Qué decisión tomó el equipo como medida preventiva?", options: ["Cambiar a todo el personal", "Suspender temporalmente la liberación de algunos resultados", "Descartar todo el equipamiento"], answer: "Suspender temporalmente la liberación de algunos resultados" },
+      { question: "¿Por qué es importante identificar tendencias a tiempo?", options: ["Para reducir reuniones", "Para evitar errores mayores y proteger la calidad", "Para eliminar controles innecesarios"], answer: "Para evitar errores mayores y proteger la calidad" },
+    ],
+    dictation: "El equipo detectó una desviación en los controles internos y suspendió temporalmente la liberación de resultados para proteger la calidad del proceso.",
+  },
+  {
+    id: "westgard",
+    title: "Reglas de Westgard",
+    level: "Intermedio",
+    category: "Laboratorio",
+    emoji: "📊",
+    description: "Análisis de reglas y toma de decisiones en el laboratorio.",
+    readingTitle: "Una alerta en el turno de la mañana",
+    reading: [
+      "En el turno de la mañana, una analista observó que uno de los niveles de control presentaba un comportamiento inusual. El valor no estaba extremadamente alejado de la media, pero al revisar la secuencia de resultados notó un patrón compatible con una regla de advertencia.",
+      "Antes de continuar con la rutina, el equipo decidió verificar si el comportamiento correspondía a una variación aleatoria o a un problema sistemático. Para eso, compararon ambos niveles de control, revisaron la precisión reciente del método y analizaron si existían cambios de lote, calibración o mantenimiento.",
+      "Comprender las reglas de Westgard ayuda a tomar decisiones más seguras y a justificar técnicamente cada acción frente a auditorías o consultas de clientes.",
+    ],
+    vocab: [
+      { es: "regla de advertencia", pt: "regra de alerta" },
+      { es: "media", pt: "média" },
+      { es: "precisión", pt: "precisão" },
+      { es: "rechazar la corrida", pt: "rejeitar a corrida" },
+      { es: "problema sistemático", pt: "problema sistemático" },
+      { es: "variación aleatoria", pt: "variação aleatória" },
+    ],
+    quiz: [
+      { question: "¿Qué observó la analista en el control?", options: ["Un comportamiento inusual", "Una caída del sistema", "Una pérdida de datos"], answer: "Un comportamiento inusual" },
+      { question: "¿Qué quiso determinar el equipo?", options: ["Si el problema era aleatorio o sistemático", "Si había que cambiar de laboratorio", "Si el cliente aceptaría el resultado"], answer: "Si el problema era aleatorio o sistemático" },
+      { question: "Las reglas de Westgard ayudan a...", options: ["Evitar todo control", "Tomar decisiones seguras y justificarlas", "Trabajar sin registros"], answer: "Tomar decisiones seguras y justificarlas" },
+    ],
+    dictation: "Comprender las reglas de Westgard ayuda a tomar decisiones más seguras y a justificar técnicamente cada acción del laboratorio.",
+  },
+  {
+    id: "trazabilidad",
+    title: "Trazabilidad y registros",
+    level: "Intermedio",
+    category: "Laboratorio",
+    emoji: "📋",
+    description: "Registros, documentación y seguimiento operativo.",
+    readingTitle: "Cuando faltaba una parte del historial",
+    reading: [
+      "Durante una auditoría interna, el equipo encontró una inconsistencia en el historial de una muestra. El resultado final estaba documentado, pero faltaban registros intermedios que explicaran claramente el recorrido completo del proceso.",
+      "La coordinadora recordó que la trazabilidad no es solo una exigencia documental. También es una herramienta para reconstruir decisiones, verificar responsabilidades y reducir el riesgo de errores no detectados.",
+      "Después del análisis, el área actualizó su checklist operativo y reforzó la importancia de registrar cada etapa con precisión. La mejora no solo ayudó a la auditoría, sino también a la organización diaria del equipo.",
+    ],
+    vocab: [
+      { es: "trazabilidad", pt: "rastreabilidade" },
+      { es: "registro", pt: "registro" },
+      { es: "recorrido del proceso", pt: "percurso do processo" },
+      { es: "checklist", pt: "checklist" },
+      { es: "inconsistencia", pt: "inconsistência" },
+      { es: "responsabilidad", pt: "responsabilidade" },
+    ],
+    quiz: [
+      { question: "¿Qué problema apareció en la auditoría?", options: ["Faltaban registros intermedios", "Se cortó la luz", "No había clientes"], answer: "Faltaban registros intermedios" },
+      { question: "¿Para qué sirve la trazabilidad?", options: ["Solo para cumplir documentos", "Para reconstruir decisiones y verificar responsabilidades", "Para reducir reuniones"], answer: "Para reconstruir decisiones y verificar responsabilidades" },
+      { question: "¿Qué hizo el área después del análisis?", options: ["Actualizó su checklist", "Cerró el sector", "Eliminó registros"], answer: "Actualizó su checklist" },
+    ],
+    dictation: "La trazabilidad permite reconstruir decisiones, verificar responsabilidades y reducir el riesgo de errores no detectados.",
+  },
+  {
+    id: "validacion",
+    title: "Validación del método",
+    level: "Avanzado",
+    category: "Laboratorio",
+    emoji: "✅",
+    description: "Validación, precisión, exactitud y robustez de métodos analíticos.",
+    readingTitle: "Antes de implementar el nuevo método",
+    reading: [
+      "Antes de implementar un nuevo método, el equipo necesitaba demostrar que su desempeño era adecuado para el uso previsto. No bastaba con que el procedimiento fuera rápido o práctico: también debía mostrar precisión, exactitud y estabilidad en diferentes condiciones.",
+      "Durante la validación, compararon resultados, revisaron repeticiones y evaluaron posibles interferencias. Cada dato debía ser interpretado con criterio técnico, porque una conclusión apresurada podía afectar la confiabilidad del proceso completo.",
+      "Validar no es solo llenar una planilla. Es comprender cómo responde el método, cuáles son sus límites y en qué condiciones puede ofrecer resultados consistentes.",
+    ],
+    vocab: [
+      { es: "validación", pt: "validação" },
+      { es: "exactitud", pt: "exatidão" },
+      { es: "robustez", pt: "robustez" },
+      { es: "interferencia", pt: "interferência" },
+      { es: "desempeño", pt: "desempenho" },
+      { es: "uso previsto", pt: "uso pretendido" },
+    ],
+    quiz: [
+      { question: "¿Qué debía demostrar el equipo?", options: ["Que el método era adecuado para el uso previsto", "Que el laboratorio era el más grande", "Que no hacía falta revisar datos"], answer: "Que el método era adecuado para el uso previsto" },
+      { question: "¿Qué evaluaron durante la validación?", options: ["Solo la velocidad", "Resultados, repeticiones e interferencias", "Solo el costo"], answer: "Resultados, repeticiones e interferencias" },
+      { question: "Validar un método significa...", options: ["Llenar una planilla sin analizar", "Comprender cómo responde y sus límites", "Trabajar sin criterios técnicos"], answer: "Comprender cómo responde y sus límites" },
+    ],
+    dictation: "Validar un método significa comprender cómo responde, cuáles son sus límites y en qué condiciones ofrece resultados consistentes.",
+  },
+  {
+    id: "muestras",
+    title: "Manejo de muestras",
+    level: "Básico",
+    category: "Laboratorio",
+    emoji: "🧪",
+    description: "Recepción, identificación, conservación y rechazo de muestras.",
+    readingTitle: "La muestra que llegó sin identificar",
+    reading: [
+      "Una mañana, el área de recepción recibió varias muestras de un hospital nuevo. Algunas venían sin etiqueta o con información incompleta. El equipo tuvo que decidir rápidamente cuáles podían procesarse y cuáles debían ser rechazadas o aclaradas con el cliente.",
+      "El protocolo de recepción establece criterios claros: volumen mínimo, tipo de tubo, temperatura de conservación y datos de identificación obligatorios. Cuando una muestra no cumple estos requisitos, el analista debe comunicarlo de manera profesional y registrar el motivo del rechazo.",
+      "Ese episodio impulsó al equipo a mejorar la comunicación con el hospital y a crear un instructivo específico para la preparación de muestras antes del envío.",
+    ],
+    vocab: [
+      { es: "muestra", pt: "amostra" },
+      { es: "recepción", pt: "recepção" },
+      { es: "etiqueta", pt: "etiqueta / rótulo" },
+      { es: "rechazo", pt: "rejeição" },
+      { es: "conservación", pt: "conservação" },
+      { es: "criterio", pt: "critério" },
+    ],
+    quiz: [
+      { question: "¿Qué problema tenían algunas muestras al llegar?", options: ["Estaban congeladas", "Venían sin etiqueta o con información incompleta", "Eran del tipo equivocado de análisis"], answer: "Venían sin etiqueta o con información incompleta" },
+      { question: "¿Qué establece el protocolo de recepción?", options: ["Criterios claros para aceptar o rechazar muestras", "Que toda muestra debe procesarse", "Que el cliente nunca se equivoca"], answer: "Criterios claros para aceptar o rechazar muestras" },
+      { question: "¿Qué hizo el equipo después del episodio?", options: ["Ignoró el problema", "Mejoró la comunicación y creó un instructivo", "Rechazó a todos los nuevos clientes"], answer: "Mejoró la comunicación y creó un instructivo" },
+    ],
+    dictation: "Cuando una muestra no cumple los criterios de recepción, el analista debe comunicarlo de forma profesional y registrar el motivo del rechazo.",
+  },
+  /* ── GESTIÓN / CALIDAD ─────────────────── */
+  {
+    id: "indicadores",
+    title: "Indicadores de calidad",
+    level: "Intermedio",
+    category: "Gestión",
+    emoji: "📈",
+    description: "Interpretar y discutir indicadores, metas y desvíos operativos.",
+    readingTitle: "Cuando el indicador no cuenta toda la historia",
+    reading: [
+      "En la reunión mensual, el equipo revisó los principales indicadores del área. A simple vista, el tiempo medio de respuesta parecía estable y la cantidad de no conformidades había disminuido. Sin embargo, una analista señaló que algunos retrasos críticos no estaban siendo suficientemente visibles en el promedio general.",
+      "A partir de esa observación, la coordinación propuso desagregar los datos por tipo de cliente, franja horaria y complejidad del ensayo. Esa decisión permitió identificar que ciertos procesos especiales estaban generando impactos mayores que no aparecían en el informe resumido.",
+      "Un indicador aislado puede ser útil, pero no siempre explica el contexto completo. Para una buena gestión, es fundamental cruzar datos, comparar tendencias y discutir el significado operativo de cada número.",
+    ],
+    vocab: [
+      { es: "indicador", pt: "indicador" },
+      { es: "desagregar datos", pt: "desagregar dados" },
+      { es: "no conformidad", pt: "não conformidade" },
+      { es: "promedio general", pt: "média geral" },
+      { es: "toma de decisiones", pt: "tomada de decisão" },
+      { es: "tendencia", pt: "tendência" },
+    ],
+    quiz: [
+      { question: "¿Qué parecía estable al comienzo de la reunión?", options: ["El tiempo medio de respuesta", "La rotación de personal", "El presupuesto anual"], answer: "El tiempo medio de respuesta" },
+      { question: "¿Qué propuso la coordinación?", options: ["Eliminar los indicadores", "Desagregar los datos por distintos criterios", "Suspender las reuniones"], answer: "Desagregar los datos por distintos criterios" },
+      { question: "La idea principal del texto es que...", options: ["Un indicador aislado siempre es suficiente", "El contexto importa para interpretar los números", "Los informes deben eliminarse"], answer: "El contexto importa para interpretar los números" },
+    ],
+    dictation: "Para una buena gestión, es fundamental cruzar datos, comparar tendencias y discutir el significado operativo de cada número.",
+  },
+  {
+    id: "no-conformidades",
+    title: "No conformidades y CAPA",
+    level: "Intermedio",
+    category: "Gestión",
+    emoji: "⚠️",
+    description: "Detección, registro y acciones correctivas y preventivas.",
+    readingTitle: "El mismo error dos veces",
+    reading: [
+      "El área de calidad registró una no conformidad relacionada con un error en el etiquetado de muestras. No era la primera vez que ocurría algo similar. Al revisar los registros, encontraron que un episodio parecido había sido cerrado seis meses antes sin una acción correctiva real.",
+      "Esta vez, el equipo decidió aplicar un análisis de causa raíz. Identificaron que el problema no era individual sino estructural: el procedimiento escrito estaba desactualizado y no reflejaba el flujo real de trabajo.",
+      "Se implementó una acción correctiva que incluyó actualizar el procedimiento, capacitar al personal y definir un indicador de seguimiento. La CAPA fue documentada y se programó una verificación de eficacia a los 30 días.",
+    ],
+    vocab: [
+      { es: "no conformidad", pt: "não conformidade" },
+      { es: "acción correctiva", pt: "ação corretiva" },
+      { es: "acción preventiva", pt: "ação preventiva" },
+      { es: "causa raíz", pt: "causa raiz" },
+      { es: "verificación de eficacia", pt: "verificação de eficácia" },
+      { es: "CAPA", pt: "CAPA (ação corretiva e preventiva)" },
+    ],
+    quiz: [
+      { question: "¿Por qué el problema se repitió?", options: ["Por falta de muestras", "Porque la acción correctiva anterior no fue real", "Por un error del cliente"], answer: "Porque la acción correctiva anterior no fue real" },
+      { question: "¿Qué encontraron al analizar la causa raíz?", options: ["Que era un error individual", "Que el procedimiento estaba desactualizado", "Que faltaban reactivos"], answer: "Que el procedimiento estaba desactualizado" },
+      { question: "¿Qué se programó a los 30 días?", options: ["Una reunión social", "Una verificación de eficacia", "Una nueva auditoría externa"], answer: "Una verificación de eficacia" },
+    ],
+    dictation: "Una acción correctiva debe incluir el análisis de causa raíz, la actualización del procedimiento y una verificación de eficacia posterior.",
+  },
+  /* ── COMUNICACIÓN ──────────────────────── */
+  {
+    id: "atencion-cliente",
+    title: "Atención técnica al cliente",
+    level: "Intermedio",
+    category: "Comunicación",
+    emoji: "📞",
+    description: "Español profesional para explicar resultados y gestionar dudas.",
+    readingTitle: "Una llamada que exigía claridad",
+    reading: [
+      "Un cliente llamó al área técnica porque no entendía por qué el informe más reciente mostraba una diferencia respecto del mes anterior. Aunque el resultado estaba correctamente validado, el cliente necesitaba una explicación clara y comprensible.",
+      "La analista evitó respuestas demasiado rápidas. Primero escuchó la duda completa, confirmó qué información tenía el cliente y después explicó la situación paso a paso, usando un lenguaje técnico pero accesible.",
+      "En contextos de atención técnica, no alcanza con tener razón: también es necesario explicar con claridad, transmitir confianza y verificar que el cliente realmente haya entendido.",
+    ],
+    vocab: [
+      { es: "duda", pt: "dúvida" },
+      { es: "informe", pt: "relatório" },
+      { es: "validado", pt: "validado" },
+      { es: "con cautela", pt: "com cautela" },
+      { es: "transmitir confianza", pt: "transmitir confiança" },
+      { es: "explicar paso a paso", pt: "explicar passo a passo" },
+    ],
+    quiz: [
+      { question: "¿Por qué llamó el cliente?", options: ["Porque no entendía una diferencia en el informe", "Porque quería cambiar de proveedor", "Porque perdió la contraseña"], answer: "Porque no entendía una diferencia en el informe" },
+      { question: "¿Qué hizo primero la analista?", options: ["Cortó la llamada", "Escuchó la duda completa", "Envió un correo automático"], answer: "Escuchó la duda completa" },
+      { question: "En atención técnica también hay que...", options: ["Hablar rápido", "Transmitir claridad y confianza", "Usar solo términos complejos"], answer: "Transmitir claridad y confianza" },
+    ],
+    dictation: "En atención técnica no alcanza con tener razón: también es necesario explicar con claridad y transmitir confianza.",
+  },
+  {
+    id: "correo-tecnico",
+    title: "Correo técnico profesional",
+    level: "Básico",
+    category: "Comunicación",
+    emoji: "✉️",
+    description: "Redactar correos técnicos claros y profesionales en español.",
+    readingTitle: "Un correo que generó confusión",
+    reading: [
+      "El área de soporte recibió una respuesta negativa de un cliente luego de enviar un correo técnico sobre el cambio de metodología. Al releer el mensaje, el equipo notó que la información era correcta pero la redacción era poco clara: oraciones largas, sin saludo inicial y con términos sin explicación.",
+      "Un correo técnico efectivo tiene estructura: saludo profesional, contexto breve, información principal, próximos pasos y cierre cordial. Cada parte cumple una función y ayuda al lector a procesar la información sin esfuerzo.",
+      "Después de reescribir el correo con esa estructura, el cliente respondió positivamente y agradeció la claridad. La forma en que se comunica la información técnica afecta directamente la percepción del servicio.",
+    ],
+    vocab: [
+      { es: "redacción", pt: "redação" },
+      { es: "saludo", pt: "saudação" },
+      { es: "cierre cordial", pt: "encerramento cordial" },
+      { es: "próximos pasos", pt: "próximos passos" },
+      { es: "percepción", pt: "percepção" },
+      { es: "estructura", pt: "estrutura" },
+    ],
+    quiz: [
+      { question: "¿Por qué el correo generó confusión?", options: ["Porque tenía errores técnicos", "Porque la redacción era poco clara", "Porque lo envió la persona equivocada"], answer: "Porque la redacción era poco clara" },
+      { question: "¿Qué incluye la estructura de un buen correo técnico?", options: ["Solo la información técnica", "Saludo, contexto, información, próximos pasos y cierre", "Solo el problema y la solución"], answer: "Saludo, contexto, información, próximos pasos y cierre" },
+      { question: "¿Cómo respondió el cliente al nuevo correo?", options: ["Negativamente", "Positivamente y agradeció la claridad", "No respondió"], answer: "Positivamente y agradeció la claridad" },
+    ],
+    dictation: "Un correo técnico efectivo tiene saludo profesional, contexto breve, información clara, próximos pasos y cierre cordial.",
+  },
+  /* ── TI / SISTEMAS ─────────────────────── */
+  {
+    id: "helpdesk",
+    title: "Soporte técnico (Helpdesk)",
+    level: "Básico",
+    category: "Tecnología",
+    emoji: "💻",
+    description: "Vocabulario y comunicación para el soporte técnico interno.",
+    readingTitle: "El sistema que no abría",
+    reading: [
+      "Un lunes a la mañana, varios analistas reportaron que el sistema de gestión de laboratorio no respondía. El área de TI recibió múltiples tickets al mismo tiempo. La primera tarea fue clasificar los reportes: ¿era un problema generalizado o afectaba solo a algunos usuarios?",
+      "El técnico de soporte revisó el servidor, verificó los accesos y detectó que una actualización automática había generado un conflicto con el módulo de impresión de resultados. El problema fue aislado y resuelto en menos de una hora.",
+      "La experiencia reforzó la importancia de tener un canal de reporte claro, documentar los incidentes y comunicar el estado de la resolución a los usuarios afectados.",
+    ],
+    vocab: [
+      { es: "ticket", pt: "chamado / ticket" },
+      { es: "servidor", pt: "servidor" },
+      { es: "actualización", pt: "atualização" },
+      { es: "incidente", pt: "incidente" },
+      { es: "usuario", pt: "usuário" },
+      { es: "soporte técnico", pt: "suporte técnico" },
+    ],
+    quiz: [
+      { question: "¿Cuál fue el primer paso del técnico de soporte?", options: ["Reinstalar el sistema", "Clasificar si era un problema generalizado o local", "Llamar al proveedor externo"], answer: "Clasificar si era un problema generalizado o local" },
+      { question: "¿Qué causó el problema?", options: ["Una muestra mal procesada", "Una actualización automática con conflicto", "Un error del usuario"], answer: "Una actualización automática con conflicto" },
+      { question: "¿Qué reforzó la experiencia?", options: ["Que los sistemas nunca fallan", "La importancia de documentar y comunicar incidentes", "Que el soporte no es necesario"], answer: "La importancia de documentar y comunicar incidentes" },
+    ],
+    dictation: "Es importante documentar los incidentes técnicos y comunicar el estado de la resolución a todos los usuarios afectados.",
+  },
+  {
+    id: "seguridad-datos",
+    title: "Seguridad de datos",
+    level: "Intermedio",
+    category: "Tecnología",
+    emoji: "🔒",
+    description: "Protección de datos, accesos y buenas prácticas en sistemas.",
+    readingTitle: "Una contraseña compartida",
+    reading: [
+      "Durante una auditoría de seguridad, se descubrió que varios usuarios del laboratorio compartían la misma contraseña para acceder al sistema de resultados. Aunque todos confiaban entre sí, la práctica representaba un riesgo real: si alguien modificaba un resultado, sería imposible saber quién lo había hecho.",
+      "El área de TI implementó una política de accesos individuales, contraseñas seguras y autenticación con doble factor para los módulos más sensibles. También se estableció un registro de auditoría que quedaba guardado automáticamente.",
+      "La seguridad de los datos no es solo una exigencia regulatoria: es una forma de proteger la integridad de los resultados y la confianza del cliente.",
+    ],
+    vocab: [
+      { es: "contraseña", pt: "senha" },
+      { es: "acceso", pt: "acesso" },
+      { es: "doble factor", pt: "duplo fator" },
+      { es: "auditoría de seguridad", pt: "auditoria de segurança" },
+      { es: "integridad de datos", pt: "integridade de dados" },
+      { es: "registro de auditoría", pt: "registro de auditoria" },
+    ],
+    quiz: [
+      { question: "¿Qué práctica de riesgo se descubrió?", options: ["Que apagaban los servidores", "Que varios usuarios compartían la misma contraseña", "Que no usaban el sistema"], answer: "Que varios usuarios compartían la misma contraseña" },
+      { question: "¿Qué implementó TI para mejorar la seguridad?", options: ["Solo cambiar contraseñas", "Accesos individuales, contraseñas seguras y doble factor", "Cerrar el acceso a todos"], answer: "Accesos individuales, contraseñas seguras y doble factor" },
+      { question: "La seguridad de datos protege principalmente...", options: ["El servidor físico", "La integridad de los resultados y la confianza del cliente", "El presupuesto del área"], answer: "La integridad de los resultados y la confianza del cliente" },
+    ],
+    dictation: "La seguridad de los datos protege la integridad de los resultados y la confianza del cliente, y no es solo una exigencia regulatoria.",
+  },
+  {
+    id: "lims",
+    title: "Sistema LIMS",
+    level: "Intermedio",
+    category: "Tecnología",
+    emoji: "🖥️",
+    description: "Gestión de información de laboratorio: flujo, trazabilidad y reportes.",
+    readingTitle: "El flujo digital de una muestra",
+    reading: [
+      "Desde que llega al laboratorio, cada muestra deja un rastro digital en el sistema LIMS. El número de recepción, el analista asignado, el instrumento utilizado, los controles de calidad asociados y el resultado final quedan registrados y vinculados entre sí.",
+      "Cuando un cliente solicita una revisión de resultados históricos, el LIMS permite recuperar toda esa información en segundos. Esto no solo ahorra tiempo: también demuestra que el proceso fue controlado y documentado en cada etapa.",
+      "Un LIMS bien configurado reduce errores de transcripción, facilita la trazabilidad y permite generar informes automáticos. Su correcto uso es parte fundamental del trabajo de todo el equipo.",
+    ],
+    vocab: [
+      { es: "LIMS", pt: "LIMS (Sistema de Gestão de Informação de Laboratório)" },
+      { es: "rastro digital", pt: "rastro digital" },
+      { es: "transcripción", pt: "transcrição" },
+      { es: "informe automático", pt: "relatório automático" },
+      { es: "vinculado", pt: "vinculado" },
+      { es: "recuperar información", pt: "recuperar informação" },
+    ],
+    quiz: [
+      { question: "¿Qué queda registrado en el LIMS?", options: ["Solo el resultado final", "Recepción, analista, instrumento, controles y resultado", "Solo el nombre del cliente"], answer: "Recepción, analista, instrumento, controles y resultado" },
+      { question: "¿Qué permite el LIMS cuando un cliente solicita una revisión?", options: ["Nada, hay que buscar en papel", "Recuperar toda la información rápidamente", "Reiniciar el proceso desde cero"], answer: "Recuperar toda la información rápidamente" },
+      { question: "Un LIMS bien configurado...", options: ["Reemplaza al analista", "Reduce errores y facilita la trazabilidad", "Solo sirve para facturación"], answer: "Reduce errores y facilita la trazabilidad" },
+    ],
+    dictation: "Un LIMS bien configurado reduce errores de transcripción, facilita la trazabilidad y permite generar informes automáticos.",
+  },
 ];
 
-const CATEGORIES = ["Todos", "Laboratorio", "Gestión", "Comunicación", "Tecnología", "Gramática", "Controllab"];
+/* ─────────────────────────────────────────────
+   STUDENTS
+───────────────────────────────────────────── */
+const defaultStudents: Student[] = [
+  { id: "marilia", name: "Marília", code: "MARILIA" },
+  { id: "claudio", name: "Claudio", code: "CLAUDIO" },
+  { id: "juliana", name: "Juliana", code: "JULIANA" },
+  { id: "thamiris", name: "Thamiris", code: "THAMIRIS" },
+  { id: "livia", name: "Livia", code: "LIVIA" },
+  { id: "adriana", name: "Adriana", code: "ADRIANA" },
+  { id: "rafael", name: "Rafael", code: "RAFAEL" },
+  { id: "jessica", name: "Jessica", code: "JESSICA" },
+  { id: "luiza", name: "Luiza", code: "LUIZA" },
+  { id: "anapaulа", name: "Ana Paula", code: "ANAPAULA" },
+  { id: "lucas", name: "Lucas", code: "LUCAS" },
+  { id: "katia", name: "Katia", code: "KATIA" },
+  { id: "vinicius", name: "Vinicius", code: "VINICIUS" },
+  { id: "thiago", name: "Thiago", code: "THIAGO" },
+];
 
-function strSeed(s: string): number { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; } return h; }
-function shuffleOpts(opts: string[], seed: number): string[] { const arr = [...opts]; let s = seed || 1; for (let i = arr.length - 1; i > 0; i--) { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s = s >>> 0; const j = s % (i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
-function normalize(value: string): string { return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim(); }
-function createInitialState(): AppState { return { students: defaultStudents, currentStudentId: null, progress: {}, dictations: {} }; }
+const STORAGE_KEY = "aula-controllab-v3";
 
-async function loadRemoteState(): Promise<AppState | null> {
-  if (!supabase) return null;
-  const { data, error } = await supabase.from("aula_controllab_state").select("data").eq("id", DB_ROW_ID).maybeSingle();
-  if (error) throw error;
-  return (data?.data as AppState) || null;
+function createInitialState(): AppState {
+  return { students: defaultStudents, currentStudentId: null, progress: {}, dictations: {} };
 }
-async function saveRemoteState(state: AppState): Promise<void> {
-  if (!supabase) return;
-  const { error } = await supabase.from("aula_controllab_state").upsert({ id: DB_ROW_ID, data: state, updated_at: new Date().toISOString() }, { onConflict: "id" });
-  if (error) throw error;
+
+function normalize(value: string): string {
+  return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 }
 
+const CATEGORIES = ["Todos", "Laboratorio", "Gestión", "Comunicación", "Tecnología"];
+const LEVEL_COLOR: Record<string, string> = {
+  "Básico": "bg-emerald-100 text-emerald-800",
+  "Intermedio": "bg-amber-100 text-amber-800",
+  "Avanzado": "bg-rose-100 text-rose-800",
+};
+
+/* ─────────────────────────────────────────────
+   COMPONENT
+───────────────────────────────────────────── */
 export default function Home() {
   const [appState, setAppState] = useState<AppState>(createInitialState);
-  const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
-  const [loginName, setLoginName] = useState(""); const [loginCode, setLoginCode] = useState(""); const [loginError, setLoginError] = useState("");
+  const [loginName, setLoginName] = useState("");
+  const [loginCode, setLoginCode] = useState("");
+  const [loginError, setLoginError] = useState("");
   const [selectedModuleId, setSelectedModuleId] = useState(MODULES[0].id);
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState(""); const [submitted, setSubmitted] = useState(false);
-  const [showProfessorPanel, setShowProfessorPanel] = useState(false); const [professorUnlocked, setProfessorUnlocked] = useState(false);
-  const [newStudentName, setNewStudentName] = useState(""); const [newStudentCode, setNewStudentCode] = useState("");
-  const [dictationText, setDictationText] = useState(""); const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
+  const [selectedOption, setSelectedOption] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [showProfessorPanel, setShowProfessorPanel] = useState(false);
+  const [newStudentName, setNewStudentName] = useState("");
+  const [newStudentCode, setNewStudentCode] = useState("");
+  const [dictationText, setDictationText] = useState("");
+  const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
   const [teacherTab, setTeacherTab] = useState<"students" | "progress" | "dictations">("progress");
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [activeSection, setActiveSection] = useState<"reading" | "quiz" | "dictation" | "vocab">("reading");
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [newPassword, setNewPassword] = useState(""); const [confirmPassword, setConfirmPassword] = useState(""); const [passwordMsg, setPasswordMsg] = useState("");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) setAppState({ ...createInitialState(), ...JSON.parse(saved) });
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch { /* ignore */ }
+  }, [appState]);
 
   const currentStudent = appState.students.find(s => s.id === appState.currentStudentId) ?? null;
   const selectedModule = MODULES.find(m => m.id === selectedModuleId) ?? MODULES[0];
   const studentProgress = currentStudent ? appState.progress[currentStudent.id] || {} : {};
   const studentDictations = currentStudent ? appState.dictations[currentStudent.id] || {} : {};
-  const currentDictation = studentDictations[selectedModuleId] || null;
-  const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);
+  const moduleProgress: ModuleProgress = studentProgress[selectedModuleId] || { completed: false, score: 0, total: selectedModule.quiz.length, attempts: 0 };
   const currentQuestion = selectedModule.quiz[currentQuestionIndex];
-  const shuffledOpts = shuffleOpts(currentQuestion.options, strSeed(selectedModule.id + String(currentQuestionIndex)));
   const isCorrect = submitted && selectedOption === currentQuestion.answer;
+  const currentDictation = studentDictations[selectedModuleId] || null;
+
+  const filteredModules = activeCategory === "Todos" ? MODULES : MODULES.filter(m => m.category === activeCategory);
+
+  useEffect(() => {
+    setCurrentQuestionIndex(0);
+    setSelectedOption("");
+    setSubmitted(false);
+    setDictationText("");
+    setDictationResult(null);
+    setQuizAnswers({});
+    setActiveSection("reading");
+  }, [selectedModuleId, appState.currentStudentId]);
+
+  const totalQuestions = useMemo(() => MODULES.reduce((sum, m) => sum + m.quiz.length, 0), []);
   const completedModules = Object.keys(studentProgress).length;
   const totalBestScore = MODULES.reduce((sum, m) => sum + (studentProgress[m.id]?.score || 0), 0);
   const overallPercent = Math.round((completedModules / MODULES.length) * 100);
 
-  const speak = (text: string, rate = 0.9) => { if (typeof window === "undefined" || !("speechSynthesis" in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "es-ES"; u.rate = rate; const v = window.speechSynthesis.getVoices().find(x => x.lang.startsWith("es")); if (v) u.voice = v; window.speechSynthesis.speak(u); };
-  const stopSpeak = () => { if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel(); };
+  const professorRows = appState.students.map(student => {
+    const progress = appState.progress[student.id] || {};
+    const dictations = appState.dictations[student.id] || {};
+    const completedMods = Object.keys(progress).length;
+    const bestScore = MODULES.reduce((sum, m) => sum + (progress[m.id]?.score || 0), 0);
+    const dictScores = MODULES.map(m => dictations[m.id]?.score).filter((v): v is number => typeof v === "number");
+    const dictAvg = dictScores.length ? Math.round(dictScores.reduce((a, b) => a + b, 0) / dictScores.length) : null;
+    return { ...student, completedMods, bestScore, dictAvg };
+  });
 
-  useEffect(() => {
-    let mounted = true;
-    const LSKEY = "aula-controllab-v7";
-    (async () => {
-      try { if (supabase) { const remote = await loadRemoteState(); if (!mounted) return; if (remote) { setAppState({ students: Array.isArray(remote.students) && remote.students.length ? remote.students : defaultStudents, currentStudentId: null, progress: remote.progress || {}, dictations: remote.dictations || {} }); setLoadStatus("ready"); return; } } } catch {}
-      if (!mounted) return;
-      try { const saved = localStorage.getItem(LSKEY); if (saved) { const p = JSON.parse(saved); setAppState({ ...createInitialState(), ...p, currentStudentId: null }); } else setAppState(createInitialState()); } catch { setAppState(createInitialState()); }
-      setLoadStatus("ready");
-    })();
-    return () => { mounted = false; };
-  }, []);
+  const login = () => {
+    const found = appState.students.find(s => normalize(s.name) === normalize(loginName) && normalize(s.code) === normalize(loginCode));
+    if (!found) { setLoginError("Nombre o código incorrecto. Verificá con tu profe."); return; }
+    setAppState(prev => ({ ...prev, currentStudentId: found.id }));
+    setLoginError("");
+    setLoginName("");
+    setLoginCode("");
+  };
 
-  useEffect(() => {
-    if (loadStatus !== "ready") return;
-    const LSKEY = "aula-controllab-v7";
-    const t = setTimeout(async () => { try { localStorage.setItem(LSKEY, JSON.stringify(appState)); } catch {} if (supabase) { try { await saveRemoteState(appState); } catch {} } }, 500);
-    return () => clearTimeout(t);
-  }, [appState, loadStatus]);
+  const logout = () => {
+    setAppState(prev => ({ ...prev, currentStudentId: null }));
+    setSelectedModuleId(MODULES[0].id);
+    setShowProfessorPanel(false);
+  };
 
-  useEffect(() => { stopSpeak(); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setDictationText(""); setDictationResult(null); setQuizAnswers({}); setActiveSection("reading"); }, [selectedModuleId, appState.currentStudentId]); // eslint-disable-line
+  const saveProgress = (scoreValue: number, totalValue: number) => {
+    if (!currentStudent) return;
+    setAppState(prev => {
+      const prevSP = prev.progress[currentStudent.id] || {};
+      const prevMod = prevSP[selectedModuleId] || { completed: false, score: 0, total: totalValue, attempts: 0 };
+      return {
+        ...prev,
+        progress: { ...prev.progress, [currentStudent.id]: { ...prevSP, [selectedModuleId]: { completed: true, score: Math.max(prevMod.score || 0, scoreValue), total: totalValue, attempts: (prevMod.attempts || 0) + 1 } } },
+      };
+    });
+  };
 
-  const logout = () => { stopSpeak(); setAppState(prev => ({ ...prev, currentStudentId: null })); setSelectedModuleId(MODULES[0].id); setShowProfessorPanel(false); setProfessorUnlocked(false); };
-  const login = () => { const found = appState.students.find(s => normalize(s.name) === normalize(loginName) && normalize(s.code) === normalize(loginCode)); if (!found) { setLoginError("Usuario o contraseña incorrectos."); return; } setAppState(prev => ({ ...prev, currentStudentId: found.id })); setLoginError(""); setLoginName(""); setLoginCode(""); };
-  const changePassword = () => { if (!newPassword.trim()) { setPasswordMsg("Escribí una contraseña nueva."); return; } if (newPassword.trim().length < 4) { setPasswordMsg("La contraseña debe tener al menos 4 caracteres."); return; } if (newPassword.trim() !== confirmPassword.trim()) { setPasswordMsg("Las contraseñas no coinciden."); return; } if (!currentStudent) return; setAppState(prev => ({ ...prev, students: prev.students.map(s => s.id === currentStudent.id ? { ...s, code: newPassword.trim().toUpperCase() } : s) })); setPasswordMsg("✓ Contraseña actualizada correctamente."); setNewPassword(""); setConfirmPassword(""); setTimeout(() => { setShowChangePassword(false); setPasswordMsg(""); }, 1500); };
-  const handleProfessorClick = () => { if (professorUnlocked) { setShowProfessorPanel(v => !v); return; } const pwd = window.prompt("Contraseña del profesor:"); if (pwd === PROFESSOR_PASSWORD) { setProfessorUnlocked(true); setShowProfessorPanel(true); } else if (pwd !== null) alert("Contraseña incorrecta."); };
-  const saveProgress = (scoreValue: number, totalValue: number) => { if (!currentStudent) return; setAppState(prev => { const prevSP = prev.progress[currentStudent.id] || {}; const prevM = prevSP[selectedModuleId] || { completed: false, score: 0, total: totalValue, attempts: 0 }; return { ...prev, progress: { ...prev.progress, [currentStudent.id]: { ...prevSP, [selectedModuleId]: { completed: true, score: Math.max(prevM.score || 0, scoreValue), total: totalValue, attempts: (prevM.attempts || 0) + 1 } } } }; }); };
-  const resetCurrentModule = () => { if (!currentStudent) return; if (!window.confirm(`¿Reiniciar el módulo "${selectedModule.title}" para ${currentStudent.name}?`)) return; setAppState(prev => { const newP = { ...(prev.progress[currentStudent.id] || {}) }; const newD = { ...(prev.dictations[currentStudent.id] || {}) }; delete newP[selectedModuleId]; delete newD[selectedModuleId]; return { ...prev, progress: { ...prev.progress, [currentStudent.id]: newP }, dictations: { ...prev.dictations, [currentStudent.id]: newD } }; }); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setDictationText(""); setDictationResult(null); setActiveSection("reading"); };
-  const resetStudentModule = (studentId: string, moduleId: string) => { setAppState(prev => { const newP = { ...(prev.progress[studentId] || {}) }; const newD = { ...(prev.dictations[studentId] || {}) }; delete newP[moduleId]; delete newD[moduleId]; return { ...prev, progress: { ...prev.progress, [studentId]: newP }, dictations: { ...prev.dictations, [studentId]: newD } }; }); };
-  const resetStudentAll = (studentId: string, studentName: string) => { if (!window.confirm(`¿Reiniciar TODOS los módulos de ${studentName}?`)) return; setAppState(prev => ({ ...prev, progress: { ...prev.progress, [studentId]: {} }, dictations: { ...prev.dictations, [studentId]: {} } })); };
-  const resetAllStudents = () => { if (!window.confirm("¿Borrar TODO el progreso de TODOS los alumnos?")) return; setAppState(prev => ({ ...prev, progress: {}, dictations: {} })); };
   const handleSubmit = () => { if (!selectedOption) return; setSubmitted(true); };
-  const handleNext = () => { if (currentQuestionIndex < selectedModule.quiz.length - 1) { const next = currentQuestionIndex + 1; setCurrentQuestionIndex(next); setSelectedOption(quizAnswers[next] || ""); setSubmitted(false); return; } const correct = selectedModule.quiz.reduce((sum, q, i) => sum + (quizAnswers[i] === q.answer ? 1 : 0), 0); saveProgress(correct, selectedModule.quiz.length); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setActiveSection("reading"); };
-  const setAnswerMemory = (value: string) => { setSelectedOption(value); setQuizAnswers(prev => ({ ...prev, [currentQuestionIndex]: value })); };
-  const addStudent = () => { if (!newStudentName.trim() || !newStudentCode.trim()) return; const exists = appState.students.some(s => normalize(s.name) === normalize(newStudentName) || normalize(s.code) === normalize(newStudentCode)); if (exists) { alert("Ese alumno o código ya existe."); return; } const id = `${normalize(newStudentName)}-${Date.now()}`; setAppState(prev => ({ ...prev, students: [...prev.students, { id, name: newStudentName.trim(), code: newStudentCode.trim().toUpperCase() }] })); setNewStudentName(""); setNewStudentCode(""); };
-  const removeStudent = (studentId: string) => { const student = appState.students.find(s => s.id === studentId); if (!window.confirm(`¿Eliminar a ${student?.name || "este alumno"}?`)) return; setAppState(prev => { const newStudents = prev.students.filter(s => s.id !== studentId); const newP = { ...prev.progress }; const newD = { ...prev.dictations }; delete newP[studentId]; delete newD[studentId]; return { ...prev, students: newStudents, progress: newP, dictations: newD }; }); };
-  const checkDictation = () => { if (!currentStudent) return; const expected = normalize(selectedModule.dictation); const written = normalize(dictationText); const expWords = expected.split(" ").filter(Boolean); const wrtWords = written.split(" ").filter(Boolean); const matches = wrtWords.filter((w, i) => w === expWords[i]).length; const score = expWords.length ? Math.round((matches / expWords.length) * 100) : 0; const result: DictationResult = { exact: expected === written, score, written: dictationText, expected: selectedModule.dictation, updatedAt: new Date().toLocaleString() }; setDictationResult(result); setAppState(prev => ({ ...prev, dictations: { ...prev.dictations, [currentStudent.id]: { ...(prev.dictations[currentStudent.id] || {}), [selectedModuleId]: result } } })); };
 
-  const professorRows = useMemo(() => appState.students.map(student => { const progress = appState.progress[student.id] || {}; const dictations = appState.dictations[student.id] || {}; const completedMods = Object.keys(progress).length; const bestScore = MODULES.reduce((sum, m) => sum + (progress[m.id]?.score || 0), 0); const dictScores = MODULES.map(m => dictations[m.id]?.score).filter((v): v is number => typeof v === "number"); const dictAvg = dictScores.length ? Math.round(dictScores.reduce((a, b) => a + b, 0) / dictScores.length) : null; return { ...student, completedMods, bestScore, dictAvg }; }), [appState]);
+  const handleNext = () => {
+    if (currentQuestionIndex < selectedModule.quiz.length - 1) {
+      setCurrentQuestionIndex(i => i + 1);
+      setSelectedOption(quizAnswers[currentQuestionIndex + 1] || "");
+      setSubmitted(false);
+      return;
+    }
+    const correctCount = selectedModule.quiz.reduce((sum, q, i) => sum + (quizAnswers[i] === q.answer ? 1 : 0), 0);
+    saveProgress(correctCount, selectedModule.quiz.length);
+    setCurrentQuestionIndex(0);
+    setSelectedOption("");
+    setSubmitted(false);
+    setQuizAnswers({});
+    setActiveSection("reading");
+  };
 
-  if (loadStatus === "loading") return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: BG, fontFamily: FONT }}>
-      <div style={{ textAlign: "center" }}><div style={{ fontSize: 40, marginBottom: 16 }}>⚗️</div><div style={{ color: TEXT_MID, fontSize: 15 }}>Cargando Aula Controllab...</div></div>
-    </div>
-  );
+  const setAnswerMemory = (value: string) => {
+    setSelectedOption(value);
+    setQuizAnswers(prev => ({ ...prev, [currentQuestionIndex]: value }));
+  };
 
-  const ProfessorPanel = () => (
-    <div style={{ ...GLASS, borderRadius: 20, padding: 24, marginTop: 16 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" as const }}>
-        {(["progress", "students", "dictations"] as const).map(t => (
-          <button key={t} onClick={() => setTeacherTab(t)} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: teacherTab === t ? TEAL : "rgba(255,255,255,0.06)", color: teacherTab === t ? "#042f2e" : TEXT_MID, fontFamily: FONT }}>
-            {t === "progress" ? "📊 Progreso" : t === "students" ? "👥 Alumnos" : "🎙 Dictados"}
-          </button>
-        ))}
-        <button onClick={resetAllStudents} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: "rgba(251,113,133,0.15)", color: "#fb7185", fontFamily: FONT, marginLeft: "auto" }}>🗑 Borrar todo</button>
-      </div>
-      {teacherTab === "progress" && (
-        <div style={{ maxHeight: 380, overflowY: "auto" as const }}>
-          {professorRows.map(row => (
-            <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" as const }}>
-              <div style={{ flex: 1, minWidth: 120 }}><div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT }}>{row.name}</div><div style={{ fontSize: 11, color: TEXT_DIM, fontFamily: MONO }}>{row.completedMods}/{MODULES.length} mód · {row.bestScore} pts</div></div>
-              <button onClick={() => resetStudentAll(row.id, row.name)} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>Reset</button>
+  const addStudent = () => {
+    if (!newStudentName.trim() || !newStudentCode.trim()) return;
+    const id = `${normalize(newStudentName)}-${Date.now()}`;
+    setAppState(prev => ({ ...prev, students: [...prev.students, { id, name: newStudentName.trim(), code: newStudentCode.trim().toUpperCase() }] }));
+    setNewStudentName("");
+    setNewStudentCode("");
+  };
+
+  const removeStudent = (studentId: string) => {
+    setAppState(prev => {
+      const newStudents = prev.students.filter(s => s.id !== studentId);
+      const newProgress = { ...prev.progress };
+      const newDictations = { ...prev.dictations };
+      delete newProgress[studentId];
+      delete newDictations[studentId];
+      return { ...prev, students: newStudents, progress: newProgress, dictations: newDictations };
+    });
+  };
+
+  const speak = (text: string, rate: number) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "es-ES";
+    u.rate = rate;
+    window.speechSynthesis.speak(u);
+  };
+
+  const checkDictation = () => {
+    if (!currentStudent) return;
+    const expected = normalize(selectedModule.dictation);
+    const written = normalize(dictationText);
+    const expectedWords = expected.split(" ").filter(Boolean);
+    const writtenWords = written.split(" ").filter(Boolean);
+    const matches = writtenWords.filter((w, i) => w === expectedWords[i]).length;
+    const score = expectedWords.length ? Math.round((matches / expectedWords.length) * 100) : 0;
+    const result: DictationResult = { exact: expected === written, score, written: dictationText, expected: selectedModule.dictation, updatedAt: new Date().toLocaleString() };
+    setDictationResult(result);
+    setAppState(prev => ({ ...prev, dictations: { ...prev.dictations, [currentStudent.id]: { ...(prev.dictations[currentStudent.id] || {}), [selectedModuleId]: result } } }));
+  };
+
+  /* ── LOGIN SCREEN ───────────────────────── */
+  if (!currentStudent) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-10">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+          * { font-family: 'Sora', sans-serif; }
+          .mono { font-family: 'JetBrains Mono', monospace; }
+          .glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
+          .glow { box-shadow: 0 0 40px rgba(99,202,183,0.15); }
+          .accent { color: #63CAB7; }
+          .btn-primary { background: linear-gradient(135deg, #63CAB7, #4aab97); color: #0f1923; font-weight: 600; }
+          .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+          input:focus { outline: none; border-color: #63CAB7 !important; box-shadow: 0 0 0 3px rgba(99,202,183,0.2); }
+          .tag { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; }
+        `}</style>
+        <div className="w-full max-w-5xl">
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* LEFT */}
+            <div className="glass rounded-3xl p-8 md:p-10 glow">
+              <div className="mono text-xs tracking-widest text-slate-400 mb-4">CONTROLLAB · ES-PT</div>
+              <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                Aula<br /><span className="accent">Controllab</span>
+              </h1>
+              <p className="mt-4 text-slate-300 leading-7">
+                Plataforma de español técnico para el equipo Controllab. Módulos de laboratorio, calidad, TI y comunicación — diseñados para vos.
+              </p>
+              <div className="mt-8 grid grid-cols-2 gap-4">
+                {[
+                  { num: MODULES.length, label: "Módulos", sub: "Lab · Gestión · TI · Com." },
+                  { num: defaultStudents.length, label: "Alumnos", sub: "Todos registrados" },
+                  { num: "4", label: "Áreas", sub: "Lab · Gestión · TI · Com." },
+                  { num: "🎧", label: "Audio TTS", sub: "Lectura y dictado" },
+                ].map(item => (
+                  <div key={item.label} className="glass rounded-2xl p-4">
+                    <div className="text-2xl font-bold text-white mono">{item.num}</div>
+                    <div className="text-sm font-semibold text-white mt-1">{item.label}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">{item.sub}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 glass rounded-2xl p-5">
+                <div className="text-xs mono text-slate-400 mb-3 tracking-widest">ALUMNOS REGISTRADOS</div>
+                <div className="flex flex-wrap gap-2">
+                  {defaultStudents.map(s => (
+                    <span key={s.id} className="glass text-slate-200 text-xs px-3 py-1 rounded-full">{s.name}</span>
+                  ))}
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-      )}
-      {teacherTab === "dictations" && (
-        <div style={{ maxHeight: 380, overflowY: "auto" as const }}>
-          {professorRows.map(row => (
-            <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8 }}>
-              <div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT, marginBottom: 6 }}>{row.name} {row.dictAvg !== null && <span style={{ fontFamily: MONO, fontSize: 12, color: TEAL }}>avg {row.dictAvg}%</span>}</div>
-              {MODULES.filter(m => appState.dictations[row.id]?.[m.id]).map(m => { const d = appState.dictations[row.id][m.id]; return (<div key={m.id} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 4 }}><span style={{ fontSize: 12, color: TEXT_MID, fontFamily: FONT, flex: 1 }}>{m.emoji} {m.title}</span><span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: d.score >= 80 ? "#34d399" : d.score >= 50 ? "#fbbf24" : "#fb7185" }}>{d.score}%</span><button onClick={() => resetStudentModule(row.id, m.id)} style={{ background: "rgba(251,113,133,0.1)", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 10, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>×</button></div>); })}
-              {!MODULES.some(m => appState.dictations[row.id]?.[m.id]) && <div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: FONT }}>Sin dictados aún</div>}
+
+            {/* RIGHT */}
+            <div className="glass rounded-3xl p-8 md:p-10">
+              <div className="mono text-xs tracking-widest text-slate-400 mb-4">INGRESO</div>
+              <h2 className="text-2xl font-bold text-white">Entrar como alumno</h2>
+              <p className="mt-2 text-slate-400 text-sm">Usá tu nombre y el código que te dio el profe.</p>
+              <div className="mt-8 space-y-4">
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2 font-medium">Nombre</label>
+                  <input value={loginName} onChange={e => setLoginName(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Ej: Marília" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 transition" />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2 font-medium">Código de acceso</label>
+                  <input value={loginCode} onChange={e => setLoginCode(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Ej: MARILIA" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 mono transition" />
+                </div>
+                {loginError && <p className="text-rose-400 text-sm">{loginError}</p>}
+                <button onClick={login} className="btn-primary w-full rounded-xl px-5 py-3.5 text-sm transition">
+                  Ingresar →
+                </button>
+              </div>
+              <div className="mt-8 glass rounded-2xl p-5">
+                <div className="mono text-xs text-slate-400 tracking-widest mb-3">PANEL DEL PROFE</div>
+                <button onClick={() => setShowProfessorPanel(v => !v)} className="w-full text-left text-sm text-slate-300 hover:text-white transition flex justify-between items-center">
+                  <span>Agregar / gestionar alumnos</span>
+                  <span className="text-slate-500">{showProfessorPanel ? "▲" : "▼"}</span>
+                </button>
+                {showProfessorPanel && (
+                  <div className="mt-4 space-y-3">
+                    <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre del alumno" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
+                    <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm mono" />
+                    <button onClick={addStudent} className="w-full rounded-xl border border-slate-600 text-slate-200 px-4 py-2.5 text-sm hover:bg-slate-700 transition">
+                      + Agregar alumno
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
-      )}
-      {teacherTab === "students" && (
-        <div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-            <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" style={{ ...input, flex: 2 }} />
-            <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" style={{ ...input, flex: 1 }} />
-            <button onClick={addStudent} style={{ ...btnAccent, padding: "0 16px", whiteSpace: "nowrap" as const }}>+ Agregar</button>
-          </div>
-          <div style={{ maxHeight: 280, overflowY: "auto" as const }}>
-            {appState.students.map(s => (<div key={s.id} style={{ ...glassDark, borderRadius: 12, padding: "10px 14px", marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}><div style={{ flex: 1, fontSize: 14, color: TEXT, fontFamily: FONT }}>{s.name}</div><div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: MONO }}>{s.code}</div><button onClick={() => removeStudent(s.id)} style={{ background: "transparent", border: "none", color: "#fb7185", cursor: "pointer", fontSize: 16 }}>×</button></div>))}
           </div>
         </div>
-      )}
-    </div>
-  );
-
-  if (!currentStudent) return (
-    <div style={{ minHeight: "100vh", background: BG, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: FONT }}>
-      <div style={{ width: "100%", maxWidth: 420 }}>
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🔬</div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: "-0.02em" }}>Aula Controllab</h1>
-          <p style={{ color: TEXT_MID, fontSize: 14, marginTop: 8 }}>Español técnico para profesionales del laboratorio</p>
-        </div>
-        <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "0 0 24px" }}>Iniciar sesión</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <input value={loginName} onChange={e => setLoginName(e.target.value)} placeholder="Tu nombre" style={input} onKeyDown={e => e.key === "Enter" && login()} />
-            <input value={loginCode} onChange={e => setLoginCode(e.target.value)} placeholder="Contraseña" type="password" style={input} onKeyDown={e => e.key === "Enter" && login()} />
-            {loginError && <div style={{ color: "#fb7185", fontSize: 13 }}>{loginError}</div>}
-            <button onClick={login} style={{ ...btnAccent, width: "100%", textAlign: "center" as const }}>Entrar →</button>
-          </div>
-        </div>
-        <button onClick={handleProfessorClick} style={{ marginTop: 16, width: "100%", background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "10px 16px", color: TEXT_DIM, fontSize: 13, cursor: "pointer", fontFamily: FONT }}>
-          👨‍🏫 Panel del profesor
-        </button>
-        {showProfessorPanel && professorUnlocked && <ProfessorPanel />}
       </div>
-    </div>
-  );
+    );
+  }
 
+  /* ── MAIN APP ───────────────────────────── */
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: FONT }}>
-      <header style={{ ...GLASS, borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontSize: 20 }}>🔬</span>
-          <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: "-0.01em" }}>Aula Controllab</span>
-          <div style={{ flex: 1 }} />
-          <div style={{ display: "flex", gap: 6, overflowX: "auto" as const }}>
-            {CATEGORIES.map(cat => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ borderRadius: 20, padding: "5px 12px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: activeCategory === cat ? TEAL : "rgba(255,255,255,0.06)", color: activeCategory === cat ? "#042f2e" : TEXT_MID, fontFamily: FONT, whiteSpace: "nowrap" as const }}>
-                {cat}
-              </button>
-            ))}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        * { font-family: 'Sora', sans-serif; box-sizing: border-box; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); }
+        .glass-dark { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px); }
+        .accent { color: #63CAB7; }
+        .accent-bg { background-color: #63CAB7; }
+        .btn-accent { background: linear-gradient(135deg, #63CAB7, #4aab97); color: #0f1923; font-weight: 700; border-radius: 12px; transition: all 0.2s; }
+        .btn-accent:hover { opacity: 0.9; transform: translateY(-1px); }
+        input, textarea { outline: none; transition: all 0.2s; }
+        input:focus, textarea:focus { border-color: #63CAB7 !important; box-shadow: 0 0 0 3px rgba(99,202,183,0.15); }
+        .module-card:hover { border-color: rgba(99,202,183,0.4) !important; transform: translateY(-2px); }
+        .module-card { transition: all 0.2s; }
+        .module-card.active { background: linear-gradient(135deg, rgba(99,202,183,0.15), rgba(74,171,151,0.1)); border-color: #63CAB7 !important; }
+        .progress-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,0.1); overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #63CAB7, #4aab97); transition: width 0.6s ease; }
+        .section-tab { transition: all 0.2s; cursor: pointer; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 600; }
+        .section-tab.active { background: #63CAB7; color: #0f1923; }
+        .section-tab:not(.active) { color: #94a3b8; }
+        .section-tab:not(.active):hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .option-btn { transition: all 0.18s; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 16px; text-align: left; width: 100%; background: rgba(255,255,255,0.04); color: #e2e8f0; cursor: pointer; }
+        .option-btn:hover:not(:disabled) { border-color: rgba(99,202,183,0.5); background: rgba(99,202,183,0.07); }
+        .option-btn.selected { border-color: #63CAB7; background: rgba(99,202,183,0.1); }
+        .option-btn.correct { border-color: #63CAB7; background: rgba(99,202,183,0.2); color: #63CAB7; font-weight: 600; }
+        .option-btn.wrong { border-color: #f87171; background: rgba(248,113,113,0.1); color: #f87171; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+      `}</style>
+
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 glass-dark border-b border-white/5">
+        <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div>
+              <div className="mono text-xs text-slate-500 tracking-widest">CONTROLLAB</div>
+              <div className="font-bold text-lg leading-tight">
+                Hola, <span className="accent">{currentStudent.name}</span> 👋
+              </div>
+            </div>
+            <div className="hidden md:flex items-center gap-3 ml-4">
+              <div className="glass rounded-xl px-4 py-2 text-sm">
+                <span className="text-slate-400">Progreso </span>
+                <span className="font-bold accent">{overallPercent}%</span>
+              </div>
+              <div className="glass rounded-xl px-4 py-2 text-sm">
+                <span className="text-slate-400">Puntaje </span>
+                <span className="font-bold">{totalBestScore}<span className="text-slate-500">/{totalQuestions}</span></span>
+              </div>
+              <div className="glass rounded-xl px-4 py-2 text-sm">
+                <span className="text-slate-400">Módulos </span>
+                <span className="font-bold">{completedModules}<span className="text-slate-500">/{MODULES.length}</span></span>
+              </div>
+            </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button onClick={() => { setShowChangePassword(v => !v); setShowProfessorPanel(false); }} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔑</button>
-            <button onClick={handleProfessorClick} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>👨‍🏫</button>
-            <div style={{ ...glassDark, borderRadius: 10, padding: "6px 12px", fontSize: 13, fontWeight: 600 }}>{currentStudent.name}</div>
-            <button onClick={logout} style={{ background: "rgba(251,113,133,0.15)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 10, padding: "6px 12px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>Salir</button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowProfessorPanel(v => !v)} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition">
+              {showProfessorPanel ? "✕ Panel" : "📊 Panel profe"}
+            </button>
+            <button onClick={logout} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition">
+              Salir →
+            </button>
           </div>
+        </div>
+        {/* Progress bar */}
+        <div className="progress-bar mx-6 mb-3 rounded-none" style={{ borderRadius: 0 }}>
+          <div className="progress-fill" style={{ width: `${overallPercent}%` }} />
         </div>
       </header>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px" }}>
-        {showChangePassword && (
-          <div style={{ paddingTop: 16 }}>
-            <div style={{ ...GLASS, borderRadius: 20, padding: 24, maxWidth: 420 }}>
-              <h3 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 700 }}>Cambiar contraseña</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Nueva contraseña" style={input} />
-                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirmar contraseña" style={input} />
-                {passwordMsg && <div style={{ fontSize: 13, color: passwordMsg.startsWith("✓") ? "#34d399" : "#fb7185" }}>{passwordMsg}</div>}
-                <div style={{ display: "flex", gap: 10 }}>
-                  <button onClick={changePassword} style={{ ...btnAccent, flex: 1 }}>Guardar</button>
-                  <button onClick={() => { setShowChangePassword(false); setPasswordMsg(""); setNewPassword(""); setConfirmPassword(""); }} style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "12px", fontSize: 14, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>Cancelar</button>
-                </div>
+      <div className="max-w-screen-2xl mx-auto px-6 py-8">
+        {/* PROFESSOR PANEL */}
+        {showProfessorPanel && (
+          <div className="glass rounded-3xl p-6 mb-8">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+              <div>
+                <div className="mono text-xs text-slate-400 tracking-widest mb-1">PANEL DEL PROFESOR</div>
+                <h2 className="text-xl font-bold">Gestión y seguimiento de alumnos</h2>
+              </div>
+              <div className="flex gap-2">
+                {(["progress", "students", "dictations"] as const).map(tab => (
+                  <button key={tab} onClick={() => setTeacherTab(tab)} className={`section-tab ${teacherTab === tab ? "active" : ""}`}>
+                    {tab === "progress" ? "📊 Progreso" : tab === "students" ? "👥 Alumnos" : "🎙 Dictados"}
+                  </button>
+                ))}
               </div>
             </div>
+
+            {teacherTab === "progress" && (
+              <div className="overflow-x-auto rounded-2xl border border-white/10">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-white/5 text-slate-400">
+                      <th className="text-left px-4 py-3 font-semibold">Alumno</th>
+                      {MODULES.map(m => <th key={m.id} className="text-center px-2 py-3 font-semibold text-xs" title={m.title}>{m.emoji}</th>)}
+                      <th className="text-center px-4 py-3 font-semibold">Total</th>
+                      <th className="text-center px-4 py-3 font-semibold">%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {professorRows.map((row, i) => (
+                      <tr key={row.id} className={`border-t border-white/5 ${i % 2 === 0 ? "bg-white/[0.02]" : ""}`}>
+                        <td className="px-4 py-3 font-medium">{row.name}</td>
+                        {MODULES.map(m => {
+                          const p = (appState.progress[row.id] || {})[m.id];
+                          return <td key={m.id} className="text-center px-2 py-3">
+                            {p ? <span className="accent font-bold mono text-xs">{p.score}/{p.total}</span> : <span className="text-slate-600">—</span>}
+                          </td>;
+                        })}
+                        <td className="text-center px-4 py-3 font-bold accent mono">{row.bestScore}/{totalQuestions}</td>
+                        <td className="text-center px-4 py-3">
+                          <span className={`text-xs font-bold px-2 py-1 rounded-full ${row.completedMods === MODULES.length ? "bg-emerald-900 text-emerald-300" : row.completedMods > 0 ? "bg-amber-900 text-amber-300" : "bg-slate-700 text-slate-400"}`}>
+                            {Math.round((row.completedMods / MODULES.length) * 100)}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {teacherTab === "dictations" && (
+              <div className="overflow-x-auto rounded-2xl border border-white/10">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-white/5 text-slate-400">
+                      <th className="text-left px-4 py-3 font-semibold">Alumno</th>
+                      {MODULES.map(m => <th key={m.id} className="text-center px-2 py-3 font-semibold text-xs" title={m.title}>{m.emoji}</th>)}
+                      <th className="text-center px-4 py-3 font-semibold">Promedio</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {professorRows.map((row, i) => (
+                      <tr key={row.id} className={`border-t border-white/5 ${i % 2 === 0 ? "bg-white/[0.02]" : ""}`}>
+                        <td className="px-4 py-3 font-medium">{row.name}</td>
+                        {MODULES.map(m => {
+                          const d = (appState.dictations[row.id] || {})[m.id];
+                          return <td key={m.id} className="text-center px-2 py-3">
+                            {d != null ? <span className={`mono text-xs font-bold ${d.score >= 80 ? "text-emerald-400" : d.score >= 50 ? "text-amber-400" : "text-rose-400"}`}>{d.score}%</span> : <span className="text-slate-600">—</span>}
+                          </td>;
+                        })}
+                        <td className="text-center px-4 py-3 font-bold mono accent">{row.dictAvg != null ? `${row.dictAvg}%` : "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {teacherTab === "students" && (
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="glass-dark rounded-2xl p-5">
+                  <div className="mono text-xs text-slate-400 tracking-widest mb-4">AGREGAR ALUMNO</div>
+                  <div className="space-y-3">
+                    <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm" />
+                    <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código de acceso" className="w-full rounded-xl bg-slate-800 border border-slate-700 text-white px-4 py-3 text-sm mono" />
+                    <button onClick={addStudent} className="btn-accent w-full px-4 py-3 text-sm">+ Agregar</button>
+                  </div>
+                </div>
+                <div className="glass-dark rounded-2xl p-5">
+                  <div className="mono text-xs text-slate-400 tracking-widest mb-4">ALUMNOS REGISTRADOS</div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {appState.students.map(s => (
+                      <div key={s.id} className="flex items-center justify-between glass rounded-xl px-4 py-3">
+                        <div>
+                          <div className="font-medium text-sm">{s.name}</div>
+                          <div className="mono text-xs text-slate-500">{s.code}</div>
+                        </div>
+                        {!defaultStudents.some(d => d.id === s.id) && (
+                          <button onClick={() => removeStudent(s.id)} className="text-rose-400 hover:text-rose-300 text-xs transition">Eliminar</button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
-        {showProfessorPanel && professorUnlocked && <ProfessorPanel />}
-      </div>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 24px" }}>
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" as const }}>
-            <div style={{ fontSize: 40 }}>{selectedModule.emoji}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" as const, marginBottom: 6 }}>
-                <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>{selectedModule.title}</h2>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "rgba(255,255,255,0.07)", color: catColor(selectedModule.category), fontFamily: MONO }}>{selectedModule.category}</span>
-                <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: "rgba(255,255,255,0.05)", color: TEXT_DIM, fontFamily: MONO }}>{selectedModule.level}</span>
-              </div>
-              <p style={{ color: TEXT_MID, fontSize: 14, margin: 0 }}>{selectedModule.description}</p>
-            </div>
-            <button onClick={resetCurrentModule} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 12, padding: "8px 14px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>🔄 Reiniciar</button>
-          </div>
-          <div style={{ display: "flex", gap: 6, marginTop: 20, flexWrap: "wrap" as const }}>
-            {(["reading", "vocab", "quiz", "dictation"] as const).map(sec => {
-              const labels: Record<string, string> = { reading: "📖 Lectura", vocab: "📝 Vocabulario", quiz: "🧠 Quiz", dictation: "🎙 Dictado" };
-              const active = activeSection === sec;
-              return (<button key={sec} onClick={() => setActiveSection(sec)} style={{ borderRadius: 12, padding: "9px 18px", fontSize: 13, fontWeight: 600, border: `1px solid ${active ? BORDER_A : BORDER}`, cursor: "pointer", background: active ? "rgba(45,212,191,0.1)" : "rgba(255,255,255,0.04)", color: active ? TEAL : TEXT_MID, fontFamily: FONT }}>{labels[sec]}</button>);
-            })}
-          </div>
+        {/* CATEGORY FILTER */}
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+          {CATEGORIES.map(cat => (
+            <button key={cat} onClick={() => setActiveCategory(cat)} className={`section-tab whitespace-nowrap ${activeCategory === cat ? "active" : ""}`}>
+              {cat}
+            </button>
+          ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, alignItems: "start" }}>
-          <div>
+        {/* MODULE GRID */}
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 mb-8">
+          {filteredModules.map(module => {
+            const prog = studentProgress[module.id];
+            const active = module.id === selectedModuleId;
+            return (
+              <button key={module.id} onClick={() => setSelectedModuleId(module.id)} className={`module-card glass rounded-2xl p-4 text-left border ${active ? "active" : "border-white/5"}`}>
+                <div className="text-2xl mb-2">{module.emoji}</div>
+                <div className="text-xs text-slate-400 mb-1 font-medium">{module.category}</div>
+                <div className="font-bold text-sm leading-tight">{module.title}</div>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${active ? "bg-white/20 text-white" : "bg-white/5 text-slate-400"}`}>{module.level}</span>
+                  <span className={`mono text-xs font-bold ${prog ? "accent" : "text-slate-600"}`}>
+                    {prog ? `${prog.score}/${prog.total}` : "—"}
+                  </span>
+                </div>
+                {prog && (
+                  <div className="mt-2 progress-bar">
+                    <div className="progress-fill" style={{ width: `${Math.round((prog.score / prog.total) * 100)}%` }} />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* MAIN CONTENT */}
+        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+          {/* LEFT COLUMN */}
+          <div className="space-y-6">
+            {/* Module header */}
+            <div className="glass rounded-3xl p-6">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <div className="mono text-xs text-slate-400 tracking-widest mb-1">{selectedModule.category.toUpperCase()}</div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <span>{selectedModule.emoji}</span> {selectedModule.title}
+                  </h2>
+                  <p className="mt-2 text-slate-400 text-sm">{selectedModule.description}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${LEVEL_COLOR[selectedModule.level]}`}>{selectedModule.level}</span>
+                  <div className="glass rounded-xl px-4 py-2 text-sm">
+                    <span className="text-slate-400">Mejor: </span>
+                    <span className="font-bold accent mono">{moduleProgress.score}/{moduleProgress.total}</span>
+                  </div>
+                  {moduleProgress.attempts > 0 && (
+                    <div className="glass rounded-xl px-4 py-2 text-sm">
+                      <span className="text-slate-400">Intentos: </span>
+                      <span className="font-bold mono">{moduleProgress.attempts}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Section tabs */}
+              <div className="flex gap-2 mt-6 flex-wrap">
+                {(["reading", "quiz", "dictation", "vocab"] as const).map(sec => (
+                  <button key={sec} onClick={() => setActiveSection(sec)} className={`section-tab ${activeSection === sec ? "active" : ""}`}>
+                    {sec === "reading" ? "📖 Lectura" : sec === "quiz" ? "✏️ Quiz" : sec === "dictation" ? "🎙 Dictado" : "📝 Vocabulario"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* READING */}
             {activeSection === "reading" && (
-              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{selectedModule.readingTitle}</h3>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
-                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
-                  </div>
+              <div className="glass rounded-3xl p-6 md:p-8">
+                <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                  <h3 className="text-xl font-bold">{selectedModule.readingTitle}</h3>
+                  <button onClick={() => speak(selectedModule.reading.join(" "), 0.9)} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-2">
+                    🔊 <span>Escuchar lectura</span>
+                  </button>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                  {selectedModule.reading.map((para, i) => <p key={i} style={{ lineHeight: 1.9, color: "#cbd5e1", fontSize: 15, margin: 0, fontFamily: FONT }}>{para}</p>)}
+                <div className="space-y-5">
+                  {selectedModule.reading.map((para, i) => (
+                    <p key={i} className="text-slate-200 leading-8 text-[15px]">{para}</p>
+                  ))}
                 </div>
-                <button onClick={() => setActiveSection("quiz")} style={{ ...btnAccent, marginTop: 32, display: "inline-block" }}>Ir al quiz →</button>
+                <button onClick={() => setActiveSection("quiz")} className="btn-accent mt-8 px-6 py-3 text-sm">
+                  Ir al quiz →
+                </button>
               </div>
             )}
 
+            {/* QUIZ */}
             {activeSection === "quiz" && (
-              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Comprensión</h3>
-                  <div style={{ ...glassDark, borderRadius: 12, padding: "8px 16px", fontFamily: MONO, fontSize: 14, fontWeight: 700, color: TEAL }}>{currentQuestionIndex + 1}/{selectedModule.quiz.length}</div>
-                </div>
-                <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 99, marginBottom: 28, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${((currentQuestionIndex + (submitted ? 1 : 0)) / selectedModule.quiz.length) * 100}%`, background: `linear-gradient(90deg,${TEAL},#67e8f9)`, transition: "width 0.4s ease", borderRadius: 99 }} />
-                </div>
-                <div style={{ ...glassDark, borderRadius: 20, padding: 24 }}>
-                  <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, lineHeight: 1.6, fontFamily: FONT }}>{currentQuestion.question}</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {shuffledOpts.map(option => { const sel = selectedOption === option; const correct = submitted && option === currentQuestion.answer; const wrong = submitted && sel && option !== currentQuestion.answer; return (<button key={option} onClick={() => !submitted && setAnswerMemory(option)} disabled={submitted} style={optBtn(sel, correct, wrong)}>{option}</button>); })}
+              <div className="glass rounded-3xl p-6 md:p-8">
+                <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                  <h3 className="text-xl font-bold">Comprensión de lectura</h3>
+                  <div className="glass rounded-xl px-4 py-2 mono text-sm font-bold accent">
+                    {currentQuestionIndex + 1} / {selectedModule.quiz.length}
                   </div>
                 </div>
-                <div style={{ marginTop: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 16 }}>
-                  <div style={{ fontSize: 14, fontFamily: FONT }}>
-                    {submitted ? isCorrect ? <span style={{ color: "#34d399", fontWeight: 600 }}>✓ ¡Correcto!</span> : <span style={{ color: "#fb7185" }}>✗ Respuesta: <strong style={{ color: TEXT }}>{currentQuestion.answer}</strong></span> : <span style={{ color: TEXT_MID }}>Elegí una opción.</span>}
+                <div className="progress-bar mb-6">
+                  <div className="progress-fill" style={{ width: `${((currentQuestionIndex + (submitted ? 1 : 0)) / selectedModule.quiz.length) * 100}%` }} />
+                </div>
+                <div className="glass-dark rounded-2xl p-6">
+                  <p className="text-lg font-semibold mb-5 leading-7">{currentQuestion.question}</p>
+                  <div className="space-y-3">
+                    {currentQuestion.options.map(option => {
+                      const sel = selectedOption === option;
+                      const correct = submitted && option === currentQuestion.answer;
+                      const wrong = submitted && sel && option !== currentQuestion.answer;
+                      return (
+                        <button key={option} onClick={() => !submitted && setAnswerMemory(option)} disabled={submitted}
+                          className={`option-btn ${correct ? "correct" : wrong ? "wrong" : sel ? "selected" : ""}`}>
+                          {option}
+                        </button>
+                      );
+                    })}
                   </div>
-                  {!submitted ? <button onClick={handleSubmit} disabled={!selectedOption} style={{ ...btnAccent, opacity: selectedOption ? 1 : 0.4 }}>Comprobar</button> : <button onClick={handleNext} style={btnAccent}>{currentQuestionIndex < selectedModule.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>}
+                </div>
+                <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
+                  <div className="text-sm">
+                    {submitted ? (
+                      isCorrect
+                        ? <span className="text-emerald-400 font-semibold">✓ Correcto. ¡Muy bien!</span>
+                        : <span className="text-rose-400">✗ La respuesta correcta es: <strong className="text-white">{currentQuestion.answer}</strong></span>
+                    ) : (
+                      <span className="text-slate-400">Elegí una opción y comprobá tu respuesta.</span>
+                    )}
+                  </div>
+                  {!submitted
+                    ? <button onClick={handleSubmit} disabled={!selectedOption} className="btn-accent px-6 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed">Comprobar</button>
+                    : <button onClick={handleNext} className="btn-accent px-6 py-3 text-sm">
+                      {currentQuestionIndex < selectedModule.quiz.length - 1 ? "Siguiente →" : "Finalizar módulo ✓"}
+                    </button>
+                  }
                 </div>
               </div>
             )}
 
+            {/* DICTATION */}
             {activeSection === "dictation" && (
-              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>🎙 Dictado</h3>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => speak(selectedModule.dictation, 0.75)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Reproducir</button>
-                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
-                  </div>
+              <div className="glass rounded-3xl p-6 md:p-8">
+                <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                  <h3 className="text-xl font-bold">🎙 Dictado</h3>
+                  <button onClick={() => speak(selectedModule.dictation, 0.75)} className="glass rounded-xl px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-2">
+                    🔊 <span>Reproducir</span>
+                  </button>
                 </div>
-                <p style={{ color: TEXT_MID, fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.</p>
-                <textarea value={dictationText} onChange={e => setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." style={{ ...input, resize: "none" as const, lineHeight: 1.7, borderRadius: 16, padding: "16px 20px" }} />
-                <button onClick={checkDictation} style={{ ...btnAccent, marginTop: 16, display: "inline-block" }}>Corregir dictado</button>
-                {(dictationResult || currentDictation) && (() => { const r = dictationResult || currentDictation!; return (<div style={{ ...glassDark, borderRadius: 20, padding: 20, marginTop: 20, display: "flex", flexDirection: "column", gap: 12 }}><div style={{ display: "flex", alignItems: "center", gap: 12 }}><div style={{ fontSize: 32, fontWeight: 800, fontFamily: MONO, color: r.score >= 80 ? "#34d399" : r.score >= 50 ? "#fbbf24" : "#fb7185" }}>{r.score}%</div><div style={{ fontSize: 14, color: TEXT_MID }}>{r.score === 100 ? "¡Perfecto! 🎉" : r.score >= 80 ? "¡Muy bien!" : r.score >= 50 ? "Buen intento" : "Seguí practicando"}</div></div><div style={{ fontSize: 14 }}><span style={{ color: TEXT_MID }}>Frase modelo: </span><span style={{ color: "#cbd5e1", fontStyle: "italic" }}>{r.expected}</span></div></div>); })()}
+                <p className="text-slate-400 text-sm mb-5 leading-6">Escuchá el audio y escribí la frase completa en español. Podés reproducirlo las veces que quieras.</p>
+                <textarea value={dictationText} onChange={e => setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." className="w-full rounded-2xl bg-slate-800 border border-slate-700 text-white px-5 py-4 text-sm leading-7 resize-none" />
+                <button onClick={checkDictation} className="btn-accent mt-4 px-6 py-3 text-sm">Corregir dictado</button>
+                {(dictationResult || currentDictation) && (() => {
+                  const r = dictationResult || currentDictation!;
+                  return (
+                    <div className="mt-6 glass-dark rounded-2xl p-5 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`text-3xl font-black mono ${r.score >= 80 ? "text-emerald-400" : r.score >= 50 ? "text-amber-400" : "text-rose-400"}`}>{r.score}%</div>
+                        <div className="text-sm text-slate-400">{r.score === 100 ? "¡Perfecto! 🎉" : r.score >= 80 ? "¡Muy bien!" : r.score >= 50 ? "Buen intento" : "Seguí practicando"}</div>
+                      </div>
+                      <div className="text-sm">
+                        <span className="text-slate-400">Frase modelo: </span>
+                        <span className="text-slate-200 italic">{r.expected}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
+            {/* VOCAB */}
             {activeSection === "vocab" && (
-              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 24 }}>📝 Vocabulario clave</h3>
-                <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))" }}>
+              <div className="glass rounded-3xl p-6 md:p-8">
+                <h3 className="text-xl font-bold mb-6">📝 Vocabulario clave</h3>
+                <div className="grid gap-3 md:grid-cols-2">
                   {selectedModule.vocab.map(item => (
-                    <div key={item.es} style={{ ...glassDark, borderRadius: 16, padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
-                      <div><div style={{ fontWeight: 600, fontSize: 14, fontFamily: FONT }}>{item.es}</div><div style={{ fontSize: 11, color: TEXT_DIM, marginTop: 2 }}>Español</div></div>
-                      <div style={{ textAlign: "right" as const }}><div style={{ fontWeight: 600, fontSize: 14, color: TEAL }}>{item.pt}</div><div style={{ fontSize: 11, color: TEXT_DIM, marginTop: 2 }}>Portugués</div></div>
+                    <div key={item.es} className="glass-dark rounded-2xl px-5 py-4 flex justify-between items-center gap-4">
+                      <div>
+                        <div className="font-semibold">{item.es}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Español</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold accent">{item.pt}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Portugués</div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1300,53 +1045,61 @@ export default function Home() {
             )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 16, fontFamily: MONO }}>MI PROGRESO</div>
-              <div style={{ fontSize: 52, fontWeight: 800, color: TEAL, fontFamily: MONO, lineHeight: 1 }}>{overallPercent}%</div>
-              <div style={{ color: TEXT_MID, fontSize: 13, marginTop: 4 }}>completado</div>
-              <div style={{ marginTop: 16, height: 6, borderRadius: 99, background: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 99, width: `${overallPercent}%`, background: `linear-gradient(90deg,${TEAL},#67e8f9)`, boxShadow: "0 0 12px rgba(45,212,191,0.35)", transition: "width 0.7s ease" }} />
+          {/* RIGHT SIDEBAR */}
+          <aside className="space-y-5">
+            {/* My progress */}
+            <div className="glass rounded-3xl p-6">
+              <div className="mono text-xs text-slate-400 tracking-widest mb-4">MI PROGRESO</div>
+              <div className="text-5xl font-black accent mono">{overallPercent}%</div>
+              <div className="text-slate-400 text-sm mt-1">completado</div>
+              <div className="mt-5 progress-bar">
+                <div className="progress-fill" style={{ width: `${overallPercent}%` }} />
               </div>
-              <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                {[{ n: completedModules, l: "Módulos" }, { n: totalBestScore, l: "Puntos", c: TEAL }].map(x => (
-                  <div key={x.l} style={{ ...glassDark, borderRadius: 14, padding: 14 }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, fontFamily: MONO, color: x.c || TEXT }}>{x.n}</div>
-                    <div style={{ fontSize: 12, color: TEXT_DIM, marginTop: 2 }}>{x.l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 16, fontFamily: MONO }}>MÓDULOS</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 480, overflowY: "auto" as const, paddingRight: 4 }}>
-                {filteredModules.map(m => { const p = studentProgress[m.id]; const isA = m.id === selectedModuleId; return (
-                  <button key={m.id} onClick={() => setSelectedModuleId(m.id)} style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 12, padding: "10px 12px", background: isA ? "rgba(45,212,191,0.08)" : "transparent", border: `1px solid ${isA ? BORDER_A : "transparent"}`, cursor: "pointer", textAlign: "left" as const, width: "100%" }}>
-                    <span style={{ fontSize: 16 }}>{m.emoji}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: isA ? 700 : 500, color: isA ? TEXT : "#94a3b8", fontFamily: FONT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{m.title}</div>
-                      <div style={{ fontSize: 11, color: catColor(m.category), marginTop: 1, fontFamily: MONO }}>{m.category}</div>
-                    </div>
-                    {p ? <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: TEAL, whiteSpace: "nowrap" as const }}>{p.score}/{p.total}</span> : <span style={{ color: TEXT_DIM, fontSize: 12 }}>—</span>}
-                  </button>
-                ); })}
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="glass-dark rounded-2xl p-3">
+                  <div className="mono text-lg font-black">{completedModules}</div>
+                  <div className="text-xs text-slate-400 mt-0.5">Módulos</div>
+                </div>
+                <div className="glass-dark rounded-2xl p-3">
+                  <div className="mono text-lg font-black accent">{totalBestScore}</div>
+                  <div className="text-xs text-slate-400 mt-0.5">Puntos totales</div>
+                </div>
               </div>
             </div>
 
-            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 12, fontFamily: MONO }}>CONSEJO DEL DÍA</div>
-              <p style={{ fontSize: 14, color: "#cbd5e1", lineHeight: 1.7, margin: 0, fontFamily: FONT }}>💡 Cuando uses términos técnicos con un cliente, la <span style={{ color: TEAL, fontWeight: 600 }}>claridad</span> siempre es más importante que la complejidad del vocabulario.</p>
+            {/* All modules mini-list */}
+            <div className="glass rounded-3xl p-6">
+              <div className="mono text-xs text-slate-400 tracking-widest mb-4">TODOS LOS MÓDULOS</div>
+              <div className="space-y-2">
+                {MODULES.map(m => {
+                  const p = studentProgress[m.id];
+                  const isActive = m.id === selectedModuleId;
+                  return (
+                    <button key={m.id} onClick={() => setSelectedModuleId(m.id)} className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${isActive ? "bg-white/10" : "hover:bg-white/5"}`}>
+                      <span className="text-lg">{m.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-sm font-medium truncate ${isActive ? "text-white" : "text-slate-300"}`}>{m.title}</div>
+                        <div className="text-xs text-slate-500">{m.category}</div>
+                      </div>
+                      {p ? (
+                        <span className="mono text-xs font-bold accent whitespace-nowrap">{p.score}/{p.total}</span>
+                      ) : (
+                        <span className="text-slate-600 text-xs">—</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div style={{ borderRadius: 24, overflow: "hidden", border: "1px solid rgba(30,215,96,0.2)", background: "linear-gradient(135deg,rgba(30,215,96,0.07),rgba(6,11,20,0.95))" }}>
-              <div style={{ padding: "16px 20px 8px", display: "flex", alignItems: "center", gap: 8 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg>
-                <span style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: FONT }}>Escuchá mientras estudiás</span>
-              </div>
-              <iframe style={{ borderRadius: "0 0 24px 24px", display: "block" }} src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcOFHFBj89A5?utm_source=generator&theme=0" width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
+            {/* Tips */}
+            <div className="glass rounded-3xl p-6">
+              <div className="mono text-xs text-slate-400 tracking-widest mb-4">CONSEJO DEL DÍA</div>
+              <p className="text-sm text-slate-300 leading-6">
+                💡 Cuando uses términos técnicos en español con un cliente, recordá que la <span className="accent font-semibold">claridad</span> siempre es más importante que la complejidad del vocabulario.
+              </p>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </div>
