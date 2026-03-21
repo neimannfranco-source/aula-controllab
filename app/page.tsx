@@ -1637,6 +1637,8 @@ const MODULES: ModuleType[] = [
     { question: "¿Qué aplicación de la NGS en oncología se menciona?", options: ["Diagnóstico de leucemias por morfología celular", "Identificación de mutaciones que orientan el tratamiento personalizado del cáncer", "Solo detección de marcadores tumorales en sangre", "Solo diagnóstico de linfomas por biopsia convencional"], answer: "Identificación de mutaciones que orientan el tratamiento personalizado del cáncer" },
   ],
   dictation: "La secuenciación genómica, los biosensores y la impresión 3D son tecnologías que expanden las capacidades diagnósticas del laboratorio y requieren del profesional competencias en interpretación de datos complejos.",
+},
+{
   id: "controllab-investigacion", title: "Investigar un resultado inadecuado", level: "Avanzado", category: "Controllab", emoji: "🔍",
   description: "Cómo estructurar la investigación de un resultado inadecuado en el EA y usar los Questionários Ilustrados.",
   readingTitle: "Un inadecuado es una pregunta, no solo una mala noticia",
@@ -1704,9 +1706,7 @@ const MODULES: ModuleType[] = [
     { question: "¿Qué consecuencia tiene un único resultado inadecuado en un ensayo de hemoterapia crítico?", options: ["Genera una alerta pero no afecta el Certificado de Proficiência", "Genera evaluación insatisfactoria para el año completo en ese programa por el riesgo clínico que representa", "Solo requiere una investigación adicional sin consecuencias en la puntuación", "Solo afecta si el laboratorio tiene menos de 80% de adecuados en total"], answer: "Genera evaluación insatisfactoria para el año completo en ese programa por el riesgo clínico que representa" },
     { question: "¿Cómo adapta Controllab los intervalos de referencia en el programa de veterinaria?", options: ["Usa los mismos intervalos que para humanos", "Los adapta a cada especie animal, ya que los valores normales de hematología y bioquímica varían entre bovinos, caninos, felinos y equinos", "Solo los adapta para bovinos, usando humanos como referencia para las demás especies", "No usa intervalos de referencia en veterinaria, solo critérios cualitativos"], answer: "Los adapta a cada especie animal, ya que los valores normales de hematología y bioquímica varían entre bovinos, caninos, felinos y equinos" },
   ],
-  dictation: "El pr},
-{
-ograma de hemoterapia de Controllab exige el cien por ciento de resultados adecuados porque un error en tipificación o compatibilidad representa un riesgo directo para la seguridad transfusional.",
+  dictation: "El programa de hemoterapia de Controllab exige el cien por ciento de resultados adecuados porque un error en tipificación o compatibilidad representa un riesgo directo para la seguridad transfusional.",
 },
 {
   id: "controllab-variacion-biologica", title: "Variación biológica y especificaciones", level: "Avanzado", category: "Controllab", emoji: "🧬",
