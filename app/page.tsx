@@ -1722,7 +1722,7 @@ const MODULES: ModuleType[] = [
   vocab: [
     { es: "hemoterapia / seguridad transfusional", pt: "hemoterapia / segurança transfusional" },
     { es: "Sistema ABO / Sistema Rhesus", pt: "Sistema ABO / Sistema Rhesus" },
-    { es: "antibiograma / resistencia antimicrobiana", put: "antibiograma / resistência antimicrobiana" },
+    { es: "antibiograma / resistencia antimicrobiana", pt: "antibiograma / resistência antimicrobiana" },
     { es: "cepa ATCC / cepa clínica", pt: "cepa ATCC / cepa clínica" },
     { es: "NAT (Nucleic Acid Test)", pt: "NAT (Teste de Ácido Nucleico)" },
     { es: "programa vigiRAM", pt: "programa vigiRAM" },
