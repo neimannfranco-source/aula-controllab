@@ -1659,6 +1659,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<"reading" | "quiz" | "dictation" | "vocab">("reading");
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [newPassword, setNewPassword] = useState(""); const [confirmPassword, setConfirmPassword] = useState(""); const [passwordMsg, setPasswordMsg] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const currentStudent = appState.students.find(s => s.id === appState.currentStudentId) ?? null;
   const selectedModule = MODULES.find(m => m.id === selectedModuleId) ?? MODULES[0];
@@ -1677,20 +1678,17 @@ export default function Home() {
   const stopSpeak = () => { if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel(); };
 
   useEffect(() => {
-    let mounted = true;
-    const LSKEY = "aula-controllab-v7";
+    let mounted = true; const LSKEY = "aula-controllab-v7";
     (async () => {
       try { if (supabase) { const remote = await loadRemoteState(); if (!mounted) return; if (remote) { setAppState({ students: Array.isArray(remote.students) && remote.students.length ? remote.students : defaultStudents, currentStudentId: null, progress: remote.progress || {}, dictations: remote.dictations || {} }); setLoadStatus("ready"); return; } } } catch {}
       if (!mounted) return;
       try { const saved = localStorage.getItem(LSKEY); if (saved) { const p = JSON.parse(saved); setAppState({ ...createInitialState(), ...p, currentStudentId: null }); } else setAppState(createInitialState()); } catch { setAppState(createInitialState()); }
       setLoadStatus("ready");
-    })();
-    return () => { mounted = false; };
+    })(); return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
-    if (loadStatus !== "ready") return;
-    const LSKEY = "aula-controllab-v7";
+    if (loadStatus !== "ready") return; const LSKEY = "aula-controllab-v7";
     const t = setTimeout(async () => { try { localStorage.setItem(LSKEY, JSON.stringify(appState)); } catch {} if (supabase) { try { await saveRemoteState(appState); } catch {} } }, 500);
     return () => clearTimeout(t);
   }, [appState, loadStatus]);
@@ -1699,12 +1697,12 @@ export default function Home() {
 
   const logout = () => { stopSpeak(); setAppState(prev => ({ ...prev, currentStudentId: null })); setSelectedModuleId(MODULES[0].id); setShowProfessorPanel(false); setProfessorUnlocked(false); };
   const login = () => { const found = appState.students.find(s => normalize(s.name) === normalize(loginName) && normalize(s.code) === normalize(loginCode)); if (!found) { setLoginError("Usuario o contraseña incorrectos."); return; } setAppState(prev => ({ ...prev, currentStudentId: found.id })); setLoginError(""); setLoginName(""); setLoginCode(""); };
-  const changePassword = () => { if (!newPassword.trim()) { setPasswordMsg("Escribí una contraseña nueva."); return; } if (newPassword.trim().length < 4) { setPasswordMsg("La contraseña debe tener al menos 4 caracteres."); return; } if (newPassword.trim() !== confirmPassword.trim()) { setPasswordMsg("Las contraseñas no coinciden."); return; } if (!currentStudent) return; setAppState(prev => ({ ...prev, students: prev.students.map(s => s.id === currentStudent.id ? { ...s, code: newPassword.trim().toUpperCase() } : s) })); setPasswordMsg("✓ Contraseña actualizada correctamente."); setNewPassword(""); setConfirmPassword(""); setTimeout(() => { setShowChangePassword(false); setPasswordMsg(""); }, 1500); };
+  const changePassword = () => { if (!newPassword.trim()) { setPasswordMsg("Escribí una contraseña nueva."); return; } if (newPassword.trim().length < 4) { setPasswordMsg("Mínimo 4 caracteres."); return; } if (newPassword.trim() !== confirmPassword.trim()) { setPasswordMsg("Las contraseñas no coinciden."); return; } if (!currentStudent) return; setAppState(prev => ({ ...prev, students: prev.students.map(s => s.id === currentStudent.id ? { ...s, code: newPassword.trim().toUpperCase() } : s) })); setPasswordMsg("✓ Actualizada."); setNewPassword(""); setConfirmPassword(""); setTimeout(() => { setShowChangePassword(false); setPasswordMsg(""); }, 1500); };
   const handleProfessorClick = () => { if (professorUnlocked) { setShowProfessorPanel(v => !v); return; } const pwd = window.prompt("Contraseña del profesor:"); if (pwd === PROFESSOR_PASSWORD) { setProfessorUnlocked(true); setShowProfessorPanel(true); } else if (pwd !== null) alert("Contraseña incorrecta."); };
   const saveProgress = (scoreValue: number, totalValue: number) => { if (!currentStudent) return; setAppState(prev => { const prevSP = prev.progress[currentStudent.id] || {}; const prevM = prevSP[selectedModuleId] || { completed: false, score: 0, total: totalValue, attempts: 0 }; return { ...prev, progress: { ...prev.progress, [currentStudent.id]: { ...prevSP, [selectedModuleId]: { completed: true, score: Math.max(prevM.score || 0, scoreValue), total: totalValue, attempts: (prevM.attempts || 0) + 1 } } } }; }); };
-  const resetCurrentModule = () => { if (!currentStudent) return; if (!window.confirm(`¿Reiniciar el módulo "${selectedModule.title}" para ${currentStudent.name}?`)) return; setAppState(prev => { const newP = { ...(prev.progress[currentStudent.id] || {}) }; const newD = { ...(prev.dictations[currentStudent.id] || {}) }; delete newP[selectedModuleId]; delete newD[selectedModuleId]; return { ...prev, progress: { ...prev.progress, [currentStudent.id]: newP }, dictations: { ...prev.dictations, [currentStudent.id]: newD } }; }); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setDictationText(""); setDictationResult(null); setActiveSection("reading"); };
+  const resetCurrentModule = () => { if (!currentStudent) return; if (!window.confirm(`¿Reiniciar "${selectedModule.title}"?`)) return; setAppState(prev => { const newP = { ...(prev.progress[currentStudent.id] || {}) }; const newD = { ...(prev.dictations[currentStudent.id] || {}) }; delete newP[selectedModuleId]; delete newD[selectedModuleId]; return { ...prev, progress: { ...prev.progress, [currentStudent.id]: newP }, dictations: { ...prev.dictations, [currentStudent.id]: newD } }; }); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setDictationText(""); setDictationResult(null); setActiveSection("reading"); };
   const resetStudentModule = (studentId: string, moduleId: string) => { setAppState(prev => { const newP = { ...(prev.progress[studentId] || {}) }; const newD = { ...(prev.dictations[studentId] || {}) }; delete newP[moduleId]; delete newD[moduleId]; return { ...prev, progress: { ...prev.progress, [studentId]: newP }, dictations: { ...prev.dictations, [studentId]: newD } }; }); };
-  const resetStudentAll = (studentId: string, studentName: string) => { if (!window.confirm(`¿Reiniciar TODOS los módulos de ${studentName}?`)) return; setAppState(prev => ({ ...prev, progress: { ...prev.progress, [studentId]: {} }, dictations: { ...prev.dictations, [studentId]: {} } })); };
+  const resetStudentAll = (studentId: string, studentName: string) => { if (!window.confirm(`¿Reiniciar TODO de ${studentName}?`)) return; setAppState(prev => ({ ...prev, progress: { ...prev.progress, [studentId]: {} }, dictations: { ...prev.dictations, [studentId]: {} } })); };
   const resetAllStudents = () => { if (!window.confirm("¿Borrar TODO el progreso de TODOS los alumnos?")) return; setAppState(prev => ({ ...prev, progress: {}, dictations: {} })); };
   const handleSubmit = () => { if (!selectedOption) return; setSubmitted(true); };
   const handleNext = () => { if (currentQuestionIndex < selectedModule.quiz.length - 1) { const next = currentQuestionIndex + 1; setCurrentQuestionIndex(next); setSelectedOption(quizAnswers[next] || ""); setSubmitted(false); return; } const correct = selectedModule.quiz.reduce((sum, q, i) => sum + (quizAnswers[i] === q.answer ? 1 : 0), 0); saveProgress(correct, selectedModule.quiz.length); setCurrentQuestionIndex(0); setSelectedOption(""); setSubmitted(false); setQuizAnswers({}); setActiveSection("reading"); };
@@ -1716,38 +1714,45 @@ export default function Home() {
   const professorRows = useMemo(() => appState.students.map(student => { const progress = appState.progress[student.id] || {}; const dictations = appState.dictations[student.id] || {}; const completedMods = Object.keys(progress).length; const bestScore = MODULES.reduce((sum, m) => sum + (progress[m.id]?.score || 0), 0); const dictScores = MODULES.map(m => dictations[m.id]?.score).filter((v): v is number => typeof v === "number"); const dictAvg = dictScores.length ? Math.round(dictScores.reduce((a, b) => a + b, 0) / dictScores.length) : null; return { ...student, completedMods, bestScore, dictAvg }; }), [appState]);
 
   if (loadStatus === "loading") return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: BG, fontFamily: FONT }}>
-      <div style={{ textAlign: "center" }}><div style={{ fontSize: 40, marginBottom: 16 }}>⚗️</div><div style={{ color: TEXT_MID, fontSize: 15 }}>Cargando Aula Controllab...</div></div>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: C.bg, fontFamily: FONT, gap: 16 }}>
+      <div style={{ width: 48, height: 48, border: `3px solid ${C.border}`, borderTop: `3px solid ${C.teal}`, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      <span style={{ color: C.textDim, fontSize: 13 }}>Cargando Aula Controllab...</span>
     </div>
   );
 
   const ProfessorPanel = () => (
-    <div style={{ ...GLASS, borderRadius: 20, padding: 24, marginTop: 16 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" as const }}>
-        {(["progress", "students", "dictations"] as const).map(t => (
-          <button key={t} onClick={() => setTeacherTab(t)} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: teacherTab === t ? TEAL : "rgba(255,255,255,0.06)", color: teacherTab === t ? "#042f2e" : TEXT_MID, fontFamily: FONT }}>
-            {t === "progress" ? "📊 Progreso" : t === "students" ? "👥 Alumnos" : "🎙 Dictados"}
-          </button>
+    <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 24, marginTop: 16 }}>
+      <div style={{ display: "flex", gap: 4, marginBottom: 20, background: C.bg3, borderRadius: 12, padding: 4 }}>
+        {([["progress", "📊 Progreso"], ["students", "👥 Alumnos"], ["dictations", "🎙 Dictados"]] as const).map(([t, label]) => (
+          <button key={t} onClick={() => setTeacherTab(t)} style={{ flex: 1, borderRadius: 9, padding: "8px 0", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: teacherTab === t ? C.surface : "transparent", color: teacherTab === t ? C.text : C.textDim, fontFamily: FONT, boxShadow: teacherTab === t ? `0 0 0 1px ${C.border}` : "none" }}>{label}</button>
         ))}
-        <button onClick={resetAllStudents} style={{ borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: "rgba(251,113,133,0.15)", color: "#fb7185", fontFamily: FONT, marginLeft: "auto" }}>🗑 Borrar todo</button>
+        <button onClick={resetAllStudents} style={{ ...btnDanger, borderRadius: 9, marginLeft: 8 }}>🗑 Todo</button>
       </div>
       {teacherTab === "progress" && (
-        <div style={{ maxHeight: 380, overflowY: "auto" as const }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 400, overflowY: "auto" }}>
           {professorRows.map(row => (
-            <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" as const }}>
-              <div style={{ flex: 1, minWidth: 120 }}><div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT }}>{row.name}</div><div style={{ fontSize: 11, color: TEXT_DIM, fontFamily: MONO }}>{row.completedMods}/{MODULES.length} mód · {row.bestScore} pts</div></div>
-              <button onClick={() => resetStudentAll(row.id, row.name)} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>Reset</button>
+            <div key={row.id} style={{ background: C.bg3, border: `1px solid ${C.border}`, borderRadius: 14, padding: "12px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: C.tealGlow, border: `1px solid ${C.borderA}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: C.teal, fontFamily: MONO }}>{getInitial(row.name)}</div>
+                <div style={{ flex: 1 }}><div style={{ fontWeight: 600, fontSize: 14, color: C.text }}>{row.name}</div><div style={{ fontSize: 11, color: C.textDim, fontFamily: MONO }}>{row.completedMods}/{MODULES.length} mód · {row.bestScore} pts</div></div>
+                <button onClick={() => resetStudentAll(row.id, row.name)} style={btnDanger}>Reset</button>
+              </div>
+              <MiniBar value={row.completedMods} max={MODULES.length} />
             </div>
           ))}
         </div>
       )}
       {teacherTab === "dictations" && (
-        <div style={{ maxHeight: 380, overflowY: "auto" as const }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 400, overflowY: "auto" }}>
           {professorRows.map(row => (
-            <div key={row.id} style={{ ...glassDark, borderRadius: 14, padding: "12px 16px", marginBottom: 8 }}>
-              <div style={{ fontWeight: 600, fontSize: 14, color: TEXT, fontFamily: FONT, marginBottom: 6 }}>{row.name} {row.dictAvg !== null && <span style={{ fontFamily: MONO, fontSize: 12, color: TEAL }}>avg {row.dictAvg}%</span>}</div>
-              {MODULES.filter(m => appState.dictations[row.id]?.[m.id]).map(m => { const d = appState.dictations[row.id][m.id]; return (<div key={m.id} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 4 }}><span style={{ fontSize: 12, color: TEXT_MID, fontFamily: FONT, flex: 1 }}>{m.emoji} {m.title}</span><span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: d.score >= 80 ? "#34d399" : d.score >= 50 ? "#fbbf24" : "#fb7185" }}>{d.score}%</span><button onClick={() => resetStudentModule(row.id, m.id)} style={{ background: "rgba(251,113,133,0.1)", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 10, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>×</button></div>); })}
-              {!MODULES.some(m => appState.dictations[row.id]?.[m.id]) && <div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: FONT }}>Sin dictados aún</div>}
+            <div key={row.id} style={{ background: C.bg3, border: `1px solid ${C.border}`, borderRadius: 14, padding: "12px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontWeight: 600, fontSize: 14, color: C.text }}>{row.name}</span>
+                {row.dictAvg !== null && <span style={{ fontFamily: MONO, fontSize: 12, color: C.teal, background: C.tealGlow, padding: "2px 8px", borderRadius: 20 }}>avg {row.dictAvg}%</span>}
+              </div>
+              {MODULES.filter(m => appState.dictations[row.id]?.[m.id]).map(m => { const d = appState.dictations[row.id][m.id]; const sc = d.score >= 80 ? C.green : d.score >= 50 ? C.yellow : C.red; return (<div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}><span style={{ fontSize: 12, color: C.textMid, flex: 1 }}>{m.emoji} {m.title}</span><span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: sc }}>{d.score}%</span><MiniBar value={d.score} max={100} color={sc} /><button onClick={() => resetStudentModule(row.id, m.id)} style={{ background: "transparent", border: "none", color: C.textDim, cursor: "pointer", fontSize: 14, padding: "0 4px" }}>×</button></div>); })}
+              {!MODULES.some(m => appState.dictations[row.id]?.[m.id]) && <div style={{ fontSize: 12, color: C.textDim }}>Sin dictados aún</div>}
             </div>
           ))}
         </div>
@@ -1757,10 +1762,10 @@ export default function Home() {
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
             <input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="Nombre" style={{ ...input, flex: 2 }} />
             <input value={newStudentCode} onChange={e => setNewStudentCode(e.target.value)} placeholder="Código" style={{ ...input, flex: 1 }} />
-            <button onClick={addStudent} style={{ ...btnAccent, padding: "0 16px", whiteSpace: "nowrap" as const }}>+ Agregar</button>
+            <button onClick={addStudent} style={{ ...btnAccent, padding: "0 16px", whiteSpace: "nowrap" }}>+ Agregar</button>
           </div>
-          <div style={{ maxHeight: 280, overflowY: "auto" as const }}>
-            {appState.students.map(s => (<div key={s.id} style={{ ...glassDark, borderRadius: 12, padding: "10px 14px", marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}><div style={{ flex: 1, fontSize: 14, color: TEXT, fontFamily: FONT }}>{s.name}</div><div style={{ fontSize: 12, color: TEXT_DIM, fontFamily: MONO }}>{s.code}</div><button onClick={() => removeStudent(s.id)} style={{ background: "transparent", border: "none", color: "#fb7185", cursor: "pointer", fontSize: 16 }}>×</button></div>))}
+          <div style={{ maxHeight: 300, overflowY: "auto", display: "flex", flexDirection: "column", gap: 4 }}>
+            {appState.students.map(s => (<div key={s.id} style={{ background: C.bg3, border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}><div style={{ width: 28, height: 28, borderRadius: "50%", background: C.tealGlow, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: C.teal }}>{getInitial(s.name)}</div><div style={{ flex: 1, fontSize: 14, color: C.text }}>{s.name}</div><div style={{ fontSize: 11, color: C.textDim, fontFamily: MONO }}>{s.code}</div><button onClick={() => removeStudent(s.id)} style={{ background: "transparent", border: "none", color: C.red, cursor: "pointer", fontSize: 16 }}>×</button></div>))}
           </div>
         </div>
       )}
@@ -1768,221 +1773,275 @@ export default function Home() {
   );
 
   if (!currentStudent) return (
-    <div style={{ minHeight: "100vh", background: BG, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: FONT }}>
-      <div style={{ width: "100%", maxWidth: 420 }}>
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🔬</div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: "-0.02em" }}>Aula Controllab</h1>
-          <p style={{ color: TEXT_MID, fontSize: 14, marginTop: 8 }}>Español técnico para profesionales del laboratorio</p>
+    <div style={{ minHeight: "100vh", background: C.bg, backgroundImage: "radial-gradient(ellipse at 20% 50%, rgba(45,212,191,0.05) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(96,165,250,0.05) 0%, transparent 50%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: FONT }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap'); * { box-sizing: border-box; } input::placeholder { color: ${C.textDim}; } input:focus { border-color: ${C.borderA} !important; outline: none; } ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }`}</style>
+      <div style={{ width: "100%", maxWidth: 440 }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <div style={{ width: 72, height: 72, borderRadius: 20, background: C.tealGlow, border: `1px solid ${C.borderA}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 20px" }}>🔬</div>
+          <h1 style={{ fontSize: 30, fontWeight: 800, color: C.text, margin: "0 0 8px", fontFamily: DISPLAY, letterSpacing: "-0.03em" }}>Aula Controllab</h1>
+          <p style={{ color: C.textMid, fontSize: 14, margin: 0 }}>Español técnico para profesionales del laboratorio</p>
         </div>
-        <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "0 0 24px" }}>Iniciar sesión</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <input value={loginName} onChange={e => setLoginName(e.target.value)} placeholder="Tu nombre" style={input} onKeyDown={e => e.key === "Enter" && login()} />
-            <input value={loginCode} onChange={e => setLoginCode(e.target.value)} placeholder="Contraseña" type="password" style={input} onKeyDown={e => e.key === "Enter" && login()} />
-            {loginError && <div style={{ color: "#fb7185", fontSize: 13 }}>{loginError}</div>}
-            <button onClick={login} style={{ ...btnAccent, width: "100%", textAlign: "center" as const }}>Entrar →</button>
+        <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 24, padding: 32 }}>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: C.textDim, letterSpacing: "0.06em", display: "block", marginBottom: 8, fontFamily: MONO }}>NOMBRE</label>
+            <input value={loginName} onChange={e => setLoginName(e.target.value)} placeholder="Tu nombre completo" style={input} onKeyDown={e => e.key === "Enter" && login()} />
           </div>
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: C.textDim, letterSpacing: "0.06em", display: "block", marginBottom: 8, fontFamily: MONO }}>CONTRASEÑA</label>
+            <input value={loginCode} onChange={e => setLoginCode(e.target.value)} placeholder="••••••••" type="password" style={input} onKeyDown={e => e.key === "Enter" && login()} />
+          </div>
+          {loginError && <div style={{ background: "rgba(251,113,133,0.08)", border: `1px solid ${C.redBorder}`, borderRadius: 10, padding: "10px 14px", fontSize: 13, color: C.red, marginBottom: 16 }}>{loginError}</div>}
+          <button onClick={login} style={{ ...btnAccent, width: "100%", padding: "13px 24px", fontSize: 15 }}>Entrar al aula →</button>
         </div>
-        <button onClick={handleProfessorClick} style={{ marginTop: 16, width: "100%", background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "10px 16px", color: TEXT_DIM, fontSize: 13, cursor: "pointer", fontFamily: FONT }}>
-          👨‍🏫 Panel del profesor
-        </button>
+        <button onClick={handleProfessorClick} style={{ marginTop: 12, width: "100%", background: "transparent", border: `1px solid ${C.border}`, borderRadius: 14, padding: "11px 16px", color: C.textDim, fontSize: 13, cursor: "pointer", fontFamily: FONT }}>👨‍🏫 Panel del profesor</button>
         {showProfessorPanel && professorUnlocked && <ProfessorPanel />}
       </div>
     </div>
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: FONT }}>
-      <header style={{ ...GLASS, borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontSize: 20 }}>🔬</span>
-          <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: "-0.01em" }}>Aula Controllab</span>
-          <div style={{ flex: 1 }} />
-          <div style={{ display: "flex", gap: 6, overflowX: "auto" as const }}>
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: FONT }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap'); * { box-sizing: border-box; } input::placeholder, textarea::placeholder { color: ${C.textDim}; } input:focus, textarea:focus { border-color: ${C.borderA} !important; outline: none; } button:hover { opacity: 0.88; } ::-webkit-scrollbar { width: 4px; height: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; } @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } } .sa { animation: fadeIn 0.25s ease; }`}</style>
+
+      <header style={{ background: C.bg2, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", height: 56, display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 4 }}>
+            <span style={{ fontSize: 18 }}>🔬</span>
+            <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em", fontFamily: DISPLAY }}>Aula Controllab</span>
+          </div>
+          <div style={{ width: 1, height: 20, background: C.border }} />
+          <div style={{ display: "flex", gap: 4, overflowX: "auto", flex: 1 }}>
             {CATEGORIES.map(cat => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ borderRadius: 20, padding: "5px 12px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: activeCategory === cat ? TEAL : "rgba(255,255,255,0.06)", color: activeCategory === cat ? "#042f2e" : TEXT_MID, fontFamily: FONT, whiteSpace: "nowrap" as const }}>
-                {cat}
-              </button>
+              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ borderRadius: 20, padding: "4px 12px", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", whiteSpace: "nowrap", background: activeCategory === cat ? C.teal : "transparent", color: activeCategory === cat ? "#042f2e" : C.textDim, fontFamily: FONT }}>{cat}</button>
             ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button onClick={() => { setSelectedModuleId(MODULES[0].id); setActiveSection("reading"); stopSpeak(); }} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🏠</button>
-            <button onClick={() => { setShowChangePassword(v => !v); setShowProfessorPanel(false); }} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔑</button>
-            <button onClick={handleProfessorClick} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>👨‍🏫</button>
-            <div style={{ ...glassDark, borderRadius: 10, padding: "6px 12px", fontSize: 13, fontWeight: 600 }}>{currentStudent.name}</div>
-            <button onClick={logout} style={{ background: "rgba(251,113,133,0.15)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 10, padding: "6px 12px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>Salir</button>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <button onClick={() => { setShowChangePassword(v => !v); setShowProfessorPanel(false); }} style={{ ...btnGhost, padding: "5px 10px", fontSize: 13 }}>🔑</button>
+            <button onClick={handleProfessorClick} style={{ ...btnGhost, padding: "5px 10px", fontSize: 13 }}>👨‍🏫</button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.bg3, border: `1px solid ${C.border}`, borderRadius: 20, padding: "4px 12px 4px 6px" }}>
+              <div style={{ width: 24, height: 24, borderRadius: "50%", background: C.tealGlow, border: `1px solid ${C.borderA}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: C.teal, fontFamily: MONO }}>{getInitial(currentStudent.name)}</div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{currentStudent.name}</span>
+            </div>
+            <button onClick={logout} style={btnDanger}>Salir</button>
           </div>
         </div>
-      </header>
-
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px" }}>
         {showChangePassword && (
-          <div style={{ paddingTop: 16 }}>
-            <div style={{ ...GLASS, borderRadius: 20, padding: 24, maxWidth: 420 }}>
-              <h3 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 700 }}>Cambiar contraseña</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Nueva contraseña" style={input} />
-                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirmar contraseña" style={input} />
-                {passwordMsg && <div style={{ fontSize: 13, color: passwordMsg.startsWith("✓") ? "#34d399" : "#fb7185" }}>{passwordMsg}</div>}
-                <div style={{ display: "flex", gap: 10 }}>
-                  <button onClick={changePassword} style={{ ...btnAccent, flex: 1 }}>Guardar</button>
-                  <button onClick={() => { setShowChangePassword(false); setPasswordMsg(""); setNewPassword(""); setConfirmPassword(""); }} style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "12px", fontSize: 14, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>Cancelar</button>
-                </div>
-              </div>
+          <div style={{ background: C.bg2, borderTop: `1px solid ${C.border}`, padding: "16px 24px" }}>
+            <div style={{ maxWidth: 480, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Nueva contraseña" style={{ ...input, flex: 1, minWidth: 160 }} />
+              <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirmar" style={{ ...input, flex: 1, minWidth: 140 }} />
+              <button onClick={changePassword} style={btnAccent}>Guardar</button>
+              <button onClick={() => { setShowChangePassword(false); setPasswordMsg(""); }} style={btnGhost}>Cancelar</button>
+              {passwordMsg && <span style={{ fontSize: 13, color: passwordMsg.startsWith("✓") ? C.green : C.red, width: "100%" }}>{passwordMsg}</span>}
             </div>
           </div>
         )}
-        {showProfessorPanel && professorUnlocked && <ProfessorPanel />}
-      </div>
+      </header>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 24px" }}>
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" as const }}>
-            <div style={{ fontSize: 40 }}>{selectedModule.emoji}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" as const, marginBottom: 6 }}>
-                <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>{selectedModule.title}</h2>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "rgba(255,255,255,0.07)", color: catColor(selectedModule.category), fontFamily: MONO }}>{selectedModule.category}</span>
-                <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: "rgba(255,255,255,0.05)", color: TEXT_DIM, fontFamily: MONO }}>{selectedModule.level}</span>
+      {showProfessorPanel && professorUnlocked && <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px" }}><ProfessorPanel /></div>}
+
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 24px 48px", display: "grid", gridTemplateColumns: sidebarOpen ? "280px 1fr 300px" : "1fr 300px", gap: 20, alignItems: "start" }}>
+
+        {sidebarOpen && (
+          <aside style={{ position: "sticky", top: 72 }}>
+            <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, maxHeight: "calc(100vh - 120px)", overflowY: "auto" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, padding: "0 4px" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: C.textDim, fontFamily: MONO }}>MÓDULOS</span>
+                <span style={{ fontSize: 11, color: C.textDim, fontFamily: MONO }}>{filteredModules.filter(m => studentProgress[m.id]).length}/{filteredModules.length}</span>
               </div>
-              <p style={{ color: TEXT_MID, fontSize: 14, margin: 0 }}>{selectedModule.description}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {filteredModules.map(m => {
+                  const p = studentProgress[m.id]; const isActive = m.id === selectedModuleId;
+                  return (
+                    <button key={m.id} onClick={() => setSelectedModuleId(m.id)} style={{ display: "flex", alignItems: "center", gap: 10, borderRadius: 12, padding: "9px 10px", background: isActive ? C.tealGlow : "transparent", border: `1px solid ${isActive ? C.borderA : "transparent"}`, cursor: "pointer", textAlign: "left", width: "100%" }}>
+                      <span style={{ fontSize: 15, flexShrink: 0 }}>{m.emoji}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, color: isActive ? C.text : C.textMid, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 1 }}>
+                          <div style={{ width: 6, height: 6, borderRadius: "50%", background: catColor(m.category), flexShrink: 0 }} />
+                          <span style={{ fontSize: 10, color: C.textDim, fontFamily: MONO }}>{m.level}</span>
+                        </div>
+                      </div>
+                      {p ? <div style={{ flexShrink: 0, textAlign: "right" }}><div style={{ fontFamily: MONO, fontSize: 11, fontWeight: 700, color: C.teal }}>{p.score}/{p.total}</div><div style={{ fontSize: 10, color: C.teal }}>✓</div></div> : <span style={{ color: C.textDim, fontSize: 14 }}>·</span>}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <button onClick={resetCurrentModule} style={{ background: "rgba(251,113,133,0.12)", border: "1px solid rgba(251,113,133,0.2)", borderRadius: 12, padding: "8px 14px", fontSize: 12, color: "#fb7185", cursor: "pointer", fontFamily: FONT }}>🔄 Reiniciar</button>
-          </div>
-          <div style={{ display: "flex", gap: 6, marginTop: 20, flexWrap: "wrap" as const }}>
-            {(["reading", "vocab", "quiz", "dictation"] as const).map(sec => {
-              const labels: Record<string, string> = { reading: "📖 Lectura", vocab: "📝 Vocabulario", quiz: "🧠 Quiz", dictation: "🎙 Dictado" };
-              const active = activeSection === sec;
-              return (<button key={sec} onClick={() => setActiveSection(sec)} style={{ borderRadius: 12, padding: "9px 18px", fontSize: 13, fontWeight: 600, border: `1px solid ${active ? BORDER_A : BORDER}`, cursor: "pointer", background: active ? "rgba(45,212,191,0.1)" : "rgba(255,255,255,0.04)", color: active ? TEAL : TEXT_MID, fontFamily: FONT }}>{labels[sec]}</button>);
-            })}
-          </div>
-        </div>
+          </aside>
+        )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, alignItems: "start" }}>
-          <div>
-            {activeSection === "reading" && (
-              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{selectedModule.readingTitle}</h3>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
-                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
-                  </div>
+        <main>
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 16 }}>
+              <button onClick={() => setSidebarOpen(v => !v)} style={{ ...btnGhost, padding: "6px 10px", flexShrink: 0, marginTop: 4 }}>{sidebarOpen ? "◀" : "▶"}</button>
+              <div style={{ width: 52, height: 52, borderRadius: 16, background: catBg(selectedModule.category), border: `1px solid ${catColor(selectedModule.category)}22`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0 }}>{selectedModule.emoji}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                  <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: "-0.02em", fontFamily: DISPLAY }}>{selectedModule.title}</h2>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: catBg(selectedModule.category), color: catColor(selectedModule.category), fontFamily: MONO }}>{selectedModule.category}</span>
+                  <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: C.surface, color: C.textDim, fontFamily: MONO, border: `1px solid ${C.border}` }}>{selectedModule.level}</span>
+                  {studentProgress[selectedModuleId] && <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: C.tealGlow, color: C.teal, fontFamily: MONO, border: `1px solid ${C.borderA}` }}>✓ {studentProgress[selectedModuleId].score}/{studentProgress[selectedModuleId].total}</span>}
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                  {selectedModule.reading.map((para, i) => <p key={i} style={{ lineHeight: 1.9, color: "#cbd5e1", fontSize: 15, margin: 0, fontFamily: FONT }}>{para}</p>)}
-                </div>
-                <button onClick={() => setActiveSection("quiz")} style={{ ...btnAccent, marginTop: 32, display: "inline-block" }}>Ir al quiz →</button>
+                <p style={{ color: C.textMid, fontSize: 14, margin: 0 }}>{selectedModule.description}</p>
               </div>
-            )}
-
-            {activeSection === "quiz" && (
-              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-                <button onClick={() => setActiveSection("reading")} style={btnBack}>← Volver a la lectura</button>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Comprensión</h3>
-                  <div style={{ ...glassDark, borderRadius: 12, padding: "8px 16px", fontFamily: MONO, fontSize: 14, fontWeight: 700, color: TEAL }}>{currentQuestionIndex + 1}/{selectedModule.quiz.length}</div>
-                </div>
-                <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 99, marginBottom: 28, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${((currentQuestionIndex + (submitted ? 1 : 0)) / selectedModule.quiz.length) * 100}%`, background: `linear-gradient(90deg,${TEAL},#67e8f9)`, transition: "width 0.4s ease", borderRadius: 99 }} />
-                </div>
-                <div style={{ ...glassDark, borderRadius: 20, padding: 24 }}>
-                  <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, lineHeight: 1.6, fontFamily: FONT }}>{currentQuestion.question}</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {shuffledOpts.map(option => { const sel = selectedOption === option; const correct = submitted && option === currentQuestion.answer; const wrong = submitted && sel && option !== currentQuestion.answer; return (<button key={option} onClick={() => !submitted && setAnswerMemory(option)} disabled={submitted} style={optBtn(sel, correct, wrong)}>{option}</button>); })}
-                  </div>
-                </div>
-                <div style={{ marginTop: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 16 }}>
-                  <div style={{ fontSize: 14, fontFamily: FONT }}>
-                    {submitted ? isCorrect ? <span style={{ color: "#34d399", fontWeight: 600 }}>✓ ¡Correcto!</span> : <span style={{ color: "#fb7185" }}>✗ Respuesta: <strong style={{ color: TEXT }}>{currentQuestion.answer}</strong></span> : <span style={{ color: TEXT_MID }}>Elegí una opción.</span>}
-                  </div>
-                  {!submitted ? <button onClick={handleSubmit} disabled={!selectedOption} style={{ ...btnAccent, opacity: selectedOption ? 1 : 0.4 }}>Comprobar</button> : <button onClick={handleNext} style={btnAccent}>{currentQuestionIndex < selectedModule.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>}
-                </div>
-              </div>
-            )}
-
-            {activeSection === "dictation" && (
-              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-                <button onClick={() => setActiveSection("reading")} style={btnBack}>← Volver a la lectura</button>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>🎙 Dictado</h3>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => speak(selectedModule.dictation, 0.75)} style={{ ...GLASS, borderRadius: 12, padding: "9px 16px", fontSize: 13, color: TEXT_MID, cursor: "pointer", fontFamily: FONT }}>🔊 Reproducir</button>
-                    <button onClick={stopSpeak} style={{ borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 600, background: "rgba(244,63,94,0.15)", color: "#fda4af", border: "1px solid rgba(244,63,94,0.3)", cursor: "pointer", fontFamily: FONT }}>⏹ Stop</button>
-                  </div>
-                </div>
-                <p style={{ color: TEXT_MID, fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>Escuchá el audio y escribí la frase en español. Podés repetirlo varias veces.</p>
-                <textarea value={dictationText} onChange={e => setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." style={{ ...input, resize: "none" as const, lineHeight: 1.7, borderRadius: 16, padding: "16px 20px" }} />
-                <button onClick={checkDictation} style={{ ...btnAccent, marginTop: 16, display: "inline-block" }}>Corregir dictado</button>
-                {(dictationResult || currentDictation) && (() => { const r = dictationResult || currentDictation!; return (<div style={{ ...glassDark, borderRadius: 20, padding: 20, marginTop: 20, display: "flex", flexDirection: "column", gap: 12 }}><div style={{ display: "flex", alignItems: "center", gap: 12 }}><div style={{ fontSize: 32, fontWeight: 800, fontFamily: MONO, color: r.score >= 80 ? "#34d399" : r.score >= 50 ? "#fbbf24" : "#fb7185" }}>{r.score}%</div><div style={{ fontSize: 14, color: TEXT_MID }}>{r.score === 100 ? "¡Perfecto! 🎉" : r.score >= 80 ? "¡Muy bien!" : r.score >= 50 ? "Buen intento" : "Seguí practicando"}</div></div><div style={{ fontSize: 14 }}><span style={{ color: TEXT_MID }}>Frase modelo: </span><span style={{ color: "#cbd5e1", fontStyle: "italic" }}>{r.expected}</span></div></div>); })()}
-              </div>
-            )}
-
-            {activeSection === "vocab" && (
-              <div style={{ ...GLASS, borderRadius: 24, padding: 32 }}>
-                <button onClick={() => setActiveSection("reading")} style={btnBack}>← Volver a la lectura</button>
-                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 24 }}>📝 Vocabulario clave</h3>
-                <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))" }}>
-                  {selectedModule.vocab.map(item => (
-                    <div key={item.es} style={{ ...glassDark, borderRadius: 16, padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
-                      <div><div style={{ fontWeight: 600, fontSize: 14, fontFamily: FONT }}>{item.es}</div><div style={{ fontSize: 11, color: TEXT_DIM, marginTop: 2 }}>Español</div></div>
-                      <div style={{ textAlign: "right" as const }}><div style={{ fontWeight: 600, fontSize: 14, color: TEAL }}>{item.pt}</div><div style={{ fontSize: 11, color: TEXT_DIM, marginTop: 2 }}>Portugués</div></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              <button onClick={resetCurrentModule} style={{ ...btnDanger, flexShrink: 0, marginTop: 4 }}>↺ Reiniciar</button>
+            </div>
+            <div style={{ display: "flex", gap: 4, background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 14, padding: 4 }}>
+              {([["reading", "📖 Lectura"], ["vocab", "📝 Vocabulario"], ["quiz", "🧠 Quiz"], ["dictation", "🎙 Dictado"]] as const).map(([sec, label]) => (
+                <button key={sec} onClick={() => setActiveSection(sec)} style={{ flex: 1, borderRadius: 11, padding: "9px 4px", fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer", fontFamily: FONT, background: activeSection === sec ? C.teal : "transparent", color: activeSection === sec ? "#042f2e" : C.textMid }}>{label}</button>
+              ))}
+            </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 16, fontFamily: MONO }}>MI PROGRESO</div>
-              <div style={{ fontSize: 52, fontWeight: 800, color: TEAL, fontFamily: MONO, lineHeight: 1 }}>{overallPercent}%</div>
-              <div style={{ color: TEXT_MID, fontSize: 13, marginTop: 4 }}>completado</div>
-              <div style={{ marginTop: 16, height: 6, borderRadius: 99, background: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 99, width: `${overallPercent}%`, background: `linear-gradient(90deg,${TEAL},#67e8f9)`, boxShadow: "0 0 12px rgba(45,212,191,0.35)", transition: "width 0.7s ease" }} />
+          {activeSection === "reading" && (
+            <div className="sa" style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
+                <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, fontFamily: DISPLAY, letterSpacing: "-0.02em" }}>{selectedModule.readingTitle}</h3>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ display: "flex", alignItems: "center", gap: 6, background: C.tealGlow, border: `1px solid ${C.borderA}`, borderRadius: 10, padding: "7px 14px", fontSize: 13, color: C.teal, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
+                  <button onClick={stopSpeak} style={{ ...btnGhost, padding: "7px 14px" }}>⏹</button>
+                </div>
               </div>
-              <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                {[{ n: completedModules, l: "Módulos" }, { n: totalBestScore, l: "Puntos", c: TEAL }].map(x => (
-                  <div key={x.l} style={{ ...glassDark, borderRadius: 14, padding: 14 }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, fontFamily: MONO, color: x.c || TEXT }}>{x.n}</div>
-                    <div style={{ fontSize: 12, color: TEXT_DIM, marginTop: 2 }}>{x.l}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                {selectedModule.reading.map((para, i) => (
+                  <div key={i} style={{ display: "flex", gap: 20, padding: "16px 0", borderBottom: i < selectedModule.reading.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                    <span style={{ fontFamily: MONO, fontSize: 12, color: C.textDim, flexShrink: 0, paddingTop: 4, width: 20, textAlign: "right" }}>{i + 1}</span>
+                    <p style={{ lineHeight: 2.0, color: "#cbd5e1", fontSize: 15, margin: 0 }}>{para}</p>
                   </div>
                 ))}
               </div>
+              <div style={{ marginTop: 28, paddingTop: 20, borderTop: `1px solid ${C.border}`, display: "flex", gap: 12 }}>
+                <button onClick={() => setActiveSection("vocab")} style={btnGhost}>📝 Ver vocabulario</button>
+                <button onClick={() => setActiveSection("quiz")} style={btnAccent}>Ir al quiz →</button>
+              </div>
             </div>
+          )}
 
-            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 16, fontFamily: MONO }}>MÓDULOS</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 480, overflowY: "auto" as const, paddingRight: 4 }}>
-                {filteredModules.map(m => { const p = studentProgress[m.id]; const isA = m.id === selectedModuleId; return (
-                  <button key={m.id} onClick={() => setSelectedModuleId(m.id)} style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 12, padding: "10px 12px", background: isA ? "rgba(45,212,191,0.08)" : "transparent", border: `1px solid ${isA ? BORDER_A : "transparent"}`, cursor: "pointer", textAlign: "left" as const, width: "100%" }}>
-                    <span style={{ fontSize: 16 }}>{m.emoji}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: isA ? 700 : 500, color: isA ? TEXT : "#94a3b8", fontFamily: FONT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{m.title}</div>
-                      <div style={{ fontSize: 11, color: catColor(m.category), marginTop: 1, fontFamily: MONO }}>{m.category}</div>
+          {activeSection === "vocab" && (
+            <div className="sa" style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32 }}>
+              <h3 style={{ fontSize: 19, fontWeight: 700, margin: "0 0 24px", fontFamily: DISPLAY }}>📝 Vocabulario clave</h3>
+              <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
+                {selectedModule.vocab.map(item => (
+                  <div key={item.es} style={{ background: C.bg3, border: `1px solid ${C.border}`, borderRadius: 14, padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                    <div><div style={{ fontWeight: 600, fontSize: 14, color: C.text }}>{item.es}</div><div style={{ fontSize: 11, color: C.textDim, marginTop: 2, fontFamily: MONO }}>ES</div></div>
+                    <div style={{ width: 1, height: 32, background: C.border }} />
+                    <div style={{ textAlign: "right" }}><div style={{ fontWeight: 600, fontSize: 14, color: C.teal }}>{item.pt}</div><div style={{ fontSize: 11, color: C.textDim, marginTop: 2, fontFamily: MONO }}>PT</div></div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 24, display: "flex", gap: 10 }}>
+                <button onClick={() => setActiveSection("reading")} style={btnGhost}>← Lectura</button>
+                <button onClick={() => setActiveSection("quiz")} style={btnAccent}>Ir al quiz →</button>
+              </div>
+            </div>
+          )}
+
+          {activeSection === "quiz" && (
+            <div className="sa" style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+                <div style={{ flex: 1, height: 4, borderRadius: 99, background: C.bg3, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${((currentQuestionIndex + (submitted ? 1 : 0)) / selectedModule.quiz.length) * 100}%`, background: `linear-gradient(90deg, ${C.teal}, #67e8f9)`, borderRadius: 99, transition: "width 0.4s ease" }} />
+                </div>
+                <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 600, color: C.textMid, flexShrink: 0 }}>{currentQuestionIndex + 1} <span style={{ color: C.textDim }}>/ {selectedModule.quiz.length}</span></span>
+              </div>
+              <p style={{ fontSize: 17, fontWeight: 600, color: C.text, lineHeight: 1.65, margin: "0 0 24px" }}>{currentQuestion.question}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+                {shuffledOpts.map(option => {
+                  const sel = selectedOption === option; const correct = submitted && option === currentQuestion.answer; const wrong = submitted && sel && option !== currentQuestion.answer;
+                  return (
+                    <button key={option} onClick={() => !submitted && setAnswerMemory(option)} disabled={submitted} style={optBtn(sel, correct, wrong)}>
+                      <span style={{ width: 20, height: 20, borderRadius: "50%", border: `1.5px solid ${correct ? C.green : wrong ? C.red : sel ? C.teal : C.border}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>{correct ? "✓" : wrong ? "✗" : ""}</span>
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ fontSize: 14 }}>
+                  {submitted ? isCorrect ? <span style={{ color: C.green, fontWeight: 600 }}>✓ ¡Correcto!</span> : <div><span style={{ color: C.red }}>✗ Respuesta: </span><strong style={{ color: C.text }}>{currentQuestion.answer}</strong></div> : <span style={{ color: C.textDim }}>Seleccioná una opción</span>}
+                </div>
+                {!submitted ? <button onClick={handleSubmit} disabled={!selectedOption} style={{ ...btnAccent, opacity: selectedOption ? 1 : 0.35 }}>Comprobar</button> : <button onClick={handleNext} style={btnAccent}>{currentQuestionIndex < selectedModule.quiz.length - 1 ? "Siguiente →" : "Finalizar ✓"}</button>}
+              </div>
+            </div>
+          )}
+
+          {activeSection === "dictation" && (
+            <div className="sa" style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+                <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, fontFamily: DISPLAY }}>🎙 Dictado</h3>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => speak(selectedModule.dictation, 0.75)} style={{ display: "flex", alignItems: "center", gap: 6, background: C.tealGlow, border: `1px solid ${C.borderA}`, borderRadius: 10, padding: "7px 14px", fontSize: 13, color: C.teal, cursor: "pointer", fontFamily: FONT }}>🔊 Reproducir</button>
+                  <button onClick={stopSpeak} style={{ ...btnGhost, padding: "7px 14px" }}>⏹</button>
+                </div>
+              </div>
+              <p style={{ color: C.textMid, fontSize: 14, marginBottom: 20, lineHeight: 1.7 }}>Escuchá el audio y escribí la frase en español.</p>
+              <textarea value={dictationText} onChange={e => setDictationText(e.target.value)} rows={4} placeholder="Escribí lo que escuchaste..." style={{ ...input, resize: "none", lineHeight: 1.8, borderRadius: 14, padding: "14px 18px" }} />
+              <button onClick={checkDictation} style={{ ...btnAccent, marginTop: 14 }}>Corregir dictado</button>
+              {(dictationResult || currentDictation) && (() => { const r = dictationResult || currentDictation!; const sc = r.score >= 80 ? C.green : r.score >= 50 ? C.yellow : C.red; return (
+                <div style={{ background: C.bg3, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, marginTop: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+                    <div style={{ position: "relative", flexShrink: 0 }}>
+                      <ScoreRing percent={r.score} size={64} />
+                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: 14, fontWeight: 700, color: sc }}>{r.score}%</div>
                     </div>
-                    {p ? <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: TEAL, whiteSpace: "nowrap" as const }}>{p.score}/{p.total}</span> : <span style={{ color: TEXT_DIM, fontSize: 12 }}>—</span>}
-                  </button>
-                ); })}
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 16, color: C.text }}>{r.score === 100 ? "¡Perfecto! 🎉" : r.score >= 80 ? "¡Muy bien! 👍" : r.score >= 50 ? "Buen intento" : "Seguí practicando"}</div>
+                      <div style={{ fontSize: 12, color: C.textDim, marginTop: 2 }}>{r.updatedAt}</div>
+                    </div>
+                  </div>
+                  <div style={{ background: C.bg2, borderRadius: 12, padding: "12px 16px" }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 6, letterSpacing: "0.06em", fontFamily: MONO }}>FRASE MODELO</div>
+                    <p style={{ fontSize: 14, color: "#cbd5e1", fontStyle: "italic", lineHeight: 1.7, margin: 0 }}>{r.expected}</p>
+                  </div>
+                </div>
+              ); })()}
+            </div>
+          )}
+        </main>
+
+        <aside style={{ position: "sticky", top: 72, display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 24 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: C.textDim, marginBottom: 16, fontFamily: MONO }}>MI PROGRESO</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+              <div style={{ position: "relative", flexShrink: 0 }}>
+                <ScoreRing percent={overallPercent} size={80} />
+                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontFamily: MONO, fontSize: 16, fontWeight: 800, color: C.teal }}>{overallPercent}%</span>
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: C.text, fontWeight: 600 }}>{completedModules} de {MODULES.length}</div>
+                <div style={{ fontSize: 12, color: C.textDim, marginTop: 2 }}>módulos completados</div>
+                <div style={{ fontSize: 13, color: C.teal, fontWeight: 700, marginTop: 6, fontFamily: MONO }}>{totalBestScore} pts totales</div>
               </div>
             </div>
-
-            <div style={{ ...GLASS, borderRadius: 24, padding: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: TEXT_DIM, marginBottom: 12, fontFamily: MONO }}>CONSEJO DEL DÍA</div>
-              <p style={{ fontSize: 14, color: "#cbd5e1", lineHeight: 1.7, margin: 0, fontFamily: FONT }}>💡 Cuando uses términos técnicos con un cliente, la <span style={{ color: TEAL, fontWeight: 600 }}>claridad</span> siempre es más importante que la complejidad del vocabulario.</p>
-            </div>
-
-            <div style={{ borderRadius: 24, overflow: "hidden", border: "1px solid rgba(30,215,96,0.2)", background: "linear-gradient(135deg,rgba(30,215,96,0.07),rgba(6,11,20,0.95))" }}>
-              <div style={{ padding: "16px 20px 8px", display: "flex", alignItems: "center", gap: 8 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg>
-                <span style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: FONT }}>Escuchá mientras estudiás</span>
-              </div>
-              <iframe style={{ borderRadius: "0 0 24px 24px", display: "block" }} src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcOFHFBj89A5?utm_source=generator&theme=0" width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
-            </div>
+            {["Laboratorio", "Gestión", "Comunicación", "Tecnología", "Gramática", "Controllab"].map(cat => {
+              const catMods = MODULES.filter(m => m.category === cat); const done = catMods.filter(m => studentProgress[m.id]).length;
+              return (
+                <div key={cat} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: catColor(cat), flexShrink: 0 }} />
+                  <span style={{ fontSize: 11, color: C.textMid, width: 90, flexShrink: 0 }}>{cat}</span>
+                  <MiniBar value={done} max={catMods.length} color={catColor(cat)} />
+                  <span style={{ fontSize: 11, color: C.textDim, fontFamily: MONO, flexShrink: 0 }}>{done}/{catMods.length}</span>
+                </div>
+              );
+            })}
           </div>
-        </div>
+
+          <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: C.textDim, marginBottom: 10, fontFamily: MONO }}>CONSEJO DEL DÍA</div>
+            <p style={{ fontSize: 13, color: C.textMid, lineHeight: 1.8, margin: 0 }}>💡 En atención técnica, la <span style={{ color: C.teal, fontWeight: 600 }}>claridad</span> siempre es más valiosa que la complejidad del vocabulario.</p>
+          </div>
+
+          <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(30,215,96,0.18)", background: "linear-gradient(135deg, rgba(30,215,96,0.06), rgba(6,11,20,0.98))" }}>
+            <div style={{ padding: "14px 18px 8px", display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg>
+              <span style={{ fontSize: 12, fontWeight: 600, color: C.text }}>Escuchá mientras estudiás</span>
+            </div>
+            <iframe style={{ borderRadius: "0 0 20px 20px", display: "block" }} src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcOFHFBj89A5?utm_source=generator&theme=0" width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
+          </div>
+        </aside>
       </div>
     </div>
   );
