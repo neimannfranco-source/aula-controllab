@@ -26,27 +26,32 @@ type AppState = {
 };
 type LoadStatus = "loading" | "ready" | "error";
 
-const BG = "#060b14";
-const GLASS: React.CSSProperties = { background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" };
-const glassDark: React.CSSProperties = { background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.08)" };
-const TEAL = "#2dd4bf";
-const TEXT = "#f1f5f9";
-const TEXT_MID = "#94a3b8";
-const TEXT_DIM = "#475569";
-const BORDER = "rgba(255,255,255,0.08)";
-const BORDER_A = "rgba(45,212,191,0.35)";
-const MONO = "'JetBrains Mono','Fira Code',monospace";
-const FONT = "'DM Sans','Inter',sans-serif";
-
-const input: React.CSSProperties = { width: "100%", background: "rgba(0,0,0,0.3)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "12px 16px", color: TEXT, fontSize: 14, fontFamily: FONT, outline: "none", boxSizing: "border-box" };
-const btnAccent: React.CSSProperties = { background: `linear-gradient(135deg,${TEAL},#0d9488)`, color: "#042f2e", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT };
-const btnBack: React.CSSProperties = { background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 13, padding: "0 0 8px 0", display: "flex", alignItems: "center", gap: 4, fontFamily: "'DM Sans','Inter',sans-serif" };
-const optBtn = (sel: boolean, correct: boolean, wrong: boolean): React.CSSProperties => ({ textAlign: "left", padding: "14px 18px", borderRadius: 14, border: `1px solid ${correct ? "rgba(52,211,153,0.5)" : wrong ? "rgba(251,113,133,0.5)" : sel ? BORDER_A : BORDER}`, background: correct ? "rgba(52,211,153,0.12)" : wrong ? "rgba(251,113,133,0.12)" : sel ? "rgba(45,212,191,0.08)" : "rgba(0,0,0,0.2)", color: correct ? "#34d399" : wrong ? "#fb7185" : sel ? TEAL : TEXT_MID, cursor: "pointer", fontFamily: FONT, fontSize: 14, width: "100%" });
-
-function catColor(cat: string): string {
-  const m: Record<string, string> = { Laboratorio: "#60a5fa", Gestión: "#f472b6", Comunicación: "#fb923c", Tecnología: "#a78bfa", Gramática: "#facc15", Controllab: TEAL };
-  return m[cat] || TEXT_MID;
-}
+const C = {
+  bg: "#060b14", bg2: "#0c1220", bg3: "#111827",
+  surface: "rgba(255,255,255,0.03)",
+  border: "rgba(255,255,255,0.07)", borderA: "rgba(45,212,191,0.30)",
+  teal: "#2dd4bf", tealDim: "#0d9488", tealGlow: "rgba(45,212,191,0.12)",
+  text: "#f1f5f9", textMid: "#94a3b8", textDim: "#475569",
+  green: "#34d399", yellow: "#fbbf24", red: "#fb7185",
+  redDim: "rgba(251,113,133,0.12)", redBorder: "rgba(251,113,133,0.25)",
+};
+const FONT = "'DM Sans', system-ui, sans-serif";
+const MONO = "'DM Mono', 'JetBrains Mono', monospace";
+const DISPLAY = "'Syne', 'DM Sans', system-ui, sans-serif";
+const BG = C.bg; const TEAL = C.teal; const TEXT = C.text; const TEXT_MID = C.textMid; const TEXT_DIM = C.textDim; const BORDER = C.border; const BORDER_A = C.borderA;
+const GLASS: React.CSSProperties = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16 };
+const glassDark: React.CSSProperties = { background: C.bg3, border: `1px solid ${C.border}` };
+const input: React.CSSProperties = { width: "100%", background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "12px 16px", color: C.text, fontSize: 14, fontFamily: FONT, outline: "none", boxSizing: "border-box" };
+const btnAccent: React.CSSProperties = { background: `linear-gradient(135deg,${C.teal},${C.tealDim})`, color: "#042f2e", border: "none", borderRadius: 12, padding: "11px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT };
+const btnBack: React.CSSProperties = { background: "transparent", border: "none", color: C.textMid, cursor: "pointer", fontSize: 13, padding: "0 0 8px 0", display: "flex", alignItems: "center", gap: 4, fontFamily: FONT };
+const btnGhost: React.CSSProperties = { background: "transparent", border: `1px solid ${C.border}`, borderRadius: 10, padding: "7px 14px", fontSize: 13, color: C.textMid, cursor: "pointer", fontFamily: FONT };
+const btnDanger: React.CSSProperties = { background: C.redDim, border: `1px solid ${C.redBorder}`, borderRadius: 10, padding: "7px 14px", fontSize: 12, color: C.red, cursor: "pointer", fontFamily: FONT };
+const optBtn = (sel: boolean, correct: boolean, wrong: boolean): React.CSSProperties => ({ textAlign: "left", padding: "13px 18px", borderRadius: 13, border: `1px solid ${correct ? C.green + "60" : wrong ? C.red + "60" : sel ? C.teal + "60" : C.border}`, background: correct ? "rgba(52,211,153,0.1)" : wrong ? C.redDim : sel ? C.tealGlow : C.bg3, color: correct ? C.green : wrong ? C.red : sel ? C.teal : C.textMid, cursor: "pointer", fontFamily: FONT, fontSize: 14, width: "100%", display: "flex", alignItems: "center", gap: 12 });
+function catColor(cat: string): string { const m: Record<string, string> = { Laboratorio: "#60a5fa", Gestión: "#f472b6", Comunicación: "#fb923c", Tecnología: "#a78bfa", Gramática: "#facc15", Controllab: C.teal }; return m[cat] || C.textMid; }
+function catBg(cat: string): string { const m: Record<string, string> = { Laboratorio: "rgba(96,165,250,0.1)", Gestión: "rgba(244,114,182,0.1)", Comunicación: "rgba(251,146,60,0.1)", Tecnología: "rgba(167,139,250,0.1)", Gramática: "rgba(250,204,21,0.1)", Controllab: "rgba(45,212,191,0.1)" }; return m[cat] || "rgba(255,255,255,0.05)"; }
+function getInitial(name: string): string { return name.charAt(0).toUpperCase(); }
+function ScoreRing({ percent, size = 80 }: { percent: number; size?: number }) { const r = (size - 8) / 2; const circ = 2 * Math.PI * r; const dash = (percent / 100) * circ; return (<svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}><circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={6} /><circle cx={size/2} cy={size/2} r={r} fill="none" stroke={percent >= 80 ? C.teal : percent >= 50 ? C.yellow : C.red} strokeWidth={6} strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" style={{ transition: "stroke-dasharray 0.6s ease" }} /></svg>); }
+function MiniBar({ value, max, color = C.teal }: { value: number; max: number; color?: string }) { const pct = max > 0 ? Math.round((value / max) * 100) : 0; return (<div style={{ height: 4, borderRadius: 99, background: "rgba(255,255,255,0.07)", overflow: "hidden", flex: 1 }}><div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 99, transition: "width 0.5s ease" }} /></div>); }
 
 
 const MODULES: ModuleType[] = [
