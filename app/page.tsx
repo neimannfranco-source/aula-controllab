@@ -1756,6 +1756,277 @@ const MODULES: ModuleType[] = [
   ],
   dictation: "El soporte técnico de calidad reconoce su rol: dar el contexto analítico con evidencia concreta sin invadir la decisión clínica que corresponde siempre al médico tratante.",
 },
+// ══ MÓDULO NUEVO: MICROBIOLOGÍA CLÍNICA ══
+// Insertar dentro del array MODULES, después del módulo "toxicologia" (id: "toxicologia")
+// Usar Ctrl+H: buscar la línea exacta del cierre del módulo anterior y pegar este bloque después
+
+{
+  id: "microbiologia-clinica",
+  title: "Microbiología clínica",
+  level: "Avanzado",
+  category: "Laboratorio",
+  emoji: "🧫",
+  description: "Cultivos, antibiograma, identificación de microorganismos y comunicación de resultados en microbiología.",
+  readingTitle: "El cultivo que cambió el tratamiento",
+  reading: [
+    "En el laboratorio de microbiología, cada muestra cuenta una historia. Una hemocultivo positivo en las primeras doce horas de incubación puede ser la diferencia entre un tratamiento antibiótico empírico que funciona y uno que fracasa. Cuando el sistema de incubación automatizado emitió la alarma a las tres de la mañana, el analista de guardia sabía que tenía que actuar rápido.",
+    "La microbiología clínica estudia los microorganismos causantes de enfermedades infecciosas: bacterias, hongos, parásitos y virus. El laboratorio identifica el agente causal, evalúa su perfil de sensibilidad a los antimicrobianos mediante el antibiograma, y comunica esos resultados al médico para orientar el tratamiento.",
+    "El antibiograma es uno de los informes más críticos que emite el laboratorio clínico. No basta con identificar el microorganismo: el médico necesita saber a qué antibióticos es sensible, intermedio o resistente. Un resultado de sensibilidad incorrecto puede derivar en el uso de un antibiótico ineficaz mientras la infección progresa, o en el uso innecesario de antibióticos de amplio espectro que favorecen la resistencia.",
+    "Los mecanismos de resistencia antimicrobiana son una preocupación global creciente. Enterobacterias productoras de BLEE (betalactamasas de espectro extendido), Staphylococcus aureus resistente a la meticilina (SARM o MRSA), y Klebsiella pneumoniae productora de carbapenemasas (KPC) son ejemplos de patógenos que requieren manejo especial en el laboratorio y comunicación urgente al médico y al equipo de control de infecciones.",
+    "El control de calidad en microbiología tiene características propias. Las cepas de referencia ATCC son el estándar para verificar el desempeño del antibiograma: si el halos de inhibición de la cepa ATCC no cae dentro del rango esperado, los resultados de las muestras de pacientes de esa misma corrida deben retenerse hasta identificar la causa. La participación en el Ensayo de Aptitud de Controllab para microbiología permite al laboratorio comparar su desempeño en identificación y antibiograma frente a otros laboratorios que usan métodos similares.",
+  ],
+  vocab: [
+    { es: "hemocultivo / urocultivo", pt: "hemocultura / urocultura" },
+    { es: "antibiograma / perfil de sensibilidad", pt: "antibiograma / perfil de sensibilidade" },
+    { es: "sensible / intermedio / resistente", pt: "sensível / intermediário / resistente" },
+    { es: "BLEE / SARM / KPC", pt: "ESBL / MRSA / KPC" },
+    { es: "cepa ATCC / cepa clínica", pt: "cepa ATCC / cepa clínica" },
+    { es: "halo de inhibición / CIM", pt: "halo de inibição / CIM" },
+  ],
+  quiz: [
+    {
+      question: "¿Qué estudia la microbiología clínica en el laboratorio?",
+      options: [
+        "Solo la morfología de las bacterias en microscopio",
+        "Los microorganismos causantes de infecciones, su identificación y perfil de sensibilidad a antimicrobianos",
+        "Solo las infecciones bacterianas, sin incluir hongos ni parásitos",
+        "El recuento celular en sangre periférica",
+      ],
+      answer: "Los microorganismos causantes de infecciones, su identificación y perfil de sensibilidad a antimicrobianos",
+    },
+    {
+      question: "¿Qué indica el resultado 'sensible' en un antibiograma?",
+      options: [
+        "Que el microorganismo puede desarrollar resistencia con el tiempo",
+        "Que el antibiótico inhibirá el crecimiento del microorganismo a las concentraciones habituales de tratamiento",
+        "Que el antibiótico solo funciona a dosis muy altas",
+        "Que la infección ya fue controlada por el sistema inmune",
+      ],
+      answer: "Que el antibiótico inhibirá el crecimiento del microorganismo a las concentraciones habituales de tratamiento",
+    },
+    {
+      question: "¿Por qué un resultado de sensibilidad incorrecto puede ser peligroso para el paciente?",
+      options: [
+        "Solo porque puede generar costos innecesarios al hospital",
+        "Porque puede llevar a usar un antibiótico ineficaz mientras la infección progresa, o a favorecer la resistencia con antibióticos de amplio espectro innecesarios",
+        "Solo porque dificulta el trabajo del médico en la historia clínica",
+        "Porque el laboratorio pierde credibilidad ante el médico",
+      ],
+      answer: "Porque puede llevar a usar un antibiótico ineficaz mientras la infección progresa, o a favorecer la resistencia con antibióticos de amplio espectro innecesarios",
+    },
+    {
+      question: "¿Qué significa BLEE en el contexto de la resistencia antimicrobiana?",
+      options: [
+        "Bacteria de largo espectro enzimático",
+        "Betalactamasa de espectro extendido: enzima que confiere resistencia a penicilinas y cefalosporinas",
+        "Bacteria libre de esporas endospóricas",
+        "Baja sensibilidad a los leucocitos endoteliales",
+      ],
+      answer: "Betalactamasa de espectro extendido: enzima que confiere resistencia a penicilinas y cefalosporinas",
+    },
+    {
+      question: "¿Qué es SARM (MRSA)?",
+      options: [
+        "Salmonella resistente a metronidazol",
+        "Staphylococcus aureus resistente a la meticilina, un patógeno de manejo especial por su resistencia a la mayoría de los betalactámicos",
+        "Streptococcus aureus resistente a macrolidos",
+        "Un hongo resistente a los antifúngicos de primera línea",
+      ],
+      answer: "Staphylococcus aureus resistente a la meticilina, un patógeno de manejo especial por su resistencia a la mayoría de los betalactámicos",
+    },
+    {
+      question: "¿Para qué se usan las cepas ATCC en microbiología?",
+      options: [
+        "Para comparar morfología con cepas clínicas del paciente",
+        "Como control de calidad para verificar que el antibiograma funciona correctamente en esa corrida",
+        "Para identificar automáticamente los microorganismos del cultivo",
+        "Solo para la acreditación ISO 15189, no en la rutina diaria",
+      ],
+      answer: "Como control de calidad para verificar que el antibiograma funciona correctamente en esa corrida",
+    },
+    {
+      question: "¿Qué debe hacer el laboratorio si el halo de inhibición de la cepa ATCC está fuera del rango esperado?",
+      options: [
+        "Reportar los resultados de los pacientes con una nota al pie",
+        "Retener los resultados de las muestras de pacientes de esa corrida hasta identificar la causa",
+        "Solo repetir el control interno sin afectar los informes de pacientes",
+        "Continuar normalmente porque es una variación aceptable del método",
+      ],
+      answer: "Retener los resultados de las muestras de pacientes de esa corrida hasta identificar la causa",
+    },
+    {
+      question: "¿Qué es KPC en el contexto de la resistencia antimicrobiana?",
+      options: [
+        "Klebsiella productora de capsulasa",
+        "Klebsiella pneumoniae productora de carbapenemasas: bacteria resistente a los carbapenems, antibióticos de último recurso",
+        "Un kit de prueba de susceptibilidad rápida",
+        "Una técnica de cultivo para anaerobios estrictos",
+      ],
+      answer: "Klebsiella pneumoniae productora de carbapenemasas: bacteria resistente a los carbapenems, antibióticos de último recurso",
+    },
+    {
+      question: "¿Qué permite el Ensayo de Aptitud de Controllab para microbiología?",
+      options: [
+        "Obtener la acreditación ISO 15189 automáticamente",
+        "Comparar el desempeño en identificación y antibiograma frente a otros laboratorios con métodos similares",
+        "Reemplazar el control interno con cepas ATCC diario",
+        "Solo verificar la calidad del medio de cultivo usado",
+      ],
+      answer: "Comparar el desempeño en identificación y antibiograma frente a otros laboratorios con métodos similares",
+    },
+    {
+      question: "¿A quién debe comunicarse urgentemente la detección de un mecanismo de resistencia como KPC o BLEE?",
+      options: [
+        "Solo al médico solicitante, sin más pasos",
+        "Al médico tratante y al equipo de control de infecciones del hospital",
+        "Solo al área de calidad del laboratorio",
+        "Al organismo regulador, sin notificar al médico primero",
+      ],
+      answer: "Al médico tratante y al equipo de control de infecciones del hospital",
+    },
+    {
+      question: "¿Qué diferencia hay entre un resultado cuantitativo (CIM) y uno cualitativo (S/I/R) en el antibiograma?",
+      options: [
+        "Son equivalentes y se usan indistintamente",
+        "La CIM (Concentración Inhibitoria Mínima) es el valor numérico de la concentración mínima de antibiótico que inhibe el crecimiento; S/I/R es la interpretación clínica de ese valor",
+        "La CIM solo se usa en investigación, no en la clínica",
+        "El resultado S/I/R es siempre más preciso que la CIM",
+      ],
+      answer: "La CIM (Concentración Inhibitoria Mínima) es el valor numérico de la concentración mínima de antibiótico que inhibe el crecimiento; S/I/R es la interpretación clínica de ese valor",
+    },
+    {
+      question: "¿Por qué la microbiología de urgencias requiere comunicación proactiva del laboratorio?",
+      options: [
+        "Solo por exigencia de la norma ISO 15189",
+        "Porque un hemocultivo positivo o un resultado con resistencia crítica puede cambiar el tratamiento del paciente en las próximas horas y no puede esperar al informe rutinario",
+        "Solo cuando el médico lo solicita expresamente",
+        "Solo en pacientes internados en UCI, no en pacientes ambulatorios",
+      ],
+      answer: "Porque un hemocultivo positivo o un resultado con resistencia crítica puede cambiar el tratamiento del paciente en las próximas horas y no puede esperar al informe rutinario",
+    },
+    {
+      question: "¿Qué es una contaminación de muestra en microbiología y cómo se maneja?",
+      options: [
+        "Siempre indica que el paciente tiene una infección polimicrobiana",
+        "Es el crecimiento de microorganismos provenientes del entorno o la piel durante la extracción; se evalúa en contexto clínico y puede requerir nueva muestra",
+        "Solo ocurre en hemocultivos, no en otros tipos de muestras",
+        "No tiene consecuencias clínicas porque el laboratorio puede identificar los contaminantes",
+      ],
+      answer: "Es el crecimiento de microorganismos provenientes del entorno o la piel durante la extracción; se evalúa en contexto clínico y puede requerir nueva muestra",
+    },
+  ],
+  dictation:
+    "El antibiograma informa si el microorganismo es sensible, intermedio o resistente, y los mecanismos de resistencia como BLEE o KPC deben comunicarse de forma urgente al médico y al equipo de control de infecciones.",
+},
+
+{
+  id: "dialogo-microbiologia-resultado",
+  title: "Diálogo: resultado de cultivo con resistencia",
+  level: "Avanzado",
+  category: "Laboratorio",
+  emoji: "📞",
+  description: "Conversación entre un analista de microbiología y un médico infectólogo sobre un hemocultivo positivo con BLEE.",
+  readingTitle: "La llamada de las tres de la mañana",
+  reading: [
+    "— Servicio de microbiología, habla Paula. ¿En qué le puedo ayudar?\n— Buenas noches, Paula, soy el Dr. Acosta, infectólogo de guardia. Recibí la alerta del sistema por el hemocultivo del paciente García, habitación 412. ¿Tienen el resultado?",
+    "— Sí, Dr. Acosta. Le estaba por llamar. El hemocultivo del frasco aerobio dio positivo a las once horas de incubación. En la Gram directa observamos bacilos Gram negativos. El cultivo ya está en placa y en el sistema automatizado de identificación. Tendremos identificación completa y antibiograma preliminar en aproximadamente doce horas.",
+    "— ¿Pueden adelantarme algo? El paciente está febril desde ayer, con leucocitosis de dieciséis mil y tensión arterial límite.\n— Entiendo la urgencia. Por la morfología en el Gram y el tiempo de positivización, el patrón es compatible con una enterobacteria, posiblemente E. coli o Klebsiella. Le recomendaría que por ahora ajuste el tratamiento empírico en función de eso. En cuanto tengamos el resultado del panel de resistencia, le llamo inmediatamente, sea cual sea la hora.",
+    "— Perfecto. ¿Hay alguna señal de resistencia que deba considerar desde ahora?\n— Todavía no tenemos el fenotipo completo, pero en función del patrón de crecimiento inicial voy a activar el protocolo de alerta para BLEE. Si confirmamos producción de betalactamasa de espectro extendido, eso va a cambiar significativamente el esquema. Le pido que de momento no use cefalosporinas de tercera generación aunque el antibiograma preliminar las muestre como sensibles, porque pueden dar falsos sensibles en cepas BLEE antes de que el sistema confirme el fenotipo.",
+    "— Muy bien considerado, Paula. ¿Cuándo estima el resultado definitivo?\n— El resultado definitivo con identificación, antibiograma completo y confirmación del mecanismo de resistencia estará listo antes de las quince horas. Lo llamo en cuanto esté disponible y también lo voy a documentar en el sistema con el código de alerta de resistencia para que el equipo de control de infecciones lo reciba automáticamente.\n— Excelente. Muchas gracias por la proactividad. Quedo atento.",
+  ],
+  vocab: [
+    { es: "hemocultivo positivo / tiempo de positivización", pt: "hemocultura positiva / tempo de positivação" },
+    { es: "Gram directo / bacilo Gram negativo", pt: "Gram direto / bacilo Gram negativo" },
+    { es: "fenotipo de resistencia / protocolo de alerta", pt: "fenótipo de resistência / protocolo de alerta" },
+    { es: "falso sensible / cefalosporina", pt: "falso sensível / cefalosporina" },
+    { es: "código de alerta de resistencia", pt: "código de alerta de resistência" },
+    { es: "ajuste del tratamiento empírico", pt: "ajuste do tratamento empírico" },
+  ],
+  quiz: [
+    {
+      question: "¿Qué encontró Paula en la Gram directa del hemocultivo positivo?",
+      options: [
+        "Cocos Gram positivos en racimos",
+        "Bacilos Gram negativos compatibles con una enterobacteria",
+        "Levaduras con pseudohifas",
+        "Flora polimicrobiana sin patrón claro",
+      ],
+      answer: "Bacilos Gram negativos compatibles con una enterobacteria",
+    },
+    {
+      question: "¿Por qué Paula recomienda no usar cefalosporinas de tercera generación aunque el antibiograma preliminar las muestre sensibles?",
+      options: [
+        "Porque las cefalosporinas no están disponibles en ese hospital",
+        "Porque las cepas BLEE pueden dar falsos sensibles antes de que el sistema confirme el fenotipo completo de resistencia",
+        "Porque el médico ya había elegido otro antibiótico",
+        "Porque las cefalosporinas siempre son ineficaces contra enterobacterias",
+      ],
+      answer: "Porque las cepas BLEE pueden dar falsos sensibles antes de que el sistema confirme el fenotipo completo de resistencia",
+    },
+    {
+      question: "¿Qué es el tiempo de positivización en un hemocultivo?",
+      options: [
+        "El tiempo que tarda el laboratorio en procesar la muestra",
+        "El tiempo desde el inicio de la incubación hasta que el sistema detecta crecimiento bacteriano",
+        "El tiempo de espera del médico para recibir el resultado",
+        "La duración total del antibiograma",
+      ],
+      answer: "El tiempo desde el inicio de la incubación hasta que el sistema detecta crecimiento bacteriano",
+    },
+    {
+      question: "¿Qué acción proactiva toma Paula al documentar el resultado?",
+      options: [
+        "Solo carga el resultado en el sistema sin más pasos",
+        "Documenta el código de alerta de resistencia para que el equipo de control de infecciones lo reciba automáticamente",
+        "Espera a que el médico lo revise antes de notificar a control de infecciones",
+        "Envía el resultado solo por correo electrónico al Dr. Acosta",
+      ],
+      answer: "Documenta el código de alerta de resistencia para que el equipo de control de infecciones lo reciba automáticamente",
+    },
+    {
+      question: "¿Qué demuestra la recomendación de Paula sobre las cefalosporinas?",
+      options: [
+        "Que el laboratorio puede indicar qué antibiótico usar",
+        "Que el analista de microbiología aporta criterio técnico que el médico necesita para tomar decisiones seguras",
+        "Que el antibiograma automatizado es siempre incorrecto",
+        "Que Paula tiene experiencia en infectología clínica",
+      ],
+      answer: "Que el analista de microbiología aporta criterio técnico que el médico necesita para tomar decisiones seguras",
+    },
+    {
+      question: "¿Cuándo estima Paula que estará el resultado definitivo?",
+      options: [
+        "En seis horas",
+        "Antes de las quince horas, con identificación, antibiograma completo y confirmación del mecanismo de resistencia",
+        "Al día siguiente por la mañana",
+        "Depende del turno que continúe el trabajo",
+      ],
+      answer: "Antes de las quince horas, con identificación, antibiograma completo y confirmación del mecanismo de resistencia",
+    },
+    {
+      question: "¿Por qué Paula activa el protocolo de alerta para BLEE antes de tener el fenotipo confirmado?",
+      options: [
+        "Por exigencia burocrática del laboratorio",
+        "Porque el patrón de crecimiento inicial ya genera sospecha y anticiparse protege al paciente mientras se espera la confirmación",
+        "Porque todos los hemocultivos positivos activan ese protocolo automáticamente",
+        "Para que el médico no use antibióticos mientras espera el resultado",
+      ],
+      answer: "Porque el patrón de crecimiento inicial ya genera sospecha y anticiparse protege al paciente mientras se espera la confirmación",
+    },
+    {
+      question: "¿Qué información del paciente menciona el Dr. Acosta que justifica la urgencia?",
+      options: [
+        "Solo que tiene fiebre desde hace dos días",
+        "Fiebre, leucocitosis de 16.000 y tensión arterial límite: signos compatibles con sepsis incipiente",
+        "Que es un paciente inmunocomprometido en quimioterapia",
+        "Solo que está internado en la habitación 412",
+      ],
+      answer: "Fiebre, leucocitosis de 16.000 y tensión arterial límite: signos compatibles con sepsis incipiente",
+    },
+  ],
+  dictation:
+    "En microbiología la comunicación proactiva es parte del resultado: un hemocultivo positivo con sospecha de BLEE debe comunicarse al médico antes de tener el fenotipo completo confirmado.",
+},
 // ══ GRAMÁTICA ══
 {
   id: "ser-estar", title: "Ser vs. Estar", level: "Básico", category: "Gramática", emoji: "🔄",
