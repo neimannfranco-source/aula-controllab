@@ -3372,7 +3372,7 @@ useEffect(() => {
       <div style={{ width: "100%", maxWidth: 440 }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
                   <h1 style={{ fontSize: 30, fontWeight: 800, color: "#1e3a2f", margin: "0 0 8px", fontFamily: DISPLAY, letterSpacing: "-0.03em" }}>Aula Controllab</h1>
-          <p style={{ color: "#2d5a3d", fontSize: 14, margin: 0 }}>Español técnico para profesionales del laboratorio</p>
+          <p style={{ color: "#1a3d28", fontSize: 18, margin: 0, fontWeight: 800, letterSpacing: "-0.01em" }}>Español técnico para profesionales del laboratorio</p>
         </div>
         <div style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 24, padding: 32 }}>
           <div style={{ marginBottom: 20 }}>
