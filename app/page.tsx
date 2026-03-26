@@ -27,11 +27,11 @@ type AppState = {
 type LoadStatus = "loading" | "ready" | "error";
 
 const C = {
-  bg: "#060b14", bg2: "#0c1220", bg3: "#111827",
+  bg: "transparent", bg2: "rgba(12,18,32,0.80)", bg3: "rgba(17,24,39,0.80)",
   surface: "rgba(255,255,255,0.03)",
   border: "rgba(255,255,255,0.07)", borderA: "rgba(45,212,191,0.30)",
   teal: "#2dd4bf", tealDim: "#0d9488", tealGlow: "rgba(45,212,191,0.12)",
-  text: "#f1f5f9", textMid: "#94a3b8", textDim: "#475569",
+  text: "#0f172a", textMid: "#334155", textDim: "#475569",
   green: "#34d399", yellow: "#fbbf24", red: "#fb7185",
   redDim: "rgba(251,113,133,0.12)", redBorder: "rgba(251,113,133,0.25)",
 };
@@ -41,7 +41,7 @@ const DISPLAY = "'Syne', 'DM Sans', system-ui, sans-serif";
 const BG = C.bg; const TEAL = C.teal; const TEXT = C.text; const TEXT_MID = C.textMid; const TEXT_DIM = C.textDim; const BORDER = C.border; const BORDER_A = C.borderA;
 const GLASS: React.CSSProperties = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16 };
 const glassDark: React.CSSProperties = { background: C.bg3, border: `1px solid ${C.border}` };
-const input: React.CSSProperties = { width: "100%", background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "12px 16px", color: C.text, fontSize: 14, fontFamily: FONT, outline: "none", boxSizing: "border-box" };
+const input: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 12, padding: "12px 16px", color: "#0f172a", fontSize: 14, fontFamily: FONT, outline: "none", boxSizing: "border-box" };
 const btnAccent: React.CSSProperties = { background: `linear-gradient(135deg,${C.teal},${C.tealDim})`, color: "#042f2e", border: "none", borderRadius: 12, padding: "11px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT };
 const btnBack: React.CSSProperties = { background: "transparent", border: "none", color: C.textMid, cursor: "pointer", fontSize: 13, padding: "0 0 8px 0", display: "flex", alignItems: "center", gap: 4, fontFamily: FONT };
 const btnGhost: React.CSSProperties = { background: "transparent", border: `1px solid ${C.border}`, borderRadius: 10, padding: "7px 14px", fontSize: 13, color: C.textMid, cursor: "pointer", fontFamily: FONT };
@@ -3309,7 +3309,7 @@ useEffect(() => {
   const professorRows = useMemo(() => appState.students.map(student => { const progress = appState.progress[student.id] || {}; const dictations = appState.dictations[student.id] || {}; const completedMods = Object.keys(progress).length; const bestScore = MODULES.reduce((sum, m) => sum + (progress[m.id]?.score || 0), 0); const dictScores = MODULES.map(m => dictations[m.id]?.score).filter((v): v is number => typeof v === "number"); const dictAvg = dictScores.length ? Math.round(dictScores.reduce((a, b) => a + b, 0) / dictScores.length) : null; return { ...student, completedMods, bestScore, dictAvg }; }), [appState]);
 
   if (loadStatus === "loading") return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: C.bg, fontFamily: FONT, gap: 16 }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundImage: "url('/control.jpg')", backgroundSize: "cover", backgroundPosition: "center", fontFamily: FONT, gap: 16 }}>
       <div style={{ width: 48, height: 48, border: `3px solid ${C.border}`, borderTop: `3px solid ${C.teal}`, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
       <span style={{ color: C.textDim, fontSize: 13 }}>Cargando Aula Controllab...</span>
@@ -3371,37 +3371,35 @@ useEffect(() => {
 <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: FONT }}>      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap'); * { box-sizing: border-box; } input::placeholder { color: ${C.textDim}; } input:focus { border-color: ${C.borderA} !important; outline: none; } ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }`}</style>
       <div style={{ width: "100%", maxWidth: 440 }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <div style={{ width: 72, height: 72, borderRadius: 20, background: C.tealGlow, border: `1px solid ${C.borderA}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 20px" }}>🔬</div>
-          <h1 style={{ fontSize: 30, fontWeight: 800, color: C.text, margin: "0 0 8px", fontFamily: DISPLAY, letterSpacing: "-0.03em" }}>Aula Controllab</h1>
-          <p style={{ color: C.textMid, fontSize: 14, margin: 0 }}>Español técnico para profesionales del laboratorio</p>
+                  <h1 style={{ fontSize: 30, fontWeight: 800, color: "#1e3a2f", margin: "0 0 8px", fontFamily: DISPLAY, letterSpacing: "-0.03em" }}>Aula Controllab</h1>
+          <p style={{ color: "#2d5a3d", fontSize: 14, margin: 0 }}>Español técnico para profesionales del laboratorio</p>
         </div>
-        <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 24, padding: 32 }}>
+        <div style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 24, padding: 32 }}>
           <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: C.textDim, letterSpacing: "0.06em", display: "block", marginBottom: 8, fontFamily: MONO }}>NOMBRE</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "#1e3a2f", letterSpacing: "0.06em", display: "block", marginBottom: 8, fontFamily: MONO }}>NOMBRE</label>
             <input value={loginName} onChange={e => setLoginName(e.target.value)} placeholder="Tu nombre completo" style={input} onKeyDown={e => e.key === "Enter" && login()} />
           </div>
           <div style={{ marginBottom: 24 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: C.textDim, letterSpacing: "0.06em", display: "block", marginBottom: 8, fontFamily: MONO }}>CONTRASEÑA</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "#1e3a2f", letterSpacing: "0.06em", display: "block", marginBottom: 8, fontFamily: MONO }}>CONTRASEÑA</label>
             <input value={loginCode} onChange={e => setLoginCode(e.target.value)} placeholder="••••••••" type="password" style={input} onKeyDown={e => e.key === "Enter" && login()} />
           </div>
           {loginError && <div style={{ background: "rgba(251,113,133,0.08)", border: `1px solid ${C.redBorder}`, borderRadius: 10, padding: "10px 14px", fontSize: 13, color: C.red, marginBottom: 16 }}>{loginError}</div>}
           <button onClick={login} style={{ ...btnAccent, width: "100%", padding: "13px 24px", fontSize: 15 }}>Entrar al aula →</button>
         </div>
-        <button onClick={handleProfessorClick} style={{ marginTop: 12, width: "100%", background: "transparent", border: `1px solid ${C.border}`, borderRadius: 14, padding: "11px 16px", color: C.textDim, fontSize: 13, cursor: "pointer", fontFamily: FONT }}>👨‍🏫 Panel del profesor</button>
+        <button onClick={handleProfessorClick} style={{ marginTop: 12, width: "100%", background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 14, padding: "14px 16px", color: "#1e3a2f", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Panel del profesor</button>
         {showProfessorPanel && professorUnlocked && <ProfessorPanel />}
       </div>
     </div>
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: FONT }}>
+    <div style={{ minHeight: "100vh", backgroundImage: "url('/control.jpg')", backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed", color: C.text, fontFamily: FONT }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap'); * { box-sizing: border-box; } input::placeholder, textarea::placeholder { color: ${C.textDim}; } input:focus, textarea:focus { border-color: ${C.borderA} !important; outline: none; } button:hover { opacity: 0.88; } ::-webkit-scrollbar { width: 4px; height: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; } @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } } .sa { animation: fadeIn 0.25s ease; }`}</style>
 
       <header style={{ background: C.bg2, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 100 }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", height: 56, display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 4 }}>
-            <span style={{ fontSize: 18 }}>🔬</span>
-            <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em", fontFamily: DISPLAY }}>Aula Controllab</span>
+                        <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em", fontFamily: DISPLAY }}>Aula Controllab</span>
           </div>
           <div style={{ width: 1, height: 20, background: C.border }} />
           <div style={{ display: "flex", gap: 4, overflowX: "auto", flex: 1 }}>
