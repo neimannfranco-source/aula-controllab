@@ -2957,7 +2957,8 @@ async function saveRemoteState(state: AppState): Promise<void> {
 export default function Home() {
   const [appState, setAppState] = useState<AppState>(createInitialState);
   const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
-  const [loginName, setLoginName] = useState(""); const [loginCode, setLoginCode] = useState(""); const [loginError, setLoginError] = useState("");
+  const [loginName, setLoginName] = useState("");
+const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]); const [loginCode, setLoginCode] = useState(""); const [loginError, setLoginError] = useState("");
   const [selectedModuleId, setSelectedModuleId] = useState(MODULES[0].id);
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -2985,8 +2986,20 @@ export default function Home() {
   const totalBestScore = MODULES.reduce((sum, m) => sum + (studentProgress[m.id]?.score || 0), 0);
   const overallPercent = Math.round((completedModules / MODULES.length) * 100);
 
-  const speak = (text: string, rate = 0.9) => { if (typeof window === "undefined" || !("speechSynthesis" in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "es-ES"; u.rate = rate; const v = window.speechSynthesis.getVoices().find(x => x.lang.startsWith("es")); if (v) u.voice = v; window.speechSynthesis.speak(u); };
+  const speak = (text: string, rate = 0.9) => { if (typeof window === "undefined" || !("speechSynthesis" in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "es-ES"; u.rate = rate; const v = voices.find(x => x.lang.startsWith("es")); if (v) u.voice = v; window.speechSynthesis.speak(u); };
   const stopSpeak = () => { if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel(); };
+
+useEffect(() => {
+  if (typeof window === "undefined") return;
+  const synth = window.speechSynthesis;
+  const loadVoices = () => {
+    const v = synth.getVoices();
+    if (v.length > 0) setVoices(v);
+  };
+  loadVoices();
+  synth.onvoiceschanged = loadVoices;
+  return () => { synth.onvoiceschanged = null; };
+}, []);
 
   useEffect(() => {
     let mounted = true; const LSKEY = "aula-controllab-v7";
