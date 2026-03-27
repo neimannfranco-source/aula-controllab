@@ -31,7 +31,9 @@ const C = {
   surface: "rgba(255,255,255,0.03)",
   border: "rgba(255,255,255,0.07)", borderA: "rgba(45,212,191,0.30)",
   teal: "#2dd4bf", tealDim: "#0d9488", tealGlow: "rgba(45,212,191,0.12)",
-  text: "#0f172a", textMid: "#334155", textDim: "#475569",
+  text: "#f1f5f9",        // ← antes era "#0f172a"
+  textMid: "#cbd5e1",     // ← antes era "#334155"
+  textDim: "#94a3b8",     // ← antes era "#475569"
   green: "#34d399", yellow: "#fbbf24", red: "#fb7185",
   redDim: "rgba(251,113,133,0.12)", redBorder: "rgba(251,113,133,0.25)",
 };
@@ -3393,7 +3395,7 @@ useEffect(() => {
   );
 
   return (
-    <div style={{ minHeight: "100vh", backgroundImage: "url('/control.jpg')", backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed", color: C.text, fontFamily: FONT }}>
+    <div style={{ minHeight: "100vh", background: "#0a0f1a", color: C.text, fontFamily: FONT }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap'); * { box-sizing: border-box; } input::placeholder, textarea::placeholder { color: ${C.textDim}; } input:focus, textarea:focus { border-color: ${C.borderA} !important; outline: none; } button:hover { opacity: 0.88; } ::-webkit-scrollbar { width: 4px; height: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; } @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } } .sa { animation: fadeIn 0.25s ease; }`}</style>
 
       <header style={{ background: C.bg2, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 100 }}>
@@ -3448,7 +3450,7 @@ useEffect(() => {
                     <button key={m.id} onClick={() => setSelectedModuleId(m.id)} style={{ display: "flex", alignItems: "center", gap: 10, borderRadius: 12, padding: "9px 10px", background: isActive ? C.tealGlow : "transparent", border: `1px solid ${isActive ? C.borderA : "transparent"}`, cursor: "pointer", textAlign: "left", width: "100%" }}>
                       <span style={{ fontSize: 15, flexShrink: 0 }}>{m.emoji}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, color: isActive ? C.text : C.textMid, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</div>
+                        <div style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, color: isActive ? C.teal : "#94a3b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</div>
                         <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 1 }}>
                           <div style={{ width: 6, height: 6, borderRadius: "50%", background: catColor(m.category), flexShrink: 0 }} />
                           <span style={{ fontSize: 10, color: C.textDim, fontFamily: MONO }}>{m.level}</span>
@@ -3470,7 +3472,7 @@ useEffect(() => {
               <div style={{ width: 52, height: 52, borderRadius: 16, background: catBg(selectedModule.category), border: `1px solid ${catColor(selectedModule.category)}22`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0 }}>{selectedModule.emoji}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
-                  <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: "-0.02em", fontFamily: DISPLAY }}>{selectedModule.title}</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: "-0.02em", fontFamily: DISPLAY, color: "#f1f5f9" }}>{selectedModule.title}</h2>
                   <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: catBg(selectedModule.category), color: catColor(selectedModule.category), fontFamily: MONO }}>{selectedModule.category}</span>
                   <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: C.surface, color: C.textDim, fontFamily: MONO, border: `1px solid ${C.border}` }}>{selectedModule.level}</span>
                   {studentProgress[selectedModuleId] && <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: C.tealGlow, color: C.teal, fontFamily: MONO, border: `1px solid ${C.borderA}` }}>✓ {studentProgress[selectedModuleId].score}/{studentProgress[selectedModuleId].total}</span>}
@@ -3489,7 +3491,7 @@ useEffect(() => {
           {activeSection === "reading" && (
             <div className="sa" style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
-                <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, fontFamily: DISPLAY, letterSpacing: "-0.02em" }}>{selectedModule.readingTitle}</h3>
+                <h3 style={{ fontSize: 19, fontWeight: 700, margin: 0, fontFamily: DISPLAY, letterSpacing: "-0.02em", color: "#f1f5f9" }}>{selectedModule.readingTitle}</h3>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={() => speak(selectedModule.reading.join(" "), 0.9)} style={{ display: "flex", alignItems: "center", gap: 6, background: C.tealGlow, border: `1px solid ${C.borderA}`, borderRadius: 10, padding: "7px 14px", fontSize: 13, color: C.teal, cursor: "pointer", fontFamily: FONT }}>🔊 Escuchar</button>
                   <button onClick={stopSpeak} style={{ ...btnGhost, padding: "7px 14px" }}>⏹</button>
@@ -3499,7 +3501,7 @@ useEffect(() => {
                 {selectedModule.reading.map((para, i) => (
                   <div key={i} style={{ display: "flex", gap: 20, padding: "16px 0", borderBottom: i < selectedModule.reading.length - 1 ? `1px solid ${C.border}` : "none" }}>
                     <span style={{ fontFamily: MONO, fontSize: 12, color: C.textDim, flexShrink: 0, paddingTop: 4, width: 20, textAlign: "right" }}>{i + 1}</span>
-                    <p style={{ lineHeight: 2.0, color: "#cbd5e1", fontSize: 15, margin: 0 }}>{para}</p>
+                    <p style={{ lineHeight: 2.0, color: "#f8fafc", fontSize: 16, margin: 0, fontWeight: 400 }}>{para}</p>
                   </div>
                 ))}
               </div>
@@ -3511,7 +3513,7 @@ useEffect(() => {
           )}
 
           {activeSection === "vocab" && (
-            <div className="sa" style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32 }}>
+            <div className="sa" style={{ background: "rgba(15, 23, 42, 0.95)", border: `1px solid ${C.border}`, borderRadius: 20, padding: 32 }}>
               <h3 style={{ fontSize: 19, fontWeight: 700, margin: "0 0 24px", fontFamily: DISPLAY }}>📝 Vocabulario clave</h3>
               <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
                 {selectedModule.vocab.map(item => (
@@ -3530,7 +3532,10 @@ useEffect(() => {
           )}
 
           {activeSection === "quiz" && (
-            <div className="sa" style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32 }}>
+            <div className="sa" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid rgba(255,255,255,0.1)`, borderRadius: 20, padding: 32 }}>
+
+
+
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
                 <div style={{ flex: 1, height: 4, borderRadius: 99, background: C.bg3, overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${((currentQuestionIndex + (submitted ? 1 : 0)) / selectedModule.quiz.length) * 100}%`, background: `linear-gradient(90deg, ${C.teal}, #67e8f9)`, borderRadius: 99, transition: "width 0.4s ease" }} />
@@ -3626,16 +3631,28 @@ useEffect(() => {
 
           <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 20, padding: 20 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: C.textDim, marginBottom: 10, fontFamily: MONO }}>CONSEJO DEL DÍA</div>
-            <p style={{ fontSize: 13, color: C.textMid, lineHeight: 1.8, margin: 0 }}>💡 En atención técnica, la <span style={{ color: C.teal, fontWeight: 600 }}>claridad</span> siempre es más valiosa que la complejidad del vocabulario.</p>
+            <p style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.8, margin: 0 }}>💡 En atención técnica, la <span style={{ color: C.teal, fontWeight: 600 }}>claridad</span> siempre es más valiosa que la complejidad del vocabulario.</p>
           </div>
 
-          <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(30,215,96,0.18)", background: "linear-gradient(135deg, rgba(30,215,96,0.06), rgba(6,11,20,0.98))" }}>
-            <div style={{ padding: "14px 18px 8px", display: "flex", alignItems: "center", gap: 8 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg>
-              <span style={{ fontSize: 12, fontWeight: 600, color: C.text }}>Escuchá mientras estudiás</span>
-            </div>
-            <iframe style={{ borderRadius: "0 0 20px 20px", display: "block" }} src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcOFHFBj89A5?utm_source=generator&theme=0" width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
-          </div>
+          <div style={{ borderRadius: 20, padding: "24px 20px", border: "1px solid rgba(30,215,96,0.2)", background: "linear-gradient(135deg, rgba(30,215,96,0.08), rgba(6,11,20,0.95))", textAlign: "center" }}>
+  <div style={{ fontSize: 32, marginBottom: 10 }}>🎧</div>
+  <div style={{ fontSize: 13, fontWeight: 700, color: "#f1f5f9", marginBottom: 6, letterSpacing: "-0.01em" }}>Estudiá con música</div>
+  <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 16, lineHeight: 1.5 }}>Lo-fi y jazz para concentrarte mientras aprendés español</div>
+  <a 
+    href="https://open.spotify.com/playlist/37i9dQZF1DWXRqHkefnzsZC" 
+    target="_blank" 
+    rel="noreferrer" 
+    style={{ 
+      display: "inline-flex", alignItems: "center", gap: 6,
+      background: "#1DB954", color: "#000", fontWeight: 700,
+      fontSize: 12, borderRadius: 20, padding: "8px 16px",
+      textDecoration: "none", letterSpacing: "0.02em"
+    }}
+  >
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+    Abrir en Spotify
+  </a>
+</div>
         </aside>
       </div>
     </div>
